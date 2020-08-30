@@ -21,5 +21,7 @@ class Experiment:
         self.solver = solver_cls(model)
 
     def run(self):
-        print("=> Running experiment:", self.name)
+        flush: bool = self.train_args.get("use_tqdm", False)
+        print("\033[1m\033[92m=> Running experiment: %s\033[0m" % self.name, flush=flush)
+
         self.history = self.solver.train(**self.train_args)

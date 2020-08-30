@@ -53,7 +53,7 @@ class ClassificationSolver(BaseSolver):
             loss_fn = F.nll_loss
 
         for epoch in range(epochs):
-            print("Epoch: %d / %d" % (epoch + 1, epochs))
+            print("Epoch: %d / %d" % (epoch + 1, epochs), flush=use_tqdm)
             avg_train_loss, avg_train_acc = self._train_step(
                 train_loader, optimizer, scheduler, device, loss_fn, use_tqdm
             )
@@ -64,7 +64,7 @@ class ClassificationSolver(BaseSolver):
                 scheduler.step()
 
             if test_loader is not None:
-                avg_test_loss, avg_test_acc = self._test_step(test_loader, device)
+                avg_test_loss, avg_test_acc = self._test_step(test_loader, device, flush_print=use_tqdm)
                 self.test_losses.append(avg_test_loss)
                 self.test_accs.append(avg_test_acc)
 
@@ -139,7 +139,7 @@ class ClassificationSolver(BaseSolver):
             # updating progress bar
             if use_tqdm:
                 pbar.set_description(
-                    desc=f"Loss={loss.item()} Batch_id={batch_idx} Accuracy={acc:0.2f}"
+                    desc=f"Batch_id: {batch_idx + 1} - Loss: {loss.item():0.4f} - Accuracy: {acc:0.2f}%"
                 )
             else:
                 pbar.update(
@@ -165,7 +165,7 @@ class ClassificationSolver(BaseSolver):
         )
 
     def _test_step(
-        self, test_loader: torch.utils.data.DataLoader, device: str
+        self, test_loader: torch.utils.data.DataLoader, device: str, flush_print: bool = False
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Performs a single test step.
@@ -173,6 +173,7 @@ class ClassificationSolver(BaseSolver):
         Args:
             test_loader (torch.utils.data.DataLoader): The DataLoader for the test data.
             device (str): A valid pytorch device string.
+            flush_print (bool, optional): Whether to flush the print statement or not. Needed when tqdm is used in a notebook. Defaults to False.
 
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average test loss and average
@@ -211,7 +212,8 @@ class ClassificationSolver(BaseSolver):
                 correct,
                 len(test_loader.dataset),
                 test_acc,
-            )
+            ),
+            flush=flush_print
         )
 
         return (test_loss, test_acc)
