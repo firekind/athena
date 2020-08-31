@@ -13,7 +13,7 @@ def plot_experiments(experiments: List[Experiment], save_path: str = None, figsi
     Plots the train and test losses and accuracies of the given experiments.
 
     Args:
-        experiments (List[Experiment]): The list of Experiments to plot
+        experiments (List[Experiment]): The list of ``Experiments`` to plot
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (18, 13).
     """
@@ -58,7 +58,7 @@ def plot_misclassified(
     Args:
         number (int): The number of misclassified images to plot.
         experiment (Experiment): The experiment that should be used to get the misclassified images
-        data_loader (DataLoader): The DataLoader of the input data
+        data_loader (DataLoader): The ``DataLoader`` of the input data
         device (str): A valid pytorch device string.
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).

@@ -43,7 +43,7 @@ def MNIST(
         worker_init_fn (Callable, optional): If not None, this will be called on each worker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. Defaults to None.
 
     Returns:
-        DataLoader: The `DataLoader` with the given parameters.
+        DataLoader: The ``DataLoader`` with the given parameters.
     """
 
     dataset = datasets.MNIST(

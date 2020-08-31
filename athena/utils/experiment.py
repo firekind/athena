@@ -14,6 +14,17 @@ class Experiment:
         train_args: Dict[str, Any],
         solver_cls: BaseSolver,
     ):
+        """
+        Bundles information regarding an experiment. An experiment is performed on a model, with
+        a ``Solver`` and the arguments that have to be used to train the model.
+
+        Args:
+            name (str): The name of the experiment.
+            model (nn.Module): The model to experiment on.
+            train_args (Dict[str, Any]): The arguments to be passed on to the ``Solver`` when training.
+            solver_cls (BaseSolver): The ``Solver`` class to use.
+        """
+
         self.name = name
         self.model = model
         self.train_args = train_args
@@ -22,8 +33,8 @@ class Experiment:
 
     def run(self):
         """
-        Runs the experiment. More specifically, calls the `BaseSolver.train` method and saves the 
-        `History`.
+        Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the 
+        ``History``.
         """
         
         flush: bool = self.train_args.get("use_tqdm", False)
