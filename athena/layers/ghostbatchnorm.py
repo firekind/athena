@@ -13,7 +13,17 @@ class _BatchNorm(nn.BatchNorm2d):
 
 
 class GhostBatchNorm(_BatchNorm):
-    def __init__(self, num_features, num_splits, **kw):
+    def __init__(self, num_features: int, num_splits: int, **kw):
+        """
+        An implementation of `Ghost Batch Normalization`_. Code taken from here_.
+
+        Args:
+            num_features (int): The number of input features to this layer.
+            num_splits (int): The number of splits to perform.
+
+        .. _Ghost Batch Normalization: https://arxiv.org/abs/1705.08741
+        .. _here: https://github.com/apple/ml-cifar-10-faster/blob/master/utils.py
+        """
         super().__init__(num_features, **kw)
         self.num_splits = num_splits
         self.register_buffer(

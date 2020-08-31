@@ -21,6 +21,11 @@ class Experiment:
         self.solver = solver_cls(model)
 
     def run(self):
+        """
+        Runs the experiment. More specifically, calls the `BaseSolver.train` method and saves the 
+        `History`.
+        """
+        
         flush: bool = self.train_args.get("use_tqdm", False)
         print("\033[1m\033[92m=> Running experiment: %s\033[0m" % self.name, flush=flush)
 

@@ -3,7 +3,9 @@ from typing import List, Callable, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.optim.lr_scheduler import OneCycleLR
+from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import OneCycleLR, Optimizer
+from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 from tqdm import tqdm
 from pkbar import Kbar
 
@@ -13,6 +15,13 @@ from .base_solver import BaseSolver
 
 class ClassificationSolver(BaseSolver):
     def __init__(self, model: nn.Module):
+        """
+        A solver for classification problems.
+
+        Args:
+            model (nn.Module): The model to act on.
+        """
+
         super(ClassificationSolver, self).__init__(model)
         
         self.test_losses: List[torch.Tensor] = []
@@ -23,10 +32,10 @@ class ClassificationSolver(BaseSolver):
     def train(
         self,
         epochs: int,
-        train_loader: torch.utils.data.DataLoader,
-        optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler._LRScheduler = None,
-        test_loader: torch.utils.data.DataLoader = None,
+        train_loader: DataLoader,
+        optimizer: Optimizer,
+        scheduler: LRScheduler = None,
+        test_loader: DataLoader = None,
         device: str = "cpu",
         loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor] = None,
         use_tqdm: bool = False,
@@ -36,14 +45,13 @@ class ClassificationSolver(BaseSolver):
 
         Args:
             epochs (int): The number of epochs to train for.
-            train_loader (torch.utils.data.DataLoader): The DataLoader for the training data.
-            optimizer (torch.optim.Optimizer): The optimizer to use.
-            scheduler (torch.optim.lr_scheduler._LRScheduler, optional): The LR scheduler to use. Defaults to None.
-            test_loader (torch.utils.data.DataLoader, optional): The DataLoader for the test data. Defaults to None.
-            device (str, optional): A valid pytorch device string. Defaults to "cpu".
-            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model will
-            be trained using negative log likelihood loss.
-            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (pkbar). Defaults to False.
+            train_loader (DataLoader): The ``DataLoader`` for the training data.
+            optimizer (Optimizer): The optimizer to use.
+            scheduler (LRScheduler, optional): The ``LRscheduler`` to use. Defaults to None.
+            test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
+            device (str, optional): A valid pytorch device string. Defaults to ``cpu``.
+            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model will be trained using negative log likelihood loss.
+            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.
 
         Returns:
             History: An History object containing training information.
@@ -54,7 +62,7 @@ class ClassificationSolver(BaseSolver):
 
         for epoch in range(epochs):
             print("Epoch: %d / %d" % (epoch + 1, epochs), flush=use_tqdm)
-            avg_train_loss, avg_train_acc = self._train_step(
+            avg_train_loss, avg_train_acc = self.train_step(
                 train_loader, optimizer, scheduler, device, loss_fn, use_tqdm
             )
             self.train_losses.append(avg_train_loss)
@@ -64,7 +72,7 @@ class ClassificationSolver(BaseSolver):
                 scheduler.step()
 
             if test_loader is not None:
-                avg_test_loss, avg_test_acc = self._test_step(test_loader, device, flush_print=use_tqdm)
+                avg_test_loss, avg_test_acc = self.test_step(test_loader, device, flush_print=use_tqdm)
                 self.test_losses.append(avg_test_loss)
                 self.test_accs.append(avg_test_acc)
 
@@ -72,11 +80,11 @@ class ClassificationSolver(BaseSolver):
             self.train_losses, self.train_accs, self.test_losses, self.test_accs
         )
 
-    def _train_step(
+    def train_step(
         self,
-        train_loader: torch.utils.data.DataLoader,
-        optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler._LRScheduler,
+        train_loader: DataLoader,
+        optimizer: Optimizer,
+        scheduler: LRScheduler,
         device: str,
         loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         use_tqdm: bool,
@@ -85,12 +93,12 @@ class ClassificationSolver(BaseSolver):
         Performs a single train step.
 
         Args:
-            train_loader (torch.utils.data.DataLoader): The DataLoader for the training data.
-            optimizer (torch.optim.Optimizer): The optimizer to use.
-            scheduler (torch.optim.lr_scheduler._LRScheduler): The LR scheduler to use.
+            train_loader (DataLoader): The ``DataLoader`` for the training data.
+            optimizer (Optimizer): The optimizer to use.
+            scheduler (LRScheduler): The LR scheduler to use.
             device (str): A valid pytorch device string.
             loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor]): The loss function to use.
-            use_tqdm (bool): If True, uses tqdm instead of a keras style progress bar (pkbar).
+            use_tqdm (bool): If True, uses tqdm instead of a keras style progress bar (``pkbar``).
 
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average train loss and average
@@ -164,20 +172,19 @@ class ClassificationSolver(BaseSolver):
             100 * correct / len(train_loader.dataset),
         )
 
-    def _test_step(
-        self, test_loader: torch.utils.data.DataLoader, device: str, flush_print: bool = False
+    def test_step(
+        self, test_loader: DataLoader, device: str, flush_print: bool = False
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Performs a single test step.
 
         Args:
-            test_loader (torch.utils.data.DataLoader): The DataLoader for the test data.
+            test_loader (DataLoader): The ``DataLoader`` for the test data.
             device (str): A valid pytorch device string.
             flush_print (bool, optional): Whether to flush the print statement or not. Needed when tqdm is used in a notebook. Defaults to False.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average test loss and average
-            test accuracy.
+            Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average test loss and average test accuracy.
         """
 
         # setting model to evaluation mode
@@ -219,18 +226,17 @@ class ClassificationSolver(BaseSolver):
         return (test_loss, test_acc)
 
     def get_misclassified(
-        self, data_loader: torch.utils.data.DataLoader, device: str
+        self, data_loader: DataLoader, device: str
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Gets the information of the misclassified data items in the given dataset.
 
         Args:
-            test_loader (torch.utils.data.DataLoader): The DataLoader to use.
+            test_loader (DataLoader): The ``DataLoader`` to use.
             device (str): A valid pytorch device string.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: A tuple consisting of the image information,
-            predicted, and actual class of the misclassified images.
+            Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: A tuple consisting of the image information, predicted, and actual class of the misclassified images.
         """
 
         # defining variables

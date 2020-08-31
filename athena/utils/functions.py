@@ -2,6 +2,7 @@ import math
 from typing import List, Tuple
 
 import torch
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 from athena import Experiment, ClassificationSolver
@@ -46,7 +47,7 @@ def plot_experiments(experiments: List[Experiment], save_path: str = None, figsi
 def plot_misclassified(
     number: int,
     experiment: Experiment,
-    data_loader: torch.utils.data.DataLoader,
+    data_loader: DataLoader,
     device: str,
     save_path: str = None,
     figsize: Tuple[int, int] = (10, 15)
@@ -57,7 +58,7 @@ def plot_misclassified(
     Args:
         number (int): The number of misclassified images to plot.
         experiment (Experiment): The experiment that should be used to get the misclassified images
-        data_loader (torch.utils.data.DataLoader): The DataLoader of the input data
+        data_loader (DataLoader): The DataLoader of the input data
         device (str): A valid pytorch device string.
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).
