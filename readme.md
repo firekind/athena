@@ -1,4 +1,4 @@
-# Athena
+# Project Athena
 
 Project Athena is a python package which helps in experimenting with various iterations of a deep learning model. The core of this package is the `Experiment` object, which contains the information about an experiment, and also the information obtained while training.
 
