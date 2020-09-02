@@ -7,7 +7,7 @@ from athena.layers import GhostBatchNorm
 class MnistNet(nn.Module):
     def __init__(
         self,
-        use_ghost_batch_norm: bool = True,
+        use_ghost_batch_norm: bool = False,
         num_splits: int = 2,
         dropout_value: float = 0,
     ):
@@ -56,7 +56,7 @@ class MnistNet(nn.Module):
         
 
         Args:
-            use_ghost_batch_norm (bool, optional): Whether to use Ghost Batch Norm instead of regular Batch Norm.Defaults to True.
+            use_ghost_batch_norm (bool, optional): Whether to use Ghost Batch Norm instead of regular Batch Norm. Defaults to False.
             num_splits (int, optional): The number of splits to use in Ghost Batch Norm. Defaults to 2.
             dropout_value (float, optional): The percentage of dropout. Defaults to 0.
         """

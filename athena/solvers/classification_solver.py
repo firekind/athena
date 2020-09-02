@@ -24,11 +24,6 @@ class ClassificationSolver(BaseSolver):
 
         super(ClassificationSolver, self).__init__(model)
 
-        self.test_losses: List[torch.Tensor] = []
-        self.test_accs: List[torch.Tensor] = []
-        self.train_losses: List[torch.Tensor] = []
-        self.train_accs: List[torch.Tensor] = []
-
     def train(
         self,
         epochs: int,
@@ -50,12 +45,14 @@ class ClassificationSolver(BaseSolver):
             scheduler (LRScheduler, optional): The ``LRscheduler`` to use. Defaults to None.
             test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
             device (str, optional): A valid pytorch device string. Defaults to ``cpu``.
-            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model will be trained using negative log likelihood loss.
+            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model \
+                will be trained using negative log likelihood loss with reduction as 'mean'
             use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.
 
         Returns:
             History: An History object containing training information.
         """
+        history = History()
 
         if loss_fn is None:
             loss_fn = F.nll_loss
@@ -65,8 +62,8 @@ class ClassificationSolver(BaseSolver):
             avg_train_loss, avg_train_acc = self.train_step(
                 train_loader, optimizer, scheduler, device, loss_fn, use_tqdm
             )
-            self.train_losses.append(avg_train_loss)
-            self.train_accs.append(avg_train_acc)
+            history.add_metric("train loss", avg_train_loss)
+            history.add_metric("train accuracy", avg_train_acc)
 
             if scheduler is not None and not isinstance(scheduler, OneCycleLR):
                 scheduler.step()
@@ -75,12 +72,10 @@ class ClassificationSolver(BaseSolver):
                 avg_test_loss, avg_test_acc = self.test_step(
                     test_loader, device, loss_fn, flush_print=use_tqdm
                 )
-                self.test_losses.append(avg_test_loss)
-                self.test_accs.append(avg_test_acc)
+                history.add_metric("test loss", avg_test_loss)
+                history.add_metric("test accuracy", avg_test_acc)
 
-        return History(
-            self.train_losses, self.train_accs, self.test_losses, self.test_accs
-        )
+        return history
 
     def train_step(
         self,
@@ -170,7 +165,7 @@ class ClassificationSolver(BaseSolver):
             )
 
         return (
-            train_loss / len(train_loader.dataset),
+            train_loss / len(train_loader),
             100 * correct / len(train_loader.dataset),
         )
 
@@ -216,7 +211,7 @@ class ClassificationSolver(BaseSolver):
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
         # averaging loss
-        test_loss /= len(test_loader.dataset)
+        test_loss /= len(test_loader)
         test_acc = 100.0 * correct / len(test_loader.dataset)
 
         # printing result
