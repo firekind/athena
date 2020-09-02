@@ -59,15 +59,21 @@ class ClassificationSolver(BaseSolver):
 
         for epoch in range(epochs):
             print("Epoch: %d / %d" % (epoch + 1, epochs), flush=use_tqdm)
+
+            # performing train step
             avg_train_loss, avg_train_acc = self.train_step(
                 train_loader, optimizer, scheduler, device, loss_fn, use_tqdm
             )
+
+            # adding metrics to history
             history.add_metric("train loss", avg_train_loss)
             history.add_metric("train accuracy", avg_train_acc)
 
+            # stepping scheduler
             if scheduler is not None and not isinstance(scheduler, OneCycleLR):
                 scheduler.step()
 
+            # performing test step
             if test_loader is not None:
                 avg_test_loss, avg_test_acc = self.test_step(
                     test_loader, device, loss_fn, flush_print=use_tqdm
