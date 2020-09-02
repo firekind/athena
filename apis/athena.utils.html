@@ -1,0 +1,398 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>athena.utils package &mdash; Athena  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="athena" href="modules.html" />
+    <link rel="prev" title="athena.solvers package" href="athena.solvers.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <h1> Athena</h1>
+    </div>
+  </div>
+</div>
+
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.layers.html">athena.layers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">athena</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="athena.html">athena package</a> &gt;</li>
+        
+      <li>athena.utils package</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apis/athena.utils.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <div class="section" id="athena-utils-package">
+<h1>athena.utils package<a class="headerlink" href="#athena-utils-package" title="Permalink to this headline">¶</a></h1>
+<p>This package contains various utility classes.</p>
+<div class="section" id="module-athena.utils.experiment">
+<span id="experiment-module"></span><h2><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module<a class="headerlink" href="#module-athena.utils.experiment" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.utils.experiment.Experiment">
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.experiment.</code><code class="sig-name descname">Experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">train_args</span></em>, <em class="sig-param"><span class="n">solver_cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Bundles information regarding an experiment. An experiment is performed on a model, with
+a <code class="docutils literal notranslate"><span class="pre">Solver</span></code> and the arguments that have to be used to train the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p></li>
+<li><p><strong>model</strong> (<em>nn.Module</em>) – The model to experiment on.</p></li>
+<li><p><strong>train_args</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The arguments to be passed on to the <code class="docutils literal notranslate"><span class="pre">Solver</span></code> when training.</p></li>
+<li><p><strong>solver_cls</strong> (<em>BaseSolver</em>) – The <code class="docutils literal notranslate"><span class="pre">Solver</span></code> class to use.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.utils.experiment.Experiment.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the experiment. More specifically, calls the <code class="docutils literal notranslate"><span class="pre">BaseSolver.train</span></code> method and saves the
+<code class="docutils literal notranslate"><span class="pre">History</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-athena.utils.functions">
+<span id="functions-module"></span><h2><code class="docutils literal notranslate"><span class="pre">functions</span></code> module<a class="headerlink" href="#module-athena.utils.functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="athena.utils.functions.plot_experiments">
+<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_experiments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">experiments</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">18, 13</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_experiments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the train and test losses and accuracies of the given experiments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiments</strong> (<em>List</em><em>[</em><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a><em>]</em>) – The list of <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> to plot</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (18, 13).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="athena.utils.functions.plot_misclassified">
+<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_misclassified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the misclassified images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>) – The number of misclassified images to plot.</p></li>
+<li><p><strong>experiment</strong> (<a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a>) – The experiment that should be used to get the misclassified images</p></li>
+<li><p><strong>data_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the input data</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (10, 15).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-athena.utils.history">
+<span id="history-module"></span><h2><code class="docutils literal notranslate"><span class="pre">history</span></code> module<a class="headerlink" href="#module-athena.utils.history" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.utils.history.History">
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.history.</code><code class="sig-name descname">History</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_losses</span></em>, <em class="sig-param"><span class="n">train_accs</span></em>, <em class="sig-param"><span class="n">test_losses</span></em>, <em class="sig-param"><span class="n">test_accs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains the information of the losses and accuracies that are recorded during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_losses</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The training losses.</p></li>
+<li><p><strong>train_accs</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The training accuracies.</p></li>
+<li><p><strong>test_losses</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The test losses.</p></li>
+<li><p><strong>test_accs</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The test accuracies.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="athena" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="athena.solvers.html" class="btn btn-neutral" title="athena.solvers package" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">athena.utils package</a><ul>
+<li><a class="reference internal" href="#module-athena.utils.experiment"><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.utils.functions"><code class="docutils literal notranslate"><span class="pre">functions</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.utils.history"><code class="docutils literal notranslate"><span class="pre">history</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/language_data.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+        <p>
+          Built with Sphinx and the 
+          <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+        </p>
+        
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. As the current maintainers of this site, Facebook’s Cookies Policy applies. Learn more, including about available controls: <a href="https://www.facebook.com/policies/cookies/">Cookies Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+</html>
