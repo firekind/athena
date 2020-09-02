@@ -23,7 +23,7 @@ class ClassificationSolver(BaseSolver):
         """
 
         super(ClassificationSolver, self).__init__(model)
-        
+
         self.test_losses: List[torch.Tensor] = []
         self.test_accs: List[torch.Tensor] = []
         self.train_losses: List[torch.Tensor] = []
@@ -72,7 +72,9 @@ class ClassificationSolver(BaseSolver):
                 scheduler.step()
 
             if test_loader is not None:
-                avg_test_loss, avg_test_acc = self.test_step(test_loader, device, flush_print=use_tqdm)
+                avg_test_loss, avg_test_acc = self.test_step(
+                    test_loader, device, loss_fn, flush_print=use_tqdm
+                )
                 self.test_losses.append(avg_test_loss)
                 self.test_accs.append(avg_test_acc)
 
@@ -173,7 +175,11 @@ class ClassificationSolver(BaseSolver):
         )
 
     def test_step(
-        self, test_loader: DataLoader, device: str, flush_print: bool = False
+        self,
+        test_loader: DataLoader,
+        device: str,
+        loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+        flush_print: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Performs a single test step.
@@ -181,6 +187,7 @@ class ClassificationSolver(BaseSolver):
         Args:
             test_loader (DataLoader): The ``DataLoader`` for the test data.
             device (str): A valid pytorch device string.
+            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor]): The loss function to use.
             flush_print (bool, optional): Whether to flush the print statement or not. Needed when tqdm is used in a notebook. Defaults to False.
 
         Returns:
@@ -202,7 +209,7 @@ class ClassificationSolver(BaseSolver):
                 output = self.model(data)
 
                 # calculating loss
-                test_loss += F.nll_loss(output, target, reduction="sum").item()
+                test_loss += loss_fn(output, target)
 
                 # calculating number of correctly predicted classes
                 pred = output.argmax(dim=1, keepdim=True)
@@ -220,7 +227,7 @@ class ClassificationSolver(BaseSolver):
                 len(test_loader.dataset),
                 test_acc,
             ),
-            flush=flush_print
+            flush=flush_print,
         )
 
         return (test_loss, test_acc)
