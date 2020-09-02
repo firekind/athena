@@ -42,7 +42,7 @@ class ClassificationSolver(BaseSolver):
             epochs (int): The number of epochs to train for.
             train_loader (DataLoader): The ``DataLoader`` for the training data.
             optimizer (Optimizer): The optimizer to use.
-            scheduler (LRScheduler, optional): The ``LRscheduler`` to use. Defaults to None.
+            scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.
             test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
             device (str, optional): A valid pytorch device string. Defaults to ``cpu``.
             loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model \

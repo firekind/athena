@@ -3,7 +3,7 @@ from typing import Dict, Any
 import torch.nn as nn
 
 from . import History
-from athena.solvers import BaseSolver
+from athena.solvers.base_solver import BaseSolver
 
 
 class Experiment:

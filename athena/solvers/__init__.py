@@ -1,2 +1,2 @@
 from .classification_solver import ClassificationSolver
-from .base_solver import BaseSolver
+from .regression_solver import RegressionSolver
