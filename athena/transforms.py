@@ -4,8 +4,9 @@ def mnist_train_transforms() -> transforms.Compose:
     """
     Default MNIST training data transforms.
     The transforms include:
-        - A random rotation between -5 and 5 degrees
-        - Normalization with mean 0.1307 and std 0.3081
+
+    * A random rotation between -5 and 5 degrees
+    * Normalization with mean 0.1307 and std 0.3081
 
     Returns:
         transforms.Compose: A transforms.Compose object.
@@ -21,7 +22,8 @@ def mnist_test_transforms() -> transforms.Compose:
     """
     Default MNIST test data transforms.
     The transforms include:
-        - Normalization with mean 0.1307 and std 0.3081
+    
+    * Normalization with mean 0.1307 and std 0.3081
 
     Returns:
         transforms.Compose: A transforms.Compose object.
