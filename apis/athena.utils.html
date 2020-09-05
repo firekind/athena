@@ -226,7 +226,7 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <dl class="py function">
 <dt id="athena.utils.functions.plot_experiments">
 <code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_experiments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">experiments</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">18, 13</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_experiments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the train and test losses and accuracies of the given experiments.</p>
+<dd><p>Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -235,12 +235,15 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (18, 13).</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – When there are no metrics to plot.</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="athena.utils.functions.plot_misclassified">
-<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_misclassified" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'gray_r'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_misclassified" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the misclassified images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -251,7 +254,11 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
 <li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
 <li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (10, 15).</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>optional</em>) – The cmap to use while plotting. Defaults to ‘gray_r’</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – When solver of type <a class="reference internal" href="athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver" title="athena.solvers.classification_solver.ClassificationSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.classification_solver.ClassificationSolver</span></code></a> is not being used,             and when the number of misclassified images are less than the number of images being requested to plot.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -261,19 +268,71 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <span id="history-module"></span><h2><code class="docutils literal notranslate"><span class="pre">history</span></code> module<a class="headerlink" href="#module-athena.utils.history" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="athena.utils.history.History">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.history.</code><code class="sig-name descname">History</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_losses</span></em>, <em class="sig-param"><span class="n">train_accs</span></em>, <em class="sig-param"><span class="n">test_losses</span></em>, <em class="sig-param"><span class="n">test_accs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.history.</code><code class="sig-name descname">History</code><a class="reference internal" href="../_modules/athena/utils/history.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains the information of the losses and accuracies that are recorded during training.</p>
+<dl class="py method">
+<dt id="athena.utils.history.History.add_metric">
+<code class="sig-name descname">add_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.add_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.add_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an item to the history.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_losses</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The training losses.</p></li>
-<li><p><strong>train_accs</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The training accuracies.</p></li>
-<li><p><strong>test_losses</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The test losses.</p></li>
-<li><p><strong>test_accs</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – The test accuracies.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the data to be added, eg. loss</p></li>
+<li><p><strong>value</strong> (<em>torch.Tensor</em>) – The value to be added.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.history.History.get_metric_names">
+<code class="sig-name descname">get_metric_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.get_metric_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.get_metric_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a list of names of the metrics being recorded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The list of metric names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.history.History.get_metric">
+<code class="sig-name descname">get_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.get_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.get_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the given metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – The name of the metric.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The value of the metric.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[torch.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.history.History.has_metric">
+<code class="sig-name descname">has_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.has_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.has_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the given metric is being (or has been) recorded or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – The name of the metric</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True, if it is being (or has been) recorded, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

@@ -197,7 +197,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">mnist</span></code> module<a class="headerlink" href="#mnist-module" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="athena.models.mnist.MnistNet">
-<em class="property">class </em><code class="sig-prename descclassname">athena.models.mnist.</code><code class="sig-name descname">MnistNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">num_splits</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">dropout_value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/models/mnist.html#MnistNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.models.mnist.MnistNet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">athena.models.mnist.</code><code class="sig-name descname">MnistNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">num_splits</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">dropout_value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/models/mnist.html#MnistNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.models.mnist.MnistNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model used on MNIST dataset. Model summary:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -241,7 +241,7 @@ Estimated Total Size (MB): 0.62
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>use_ghost_batch_norm</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use Ghost Batch Norm instead of regular Batch Norm.Defaults to True.</p></li>
+<li><p><strong>use_ghost_batch_norm</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use Ghost Batch Norm instead of regular Batch Norm. Defaults to False.</p></li>
 <li><p><strong>num_splits</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of splits to use in Ghost Batch Norm. Defaults to 2.</p></li>
 <li><p><strong>dropout_value</strong> (<em>float</em><em>, </em><em>optional</em>) – The percentage of dropout. Defaults to 0.</p></li>
 </ul>

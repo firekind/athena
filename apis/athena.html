@@ -205,6 +205,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="athena.solvers.html#module-athena.solvers.classification_solver"><code class="docutils literal notranslate"><span class="pre">classification_solver</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="athena.solvers.html#module-athena.solvers.regression_solver"><code class="docutils literal notranslate"><span class="pre">regression_solver</span></code> module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="athena.utils.html">athena.utils package</a><ul>
@@ -263,12 +264,10 @@
 <code class="sig-prename descclassname">athena.transforms.</code><code class="sig-name descname">mnist_train_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/transforms.html#mnist_train_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.transforms.mnist_train_transforms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Default MNIST training data transforms.
 The transforms include:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>A random rotation between -5 and 5 degrees</p></li>
 <li><p>Normalization with mean 0.1307 and std 0.3081</p></li>
 </ul>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A transforms.Compose object.</p>
@@ -284,11 +283,9 @@ The transforms include:</p>
 <code class="sig-prename descclassname">athena.transforms.</code><code class="sig-name descname">mnist_test_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/transforms.html#mnist_test_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.transforms.mnist_test_transforms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Default MNIST test data transforms.
 The transforms include:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>Normalization with mean 0.1307 and std 0.3081</p></li>
 </ul>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A transforms.Compose object.</p>

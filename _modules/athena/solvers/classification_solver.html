@@ -211,11 +211,6 @@
 
         <span class="nb">super</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_losses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_accs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_losses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_accs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
 <div class="viewcode-block" id="ClassificationSolver.train"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -234,40 +229,46 @@
 <span class="sd">            epochs (int): The number of epochs to train for.</span>
 <span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
 <span class="sd">            optimizer (Optimizer): The optimizer to use.</span>
-<span class="sd">            scheduler (LRScheduler, optional): The ``LRscheduler`` to use. Defaults to None.</span>
+<span class="sd">            scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.</span>
 <span class="sd">            test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.</span>
 <span class="sd">            device (str, optional): A valid pytorch device string. Defaults to ``cpu``.</span>
-<span class="sd">            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model will be trained using negative log likelihood loss.</span>
+<span class="sd">            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model \</span>
+<span class="sd">                will be trained using negative log likelihood loss with reduction as &#39;mean&#39;</span>
 <span class="sd">            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            History: An History object containing training information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">loss_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">nll_loss</span>
 
         <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Epoch: </span><span class="si">%d</span><span class="s2"> / </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span><span class="p">),</span> <span class="n">flush</span><span class="o">=</span><span class="n">use_tqdm</span><span class="p">)</span>
+
+            <span class="c1"># performing train step</span>
             <span class="n">avg_train_loss</span><span class="p">,</span> <span class="n">avg_train_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span>
                 <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">use_tqdm</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_train_loss</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_accs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_train_acc</span><span class="p">)</span>
 
+            <span class="c1"># adding metrics to history</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="s2">&quot;train loss&quot;</span><span class="p">,</span> <span class="n">avg_train_loss</span><span class="p">)</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="s2">&quot;train accuracy&quot;</span><span class="p">,</span> <span class="n">avg_train_acc</span><span class="p">)</span>
+
+            <span class="c1"># stepping scheduler</span>
             <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">OneCycleLR</span><span class="p">):</span>
                 <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
+            <span class="c1"># performing test step</span>
             <span class="k">if</span> <span class="n">test_loader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">avg_test_loss</span><span class="p">,</span> <span class="n">avg_test_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_step</span><span class="p">(</span>
                     <span class="n">test_loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">flush_print</span><span class="o">=</span><span class="n">use_tqdm</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_test_loss</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_accs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_test_acc</span><span class="p">)</span>
+                <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="s2">&quot;test loss&quot;</span><span class="p">,</span> <span class="n">avg_test_loss</span><span class="p">)</span>
+                <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="s2">&quot;test accuracy&quot;</span><span class="p">,</span> <span class="n">avg_test_acc</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">History</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_losses</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_accs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_losses</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_accs</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">history</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.train_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train_step">[docs]</a>    <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -357,7 +358,7 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="n">train_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span>
+            <span class="n">train_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">),</span>
             <span class="mi">100</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -403,7 +404,7 @@
                 <span class="n">correct</span> <span class="o">+=</span> <span class="n">pred</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">pred</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
         <span class="c1"># averaging loss</span>
-        <span class="n">test_loss</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">test_loss</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
         <span class="n">test_acc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
 
         <span class="c1"># printing result</span>

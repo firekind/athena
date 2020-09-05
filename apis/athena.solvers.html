@@ -217,10 +217,10 @@ classification problems contains a helper method to get <code class="docutils li
 <li><p><strong>epochs</strong> (<em>int</em>) – The number of epochs to train for.</p></li>
 <li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data.</p></li>
 <li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use.</p></li>
-<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRscheduler</span></code> to use. Defaults to None.</p></li>
+<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRScheduler</span></code> to use. Defaults to None.</p></li>
 <li><p><strong>test_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data. Defaults to None.</p></li>
 <li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to <code class="docutils literal notranslate"><span class="pre">cpu</span></code>.</p></li>
-<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>optional</em>) – The loss function to use. If not given, model will be trained using negative log likelihood loss.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>optional</em>) – The loss function to use. If not given, model                 will be trained using negative log likelihood loss with reduction as ‘mean’</p></li>
 <li><p><strong>use_tqdm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>). Defaults to False.</p></li>
 </ul>
 </dd>
@@ -304,6 +304,106 @@ train accuracy.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-athena.solvers.regression_solver">
+<span id="regression-solver-module"></span><h2><code class="docutils literal notranslate"><span class="pre">regression_solver</span></code> module<a class="headerlink" href="#module-athena.solvers.regression_solver" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.solvers.regression_solver.RegressionSolver">
+<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.regression_solver.</code><code class="sig-name descname">RegressionSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></p>
+<p>A solver for regression problems. This solver supports models that have mulitple inputs, and thus,
+multiple losses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>nn.Module</em>) – The model to act on.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.solvers.regression_solver.RegressionSolver.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epochs</span></em>, <em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">scheduler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">use_tqdm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the model.</p>
+<blockquote>
+<div><p><strong>Note</strong>: look at the notes in <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.train_step" title="athena.solvers.regression_solver.RegressionSolver.train_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.train_step()</span></code></a> and in                 <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.test_step" title="athena.solvers.regression_solver.RegressionSolver.test_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.test_step()</span></code></a>.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – The number of epochs to train for.</p></li>
+<li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The loss function to use.                 the loss function should take in the predicted output of the model and target output from the dataset as                 the arguments and return a list of tuples, in which the first element of each tuple is a label for the                 loss and the second element is the loss value.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The accuracy                 function to use. The function should take in two arguments, first, a list of tuples, where the first element of each tuple is the label for the loss and the second element is the loss value, and the second argument                 the target output from the dataset. The function should return a list of tuples, first element of the tuple                 should be the label of the accuracy and the second element should be the accuracy value.</p></li>
+<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRScheduler</span></code> to use. Defaults to None.</p></li>
+<li><p><strong>test_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data. Defaults to None.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to <code class="docutils literal notranslate"><span class="pre">cpu</span></code>.</p></li>
+<li><p><strong>use_tqdm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>). Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An History object containing training information.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.history.History" title="athena.utils.history.History">History</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.regression_solver.RegressionSolver.train_step">
+<code class="sig-name descname">train_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">use_tqdm</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.train_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single train step.</p>
+<blockquote>
+<div><p><strong>Note</strong>: the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the                 number of batches in the dataset while recording them for an epoch (averaging). So make                 sure any reduction in your functions are ‘mean’.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use.</p></li>
+<li><p><strong>scheduler</strong> (<em>LRScheduler</em>) – The LR scheduler to use.</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The loss function to use.                 the loss function should take in the predicted output of the model and target output from the dataset as                 the arguments and return a list of tuples, in which the first element of each tuple is a label for the                 loss and the second element is the loss value.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The accuracy                 function to use. The function should take in two arguments, first, a list of tuples, where the first element of each tuple is the label for the loss and the second element is the loss value, and the second argument                 the target output from the dataset. The function should return a list of tuples, first element of the tuple                 should be the label of the accuracy and the second element should be the accuracy value.</p></li>
+<li><p><strong>use_tqdm</strong> (<em>bool</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing tuples in which the first element of the tuple is the label                 describing the value and the second element is the value itself.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[Tuple[str, torch.Tensor]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.regression_solver.RegressionSolver.test_step">
+<code class="sig-name descname">test_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">flush_print</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.test_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.test_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single test step.</p>
+<blockquote>
+<div><p><strong>Note</strong>: the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the             number of batches in the dataset (while calculating the average loss and average accuracy during the             train step) and displayed as the result. So make sure any reduction in your functions are ‘mean’.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data.</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The loss function to use.                 the loss function should take in the predicted output of the model and target output from the dataset as                 the arguments and return a list of tuples, in which the first element of each tuple is a label for the                 loss and the second element is the loss value.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em><em>]</em>) – The accuracy                 function to use. The function should take in two arguments, first, a list of tuples, where the first element of each tuple is the label for the loss and the second element is the loss value, and the second argument                 the target output from the dataset. The function should return a list of tuples, first element of the tuple                 should be the label of the accuracy and the second element should be the accuracy value.</p></li>
+<li><p><strong>flush_print</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to flush the print statement or not. Needed when tqdm is used in a notebook. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing tuples in which the first element of the tuple is the label                 describing the value and the second element is the value itself.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[Tuple[str, torch.Tensor]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -345,6 +445,7 @@ train accuracy.</p>
               <ul>
 <li><a class="reference internal" href="#">athena.solvers package</a><ul>
 <li><a class="reference internal" href="#module-athena.solvers.classification_solver"><code class="docutils literal notranslate"><span class="pre">classification_solver</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.solvers.regression_solver"><code class="docutils literal notranslate"><span class="pre">regression_solver</span></code> module</a></li>
 </ul>
 </li>
 </ul>
