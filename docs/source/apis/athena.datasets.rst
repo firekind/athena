@@ -15,3 +15,14 @@ The good old MNIST dataset. This module contains a function to obtain a ``DataLo
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+``athena.datasets.cifar10`` module
+----------------------------------
+
+The CIFAR10 dataset. This module contains a function to obtain a ``DataLoader`` of the CIFAR10 dataset, as well as some default train and test transforms that are commonly applied.
+
+.. automodule:: athena.datasets.cifar10
+   :members:
+   :undoc-members:
+   :show-inheritance:
