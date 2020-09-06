@@ -1,6 +1,9 @@
 athena.utils package
 ====================
 
+.. toctree::
+   :hidden:
+
 This package contains various utility classes.
 
 ``experiment`` module

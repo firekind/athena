@@ -57,8 +57,23 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <h1> Athena</h1>
+      <a href= "../index.html">
+        <h1 class="header-logo" style="margin: 0px">
+          Athena
+        </h1>
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
     </div>
+
   </div>
 </div>
 
@@ -111,11 +126,11 @@
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../apis/athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apis/athena.datasets.html">athena.datasets package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apis/athena.solvers.html">athena.solvers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apis/athena.utils.html">athena.utils package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../apis/modules.html">athena</a></li>
 </ul>
 
             
@@ -183,12 +198,12 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <h1>All modules for which code is available</h1>
-<ul><li><a href="athena/datasets.html">athena.datasets</a></li>
+<ul><li><a href="athena/datasets/cifar10.html">athena.datasets.cifar10</a></li>
+<li><a href="athena/datasets/mnist.html">athena.datasets.mnist</a></li>
 <li><a href="athena/layers/ghostbatchnorm.html">athena.layers.ghostbatchnorm</a></li>
 <li><a href="athena/models/mnist.html">athena.models.mnist</a></li>
 <li><a href="athena/solvers/classification_solver.html">athena.solvers.classification_solver</a></li>
 <li><a href="athena/solvers/regression_solver.html">athena.solvers.regression_solver</a></li>
-<li><a href="athena/transforms.html">athena.transforms</a></li>
 <li><a href="athena/utils/experiment.html">athena.utils.experiment</a></li>
 <li><a href="athena/utils/functions.html">athena.utils.functions</a></li>
 <li><a href="athena/utils/history.html">athena.utils.history</a></li>
@@ -257,20 +272,41 @@
 
   <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
     <div class="container">
-        <p>
-          Built with Sphinx and the 
-          <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
-        </p>
-        
+      <p>
+        Built with Sphinx and the 
+        <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+      </p>
     </div>
   </div>
 
-  <!-- <div class="cookie-banner-wrapper">
-  <div class="container">
-    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. As the current maintainers of this site, Facebook’s Cookies Policy applies. Learn more, including about available controls: <a href="https://www.facebook.com/policies/cookies/">Cookies Policy</a>.</p>
-    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="../index.html">
+            Athena
+          </a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
-</div> -->
+
+  <!-- End Mobile Menu -->
 
   <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
 

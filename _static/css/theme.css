@@ -9723,20 +9723,16 @@ pre {
 .header-logo {
   height: 23px;
   width: 93px;
-  background-image: url("../images/logo.svg");
-  background-repeat: no-repeat;
-  background-size: 93px 23px;
   display: block;
   float: left;
   z-index: 10;
 }
 @media screen and (min-width: 1100px) {
   .header-logo {
-    background-size: 108px 27px;
     position: absolute;
     height: 27px;
     width: 108px;
-    top: 4px;
+    top: -4px;
     float: none;
   }
 }
@@ -10310,9 +10306,6 @@ ul.pytorch-breadcrumbs a {
   top: 0;
 }
 
-.tutorials-header .header-logo {
-  background-image: url("../images/logo-dark.svg");
-}
 .tutorials-header .main-menu ul li a {
   color: #262626;
 }
