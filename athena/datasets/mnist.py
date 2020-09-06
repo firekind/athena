@@ -5,7 +5,8 @@ from torchvision import datasets
 from torchvision import transforms
 from torch.utils.data import Sampler, DataLoader
 
-def MNIST(
+
+def mnist(
     root: str = "./data",
     train: bool = True,
     transform: transforms.Compose = None,
@@ -21,6 +22,7 @@ def MNIST(
     drop_last: bool = False,
     timeout: float = 0,
     worker_init_fn: Callable = None,
+    use_default_transforms: bool = False,
 ) -> DataLoader:
     """
     Creates an MNIST dataloder given the arguments.
@@ -41,10 +43,23 @@ def MNIST(
         drop_last (bool, optional): Set to True to drop the last incomplete batch. Defaults to False.
         timeout (float, optional): If positive, the timeout value for collecting a batch from workers. Should always be non-negative. Defaults to 0.
         worker_init_fn (Callable, optional): If not None, this will be called on each worker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. Defaults to None.
+        use_default_transforms (bool, optional): If true, will use the default train and test transforms specified in this module.
 
     Returns:
         DataLoader: The ``DataLoader`` with the given parameters.
     """
+
+    # checking whether ``use_default_transforms`` is specified and ``transform`` is specified. If so, throw an error.
+    assert not (
+        use_default_transforms and transform
+    ), "Specify only `use_default_transforms` or `transform`, not both."
+
+    # if ``use_default_transform`` is specified, use them.
+    if use_default_transforms:
+        if train:
+            transform = mnist_train_transforms()
+        else:
+            transform = mnist_test_transforms()
 
     dataset = datasets.MNIST(
         root=root,
@@ -64,5 +79,49 @@ def MNIST(
         pin_memory=pin_memory,
         drop_last=drop_last,
         timeout=timeout,
-        worker_init_fn=worker_init_fn
+        worker_init_fn=worker_init_fn,
+    )
+
+
+def mnist_train_transforms() -> transforms.Compose:
+    """
+    Default MNIST training data transforms.
+    The transforms include:
+
+    * A random rotation between -5 and 5 degrees
+    * Normalization with mean 0.1307 and std 0.3081
+
+    Returns:
+        transforms.Compose: A transforms.Compose object.
+    """
+
+    return transforms.Compose(
+        [
+            transforms.RandomRotation(
+                fill=(0,), degrees=(-5, 5)
+            ),  # Randomly rotating the image in the range -5,5 degrees
+            transforms.ToTensor(),  # Converting to Tensor
+            transforms.Normalize((0.1307,), (0.3081,)),  # Normalizing the
+        ]
+    )
+
+
+def mnist_test_transforms() -> transforms.Compose:
+    """
+    Default MNIST test data transforms.
+    The transforms include:
+
+    * Normalization with mean 0.1307 and std 0.3081
+
+    Returns:
+        transforms.Compose: A transforms.Compose object.
+    """
+
+    return transforms.Compose(
+        [
+            transforms.ToTensor(),  # Converting to Tensor
+            transforms.Normalize(
+                (0.1307,), (0.3081,)
+            ),  # Normalizing the dataset using mean and std
+        ]
     )

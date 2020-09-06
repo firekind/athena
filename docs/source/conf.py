@@ -60,3 +60,4 @@ autodoc_typehints = 'description'
 autoclass_content = 'init'
 autodoc_member_order = 'bysource'
 autodoc_inherit_docstrings = False
+html_context = {'github_url': "https://github.com/firekind/athena"}

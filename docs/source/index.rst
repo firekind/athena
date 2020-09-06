@@ -7,7 +7,13 @@ Welcome to Athena's documentation!
    :maxdepth: 2
    :caption: Contents
    
-   apis/*
+   apis/athena
+   apis/athena.datasets
+   apis/athena.layers
+   apis/athena.models
+   apis/athena.solvers
+   apis/athena.utils
+
 
 Athena is a package which was developed during the Extensive Vision AI Program of the School Of AI. This package is a helper package which
 is used to rapidly experiment during the assignments of the program. Although this package was made during the program, it can be used in other situations as well.
