@@ -25,7 +25,7 @@ def mnist(
     use_default_transforms: bool = False,
 ) -> DataLoader:
     """
-    Creates an MNIST dataloder given the arguments.
+    Creates an MNIST dataloader given the arguments.
 
     Args:
         root (str, optional): Root directory of dataset. Defaults to "./data".
@@ -101,7 +101,7 @@ def mnist_train_transforms() -> transforms.Compose:
                 fill=(0,), degrees=(-5, 5)
             ),  # Randomly rotating the image in the range -5,5 degrees
             transforms.ToTensor(),  # Converting to Tensor
-            transforms.Normalize((0.1307,), (0.3081,)),  # Normalizing the
+            transforms.Normalize((0.1307,), (0.3081,)),  # Normalizing
         ]
     )
 
