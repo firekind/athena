@@ -55,6 +55,7 @@ class ClassificationSolver(BaseSolver):
         history = History()
 
         if loss_fn is None:
+            print("\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.", flush=use_tqdm)
             loss_fn = F.nll_loss
 
         for epoch in range(epochs):
