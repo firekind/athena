@@ -58,7 +58,7 @@ def cifar10(
         if train:
             transform = cifar10_train_transforms()
         else:
-            transform = None
+            transform = cifar10_test_transforms()
 
     dataset = datasets.CIFAR10(
         root=root,
@@ -85,6 +85,24 @@ def cifar10(
 def cifar10_train_transforms() -> transforms.Compose:
     """
     Default CIFAR10 training data transforms.
+    The transforms include:
+
+    * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
+
+    Returns:
+        transforms.Compose: A transforms.Compose object.
+    """
+
+    return transforms.Compose(
+        [
+            transforms.ToTensor(),  # Converting to Tensor
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),  # Normalizing
+        ]
+    )
+
+def cifar10_test_transforms() -> transforms.Compose:
+    """
+    Default CIFAR10 test data transforms.
     The transforms include:
 
     * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
