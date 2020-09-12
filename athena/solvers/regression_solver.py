@@ -44,8 +44,10 @@ class RegressionSolver(BaseSolver):
         """
         Trains the model.
 
-            **Note**: look at the notes in :meth:`athena.solvers.regression_solver.RegressionSolver.train_step` and in \
-                :meth:`athena.solvers.regression_solver.RegressionSolver.test_step`.
+        Note: 
+            
+            look at the notes in :meth:`athena.solvers.regression_solver.RegressionSolver.train_step` and in \
+            :meth:`athena.solvers.regression_solver.RegressionSolver.test_step`.
 
         Args:
             epochs (int): The number of epochs to train for.
@@ -114,9 +116,11 @@ class RegressionSolver(BaseSolver):
         """
         Performs a single train step.
             
-            **Note**: the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \
-                number of batches in the dataset while recording them for an epoch (averaging). So make \
-                sure any reduction in your functions are 'mean'.
+        Note: 
+            
+            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \
+            number of batches in the dataset while recording them for an epoch (averaging). So make \
+            sure any reduction in your functions are ``mean``.
             
         Args:
             train_loader (DataLoader): The ``DataLoader`` for the training data.
@@ -246,9 +250,11 @@ class RegressionSolver(BaseSolver):
         """
         Performs a single test step.
 
-            **Note**: the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \
+        Note: 
+            
+            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \
             number of batches in the dataset (while calculating the average loss and average accuracy during the \
-            train step) and displayed as the result. So make sure any reduction in your functions are 'mean'.
+            train step) and displayed as the result. So make sure any reduction in your functions are ``mean``.
 
         Args:
             test_loader (DataLoader): The ``DataLoader`` for the test data.
