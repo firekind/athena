@@ -1,0 +1,598 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>athena.models.cifar10_v1 &mdash; Athena  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" /> -->
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a href= "../../../index.html">
+        <h1 class="header-logo" style="margin: 0px">
+          Athena
+        </h1>
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+
+  </div>
+</div>
+
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="../../index.html">Module code</a> &gt;</li>
+        
+      <li>athena.models.cifar10_v1</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <h1>Source code for athena.models.cifar10_v1</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="kn">from</span> <span class="nn">athena.layers</span> <span class="kn">import</span> <span class="n">DepthwiseConv2d</span>
+
+
+<div class="viewcode-block" id="Cifar10V1"><a class="viewcode-back" href="../../../apis/athena.models.html#athena.models.cifar10_v1.Cifar10V1">[docs]</a><span class="k">class</span> <span class="nc">Cifar10V1</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dropout_value</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cifar 10 model made for assignment 7. Implemented by Shyamant Achar. Model summary:</span>
+
+<span class="sd">        .. code-block:: none</span>
+
+<span class="sd">            ----------------------------------------------------------------</span>
+<span class="sd">                    Layer (type)               Output Shape         Param #</span>
+<span class="sd">            ================================================================</span>
+<span class="sd">                        Conv2d-1            [-1, 3, 32, 32]              30</span>
+<span class="sd">                        Conv2d-2           [-1, 32, 32, 32]             128</span>
+<span class="sd">               DepthwiseConv2d-3           [-1, 32, 32, 32]               0</span>
+<span class="sd">                   BatchNorm2d-4           [-1, 32, 32, 32]              64</span>
+<span class="sd">                          ReLU-5           [-1, 32, 32, 32]               0</span>
+<span class="sd">                       Dropout-6           [-1, 32, 32, 32]               0</span>
+<span class="sd">                        Conv2d-7           [-1, 32, 32, 32]             320</span>
+<span class="sd">                        Conv2d-8           [-1, 64, 32, 32]           2,112</span>
+<span class="sd">               DepthwiseConv2d-9           [-1, 64, 32, 32]               0</span>
+<span class="sd">                  BatchNorm2d-10           [-1, 64, 32, 32]             128</span>
+<span class="sd">                         ReLU-11           [-1, 64, 32, 32]               0</span>
+<span class="sd">                      Dropout-12           [-1, 64, 32, 32]               0</span>
+<span class="sd">                       Conv2d-13           [-1, 64, 32, 32]             640</span>
+<span class="sd">                       Conv2d-14          [-1, 128, 32, 32]           8,320</span>
+<span class="sd">              DepthwiseConv2d-15          [-1, 128, 32, 32]               0</span>
+<span class="sd">                  BatchNorm2d-16          [-1, 128, 32, 32]             256</span>
+<span class="sd">                         ReLU-17          [-1, 128, 32, 32]               0</span>
+<span class="sd">                      Dropout-18          [-1, 128, 32, 32]               0</span>
+<span class="sd">                       Conv2d-19            [-1, 3, 32, 32]              30</span>
+<span class="sd">                       Conv2d-20           [-1, 32, 32, 32]             128</span>
+<span class="sd">              DepthwiseConv2d-21           [-1, 32, 32, 32]               0</span>
+<span class="sd">                  BatchNorm2d-22           [-1, 32, 32, 32]              64</span>
+<span class="sd">                         ReLU-23           [-1, 32, 32, 32]               0</span>
+<span class="sd">                      Dropout-24           [-1, 32, 32, 32]               0</span>
+<span class="sd">                       Conv2d-25           [-1, 32, 32, 32]             320</span>
+<span class="sd">                       Conv2d-26           [-1, 64, 32, 32]           2,112</span>
+<span class="sd">              DepthwiseConv2d-27           [-1, 64, 32, 32]               0</span>
+<span class="sd">                  BatchNorm2d-28           [-1, 64, 32, 32]             128</span>
+<span class="sd">                         ReLU-29           [-1, 64, 32, 32]               0</span>
+<span class="sd">                      Dropout-30           [-1, 64, 32, 32]               0</span>
+<span class="sd">                       Conv2d-31           [-1, 64, 32, 32]             640</span>
+<span class="sd">                       Conv2d-32          [-1, 128, 32, 32]           8,320</span>
+<span class="sd">              DepthwiseConv2d-33          [-1, 128, 32, 32]               0</span>
+<span class="sd">                  BatchNorm2d-34          [-1, 128, 32, 32]             256</span>
+<span class="sd">                         ReLU-35          [-1, 128, 32, 32]               0</span>
+<span class="sd">                      Dropout-36          [-1, 128, 32, 32]               0</span>
+<span class="sd">                    MaxPool2d-37          [-1, 128, 16, 16]               0</span>
+<span class="sd">                       Conv2d-38           [-1, 32, 16, 16]           4,128</span>
+<span class="sd">                       Conv2d-39           [-1, 32, 16, 16]             320</span>
+<span class="sd">                       Conv2d-40           [-1, 64, 16, 16]           2,112</span>
+<span class="sd">              DepthwiseConv2d-41           [-1, 64, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-42           [-1, 64, 16, 16]             128</span>
+<span class="sd">                         ReLU-43           [-1, 64, 16, 16]               0</span>
+<span class="sd">                      Dropout-44           [-1, 64, 16, 16]               0</span>
+<span class="sd">                       Conv2d-45           [-1, 64, 16, 16]             640</span>
+<span class="sd">                       Conv2d-46          [-1, 128, 16, 16]           8,320</span>
+<span class="sd">              DepthwiseConv2d-47          [-1, 128, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-48          [-1, 128, 16, 16]             256</span>
+<span class="sd">                         ReLU-49          [-1, 128, 16, 16]               0</span>
+<span class="sd">                      Dropout-50          [-1, 128, 16, 16]               0</span>
+<span class="sd">                       Conv2d-51          [-1, 128, 16, 16]           1,280</span>
+<span class="sd">                       Conv2d-52          [-1, 256, 16, 16]          33,024</span>
+<span class="sd">              DepthwiseConv2d-53          [-1, 256, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-54          [-1, 256, 16, 16]             512</span>
+<span class="sd">                         ReLU-55          [-1, 256, 16, 16]               0</span>
+<span class="sd">                      Dropout-56          [-1, 256, 16, 16]               0</span>
+<span class="sd">                       Conv2d-57           [-1, 32, 16, 16]             320</span>
+<span class="sd">                       Conv2d-58           [-1, 64, 16, 16]           2,112</span>
+<span class="sd">              DepthwiseConv2d-59           [-1, 64, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-60           [-1, 64, 16, 16]             128</span>
+<span class="sd">                         ReLU-61           [-1, 64, 16, 16]               0</span>
+<span class="sd">                      Dropout-62           [-1, 64, 16, 16]               0</span>
+<span class="sd">                       Conv2d-63           [-1, 64, 16, 16]             640</span>
+<span class="sd">                       Conv2d-64          [-1, 128, 16, 16]           8,320</span>
+<span class="sd">              DepthwiseConv2d-65          [-1, 128, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-66          [-1, 128, 16, 16]             256</span>
+<span class="sd">                         ReLU-67          [-1, 128, 16, 16]               0</span>
+<span class="sd">                      Dropout-68          [-1, 128, 16, 16]               0</span>
+<span class="sd">                       Conv2d-69          [-1, 128, 16, 16]           1,280</span>
+<span class="sd">                       Conv2d-70          [-1, 256, 16, 16]          33,024</span>
+<span class="sd">              DepthwiseConv2d-71          [-1, 256, 16, 16]               0</span>
+<span class="sd">                  BatchNorm2d-72          [-1, 256, 16, 16]             512</span>
+<span class="sd">                         ReLU-73          [-1, 256, 16, 16]               0</span>
+<span class="sd">                      Dropout-74          [-1, 256, 16, 16]               0</span>
+<span class="sd">                    MaxPool2d-75            [-1, 256, 8, 8]               0</span>
+<span class="sd">                       Conv2d-76             [-1, 64, 8, 8]          16,448</span>
+<span class="sd">                       Conv2d-77             [-1, 64, 8, 8]             640</span>
+<span class="sd">                       Conv2d-78            [-1, 128, 8, 8]           8,320</span>
+<span class="sd">              DepthwiseConv2d-79            [-1, 128, 8, 8]               0</span>
+<span class="sd">                  BatchNorm2d-80            [-1, 128, 8, 8]             256</span>
+<span class="sd">                         ReLU-81            [-1, 128, 8, 8]               0</span>
+<span class="sd">                      Dropout-82            [-1, 128, 8, 8]               0</span>
+<span class="sd">                       Conv2d-83            [-1, 128, 8, 8]           1,280</span>
+<span class="sd">                       Conv2d-84            [-1, 256, 8, 8]          33,024</span>
+<span class="sd">              DepthwiseConv2d-85            [-1, 256, 8, 8]               0</span>
+<span class="sd">                  BatchNorm2d-86            [-1, 256, 8, 8]             512</span>
+<span class="sd">                         ReLU-87            [-1, 256, 8, 8]               0</span>
+<span class="sd">                      Dropout-88            [-1, 256, 8, 8]               0</span>
+<span class="sd">                       Conv2d-89            [-1, 256, 8, 8]           2,560</span>
+<span class="sd">                       Conv2d-90            [-1, 256, 8, 8]          65,792</span>
+<span class="sd">              DepthwiseConv2d-91            [-1, 256, 8, 8]               0</span>
+<span class="sd">                  BatchNorm2d-92            [-1, 256, 8, 8]             512</span>
+<span class="sd">                         ReLU-93            [-1, 256, 8, 8]               0</span>
+<span class="sd">                      Dropout-94            [-1, 256, 8, 8]               0</span>
+<span class="sd">                       Conv2d-95             [-1, 64, 8, 8]             640</span>
+<span class="sd">                       Conv2d-96            [-1, 128, 8, 8]           8,320</span>
+<span class="sd">              DepthwiseConv2d-97            [-1, 128, 8, 8]               0</span>
+<span class="sd">                  BatchNorm2d-98            [-1, 128, 8, 8]             256</span>
+<span class="sd">                         ReLU-99            [-1, 128, 8, 8]               0</span>
+<span class="sd">                     Dropout-100            [-1, 128, 8, 8]               0</span>
+<span class="sd">                      Conv2d-101            [-1, 128, 8, 8]           1,280</span>
+<span class="sd">                      Conv2d-102            [-1, 256, 8, 8]          33,024</span>
+<span class="sd">             DepthwiseConv2d-103            [-1, 256, 8, 8]               0</span>
+<span class="sd">                 BatchNorm2d-104            [-1, 256, 8, 8]             512</span>
+<span class="sd">                        ReLU-105            [-1, 256, 8, 8]               0</span>
+<span class="sd">                     Dropout-106            [-1, 256, 8, 8]               0</span>
+<span class="sd">                      Conv2d-107            [-1, 256, 8, 8]           2,560</span>
+<span class="sd">                      Conv2d-108            [-1, 256, 8, 8]          65,792</span>
+<span class="sd">             DepthwiseConv2d-109            [-1, 256, 8, 8]               0</span>
+<span class="sd">                 BatchNorm2d-110            [-1, 256, 8, 8]             512</span>
+<span class="sd">                        ReLU-111            [-1, 256, 8, 8]               0</span>
+<span class="sd">                     Dropout-112            [-1, 256, 8, 8]               0</span>
+<span class="sd">                   AvgPool2d-113            [-1, 256, 1, 1]               0</span>
+<span class="sd">                      Conv2d-114             [-1, 64, 1, 1]          16,448</span>
+<span class="sd">                      Conv2d-115             [-1, 10, 1, 1]             650</span>
+<span class="sd">            ================================================================</span>
+<span class="sd">            Total params: 380,646</span>
+<span class="sd">            Trainable params: 380,646</span>
+<span class="sd">            Non-trainable params: 0</span>
+<span class="sd">            ----------------------------------------------------------------</span>
+<span class="sd">            Input size (MB): 0.01</span>
+<span class="sd">            Forward/backward pass size (MB): 32.71</span>
+<span class="sd">            Params size (MB): 1.45</span>
+<span class="sd">            Estimated Total Size (MB): 34.17</span>
+<span class="sd">            ----------------------------------------------------------------</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            in_channels (int, optional): The number of input channels. Defaults to 3.</span>
+<span class="sd">            dropout_value (float, optional): The dropout percentage. Defaults to 0.25.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cifar10V1</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">block1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">block2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">block3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+            <span class="n">DepthwiseConv2d</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout_value</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_block</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">AvgPool2d</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">dep_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">dia_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">dep_x</span> <span class="o">+</span> <span class="n">dia_x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transition1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">dep_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">dia_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">dep_x</span> <span class="o">+</span> <span class="n">dia_x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transition2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">dep_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">dia_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dilationblock3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">dep_x</span> <span class="o">+</span> <span class="n">dia_x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+             </article>
+             
+            </div>
+            <footer>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+         <script src="../../../_static/jquery.js"></script>
+         <script src="../../../_static/underscore.js"></script>
+         <script src="../../../_static/doctools.js"></script>
+         <script src="../../../_static/language_data.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <p>
+        Built with Sphinx and the 
+        <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="../../../index.html">
+            Athena
+          </a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+</html>
