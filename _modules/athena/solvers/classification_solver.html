@@ -257,6 +257,7 @@
         <span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">loss_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[93mWarning:</span><span class="se">\033</span><span class="s2">[0m Loss function not specified. Using nll loss.&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="n">use_tqdm</span><span class="p">)</span>
             <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">nll_loss</span>
 
         <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>

@@ -215,7 +215,6 @@ various parameters that are to be used for the experiment.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># importing</span>
 <span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ClassificationSolver</span>
 <span class="kn">from</span> <span class="nn">athena.models</span> <span class="kn">import</span> <span class="n">MnistNet</span>
-<span class="kn">from</span> <span class="nn">athena.transforms</span> <span class="kn">import</span> <span class="n">mnist_test_transforms</span><span class="p">,</span> <span class="n">mnist_train_transforms</span>
 <span class="kn">from</span> <span class="nn">athena.utils.functions</span> <span class="kn">import</span> <span class="n">plot_experiments</span><span class="p">,</span> <span class="n">plot_misclassified</span>
 
 <span class="c1"># defining batch size and device</span>
@@ -223,20 +222,17 @@ various parameters that are to be used for the experiment.</p>
 <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
 
 <span class="c1"># creating the datasets</span>
-<span class="n">train_loader</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span>
-   <span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span>
+<span class="n">train_loader</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">mnist</span><span class="p">(</span>
    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-   <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-   <span class="n">transform</span><span class="o">=</span><span class="n">mnist_train_transforms</span><span class="p">(),</span>
    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span>
+   <span class="n">use_default_transforms</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 
 <span class="n">test_loader</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span>
-   <span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span>
    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
    <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-   <span class="n">transform</span><span class="o">=</span><span class="n">mnist_test_transforms</span><span class="p">(),</span>
    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span>
+   <span class="n">use_default_transforms</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 
 <span class="c1"># creating experiment</span>

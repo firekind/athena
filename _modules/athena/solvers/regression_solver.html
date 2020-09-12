@@ -246,8 +246,10 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the model.</span>
 
-<span class="sd">            **Note**: look at the notes in :meth:`athena.solvers.regression_solver.RegressionSolver.train_step` and in \</span>
-<span class="sd">                :meth:`athena.solvers.regression_solver.RegressionSolver.test_step`.</span>
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            look at the notes in :meth:`athena.solvers.regression_solver.RegressionSolver.train_step` and in \</span>
+<span class="sd">            :meth:`athena.solvers.regression_solver.RegressionSolver.test_step`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            epochs (int): The number of epochs to train for.</span>
@@ -316,9 +318,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a single train step.</span>
 <span class="sd">            </span>
-<span class="sd">            **Note**: the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
-<span class="sd">                number of batches in the dataset while recording them for an epoch (averaging). So make \</span>
-<span class="sd">                sure any reduction in your functions are &#39;mean&#39;.</span>
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
+<span class="sd">            number of batches in the dataset while recording them for an epoch (averaging). So make \</span>
+<span class="sd">            sure any reduction in your functions are ``mean``.</span>
 <span class="sd">            </span>
 <span class="sd">        Args:</span>
 <span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
@@ -448,9 +452,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a single test step.</span>
 
-<span class="sd">            **Note**: the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
 <span class="sd">            number of batches in the dataset (while calculating the average loss and average accuracy during the \</span>
-<span class="sd">            train step) and displayed as the result. So make sure any reduction in your functions are &#39;mean&#39;.</span>
+<span class="sd">            train step) and displayed as the result. So make sure any reduction in your functions are ``mean``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            test_loader (DataLoader): The ``DataLoader`` for the test data.</span>

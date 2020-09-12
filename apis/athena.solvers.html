@@ -338,9 +338,10 @@ multiple losses</p>
 <dt id="athena.solvers.regression_solver.RegressionSolver.train">
 <code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epochs</span></em>, <em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">scheduler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">use_tqdm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.train" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the model.</p>
-<blockquote>
-<div><p><strong>Note</strong>: look at the notes in <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.train_step" title="athena.solvers.regression_solver.RegressionSolver.train_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.train_step()</span></code></a> and in                 <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.test_step" title="athena.solvers.regression_solver.RegressionSolver.test_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.test_step()</span></code></a>.</p>
-</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>look at the notes in <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.train_step" title="athena.solvers.regression_solver.RegressionSolver.train_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.train_step()</span></code></a> and in             <a class="reference internal" href="#athena.solvers.regression_solver.RegressionSolver.test_step" title="athena.solvers.regression_solver.RegressionSolver.test_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">athena.solvers.regression_solver.RegressionSolver.test_step()</span></code></a>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -368,9 +369,10 @@ multiple losses</p>
 <dt id="athena.solvers.regression_solver.RegressionSolver.train_step">
 <code class="sig-name descname">train_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">use_tqdm</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.train_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a single train step.</p>
-<blockquote>
-<div><p><strong>Note</strong>: the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the                 number of batches in the dataset while recording them for an epoch (averaging). So make                 sure any reduction in your functions are ‘mean’.</p>
-</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the             number of batches in the dataset while recording them for an epoch (averaging). So make             sure any reduction in your functions are <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -396,9 +398,10 @@ multiple losses</p>
 <dt id="athena.solvers.regression_solver.RegressionSolver.test_step">
 <code class="sig-name descname">test_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">acc_fn</span></em>, <em class="sig-param"><span class="n">flush_print</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver.test_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver.test_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a single test step.</p>
-<blockquote>
-<div><p><strong>Note</strong>: the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the             number of batches in the dataset (while calculating the average loss and average accuracy during the             train step) and displayed as the result. So make sure any reduction in your functions are ‘mean’.</p>
-</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the losses and accuracies returned by the <code class="docutils literal notranslate"><span class="pre">loss_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">acc_fn</span></code> are divided by the             number of batches in the dataset (while calculating the average loss and average accuracy during the             train step) and displayed as the result. So make sure any reduction in your functions are <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

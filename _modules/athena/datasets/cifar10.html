@@ -260,7 +260,7 @@
         <span class="k">if</span> <span class="n">train</span><span class="p">:</span>
             <span class="n">transform</span> <span class="o">=</span> <span class="n">cifar10_train_transforms</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">cifar10_test_transforms</span><span class="p">()</span>
 
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span>
         <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
@@ -287,6 +287,24 @@
 <div class="viewcode-block" id="cifar10_train_transforms"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10_train_transforms">[docs]</a><span class="k">def</span> <span class="nf">cifar10_train_transforms</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Default CIFAR10 training data transforms.</span>
+<span class="sd">    The transforms include:</span>
+
+<span class="sd">    * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        transforms.Compose: A transforms.Compose object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  <span class="c1"># Converting to Tensor</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)),</span>  <span class="c1"># Normalizing</span>
+        <span class="p">]</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="cifar10_test_transforms"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10_test_transforms">[docs]</a><span class="k">def</span> <span class="nf">cifar10_test_transforms</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default CIFAR10 test data transforms.</span>
 <span class="sd">    The transforms include:</span>
 
 <span class="sd">    * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)</span>

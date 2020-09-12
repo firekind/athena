@@ -30,7 +30,6 @@ various parameters that are to be used for the experiment.
    # importing
    from athena import dataset, Experiment, ClassificationSolver
    from athena.models import MnistNet
-   from athena.transforms import mnist_test_transforms, mnist_train_transforms
    from athena.utils.functions import plot_experiments, plot_misclassified
 
    # defining batch size and device
@@ -38,20 +37,17 @@ various parameters that are to be used for the experiment.
    device = "cuda" if torch.cuda.is_available() else "cpu"
 
    # creating the datasets 
-   train_loader = datasets.MNIST(
-      root="./data",
+   train_loader = datasets.mnist(
       download=True,
-      train=True,
-      transform=mnist_train_transforms(),
       batch_size=batch_size
+      use_default_transforms=True
    )
 
    test_loader = datasets.MNIST(
-      root="./data",
       download=True,
       train=False,
-      transform=mnist_test_transforms(),
       batch_size=batch_size
+      use_default_transforms=True
    )
 
    # creating experiment
