@@ -16,3 +16,9 @@ The models package contains implmentations of various models made during the EVA
 --------------------------
 
 .. autoclass:: athena.models.cifar10_v1.Cifar10V1
+
+
+``cifa10_v2`` module
+--------------------------
+
+.. autoclass:: athena.models.cifar10_v2.Cifar10V2
