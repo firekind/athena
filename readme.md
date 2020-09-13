@@ -25,48 +25,42 @@ to make the virtual environment and install an editable version of athena. Then 
 
 ```python
 # importing
-from athena import dataset, Experiment, ClassificationSolver
+import torch.optim as optim
+from torch.optim.lr_scheduler import StepLR
+
+from athena import datasets, Experiments, ClassificationSolver
 from athena.models import MnistNet
-from athena.transforms import mnist_test_transforms, mnist_train_transforms
-from athena.utils.functions import plot_experiments, plot_misclassified
 
 # defining batch size and device
 batch_size = 128 if torch.cuda.is_available() else 64
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # creating the datasets 
-train_loader = datasets.MNIST(
-    root="./data",
+train_loader = datasets.mnist(
     download=True,
-    train=True,
-    transform=mnist_train_transforms(),
-    batch_size=batch_size
+    batch_size=batch_size,
+    use_default_transforms=True,
 )
 
-test_loader = datasets.MNIST(
-    root="./data",
+test_loader = datasets.mnist(
     download=True,
     train=False,
-    transform=mnist_test_transforms(),
-    batch_size=batch_size
+    batch_size=batch_size,
+    use_default_transforms=True,
 )
 
-# creating experiment
-model = MnistNet(use_ghost_batch_norm=True).to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-scheduler = StepLR(optimizer, step_size=8, gamma=0.1)
-exp = Experiment(
-    name="With Ghost Batch Norm",
-    model=model,
-    solver_cls=ClassificationSolver,
-    train_args=dict(
-        epochs=25,
-        train_loader=train_loader,
-        test_loader=test_loader,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        device=device,
-    )
+# creating the experiment
+exp = (
+    Experiment("Ghost batch norm with 2 splits")
+    .model(MnistNet(use_ghost_batch_norm=True))
+    .solver(ClassificationSolver)
+    .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+    .scheduler(StepLR, step_size=8, gamma=0.1)
+    .epochs(epochs)
+    .train_loader(train_loader)
+    .test_loader(test_loader)
+    .device(device)
+    .build()
 )
 
 # running experiment

@@ -1,16 +1,16 @@
 import math
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import torch
 from torch.utils.data import DataLoader
 from matplotlib import axes
 import matplotlib.pyplot as plt
 
-from athena import Experiment, ClassificationSolver
+from athena import Experiment, ClassificationSolver, Experiments
 
 
 def plot_experiments(
-    experiments: List[Experiment],
+    experiments: Union[Experiments, List[Experiment]],
     save_path: str = None,
     figsize: Tuple[int, int] = (18, 13),
 ):
@@ -18,13 +18,15 @@ def plot_experiments(
     Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.
 
     Args:
-        experiments (List[Experiment]): The list of ``Experiments`` to plot
+        experiments (Union[Experiments, List[Experiment]]): The list of ``Experiments`` to plot
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (18, 13).
 
     Raises:
         Exception: When there are no metrics to plot.
     """
+    if isinstance(experiments, Experiments):
+        experiments = list(experiments)
 
     # getting the list of metrics to plot
     metric_names = list(

@@ -22,15 +22,17 @@ is used to rapidly experiment during the assignments of the program. Although th
 Usage
 -----
 
-The core of this package is the :py:class:`athena.utils.experiment.Experiment` class, which is used to quickly set up an experiment with 
+The core of this package is the :class:`athena.utils.experiment.Experiment` class, which is used to quickly set up an experiment with 
 various parameters that are to be used for the experiment.
 
 .. code-block:: python
 
    # importing
-   from athena import dataset, Experiment, ClassificationSolver
+   import torch.optim as optim
+   from torch.optim.lr_scheduler import StepLR
+
+   from athena import datasets, Experiments, ClassificationSolver
    from athena.models import MnistNet
-   from athena.utils.functions import plot_experiments, plot_misclassified
 
    # defining batch size and device
    batch_size = 128 if torch.cuda.is_available() else 64
@@ -39,37 +41,69 @@ various parameters that are to be used for the experiment.
    # creating the datasets 
    train_loader = datasets.mnist(
       download=True,
-      batch_size=batch_size
-      use_default_transforms=True
+      batch_size=batch_size,
+      use_default_transforms=True,
    )
 
-   test_loader = datasets.MNIST(
+   test_loader = datasets.mnist(
       download=True,
       train=False,
-      batch_size=batch_size
-      use_default_transforms=True
+      batch_size=batch_size,
+      use_default_transforms=True,
    )
 
-   # creating experiment
-   model = MnistNet(use_ghost_batch_norm=True).to(device)
-   optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-   scheduler = StepLR(optimizer, step_size=8, gamma=0.1)
-   exp = Experiment(
-      name="With Ghost Batch Norm",
-      model=model,
-      solver_cls=ClassificationSolver,
-      train_args=dict(
-         epochs=25,
-         train_loader=train_loader,
-         test_loader=test_loader,
-         optimizer=optimizer,
-         scheduler=scheduler,
-         device=device,
-      )
+   # creating the experiment
+   exp = (
+      Experiment("Ghost batch norm with 2 splits")
+      .model(MnistNet(use_ghost_batch_norm=True))
+      .solver(ClassificationSolver)
+      .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+      .scheduler(StepLR, step_size=8, gamma=0.1)
+      .epochs(epochs)
+      .train_loader(train_loader)
+      .test_loader(test_loader)
+      .device(device)
+      .build()
    )
 
    # running experiment
    exp.run()
+
+To run mulitple experiments one after the other, the :class:`athena.utils.experiment.Experiments` class is used.
+
+.. code-block:: python
+
+   ...
+   from athena import Experiments
+   ...
+
+   exps = (
+      Experiments()
+      .add("Ghost batch norm with 2 splits")
+         .model(MnistNet(use_ghost_batch_norm=True))
+         .solver(ClassificationSolver)
+         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+         .scheduler(StepLR, step_size=8, gamma=0.1)
+         .epochs(epochs)
+         .train_loader(train_loader)
+         .test_loader(test_loader)
+         .device(device)
+         .build()
+
+      .add("Ghost batch norm with 4 splits")
+         .model(MnistNet(use_ghost_batch_norm=True))
+         .solver(ClassificationSolver)
+         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+         .scheduler(StepLR, step_size=8, gamma=0.1)
+         .epochs(epochs)
+         .train_loader(train_loader)
+         .test_loader(test_loader)
+         .device(device)
+         .build()
+      .done()
+   )
+
+   exps.run()
 
 Index
 -----
