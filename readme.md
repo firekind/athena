@@ -37,13 +37,11 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # creating the datasets 
 train_loader = datasets.mnist(
-    download=True,
     batch_size=batch_size,
     use_default_transforms=True,
 )
 
 test_loader = datasets.mnist(
-    download=True,
     train=False,
     batch_size=batch_size,
     use_default_transforms=True,

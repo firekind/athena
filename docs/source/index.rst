@@ -40,13 +40,11 @@ various parameters that are to be used for the experiment.
 
    # creating the datasets 
    train_loader = datasets.mnist(
-      download=True,
       batch_size=batch_size,
       use_default_transforms=True,
    )
 
    test_loader = datasets.mnist(
-      download=True,
       train=False,
       batch_size=batch_size,
       use_default_transforms=True,
