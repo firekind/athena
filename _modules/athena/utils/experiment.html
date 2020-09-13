@@ -200,9 +200,12 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <h1>Source code for athena.utils.experiment</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">torch.optim</span> <span class="kn">import</span> <span class="n">Optimizer</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">_LRScheduler</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">History</span>
 <span class="kn">from</span> <span class="nn">athena.solvers.base_solver</span> <span class="kn">import</span> <span class="n">BaseSolver</span>
@@ -212,9 +215,9 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
-        <span class="n">train_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-        <span class="n">solver_cls</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseSolver</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">train_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bundles information regarding an experiment. An experiment is performed on a model, with</span>
@@ -222,27 +225,330 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the experiment.</span>
-<span class="sd">            model (nn.Module): The model to experiment on.</span>
-<span class="sd">            train_args (Dict[str, Any]): The arguments to be passed on to the ``Solver`` when training.</span>
-<span class="sd">            solver_cls (BaseSolver): The ``Solver`` class to use.</span>
+<span class="sd">            model (nn.Module, optional): The model to experiment on. Defaults to None.</span>
+<span class="sd">            train_args (Dict[str, Any], optional): The arguments to be passed on to the ``Solver`` when training. \</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            solver_cls (BaseSolver, optional): The ``Solver`` class to use. Defaults to None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># the name of the experiment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="c1"># the model object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_obj</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="c1"># the solver class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_cls</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># creating the object of the solver if the class is not None</span>
+        <span class="k">if</span> <span class="n">solver_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="n">solver_cls</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># the arguments to be passed to the solver while training. If it is None,</span>
+        <span class="c1"># initialize it to an empty dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="o">=</span> <span class="n">train_args</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># the history object, stores info about the losses and accuracies</span>
+        <span class="c1"># once the training is over.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver_cls</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1"># the chain is used when ``Experiments`` class is used to define multiple experiments</span>
+        <span class="c1"># to run. This chain attribute keeps track of the ``Experiments`` object that was</span>
+        <span class="c1"># used to define the experiments. If the ``Experiment`` was defined without using</span>
+        <span class="c1"># ``Experiments``, this attribute will remain None.</span>
+        <span class="c1"># The ``build`` function returns this attribute if it is not none, so that more</span>
+        <span class="c1"># experiments can be added to the ``Experiments`` object.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Experiment.run"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the </span>
+<span class="sd">        Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the</span>
 <span class="sd">        ``History``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="n">flush</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_tqdm&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[92m=&gt; Running experiment: </span><span class="si">%s</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="n">flush</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">)</span></div></div>
+        <span class="n">flush</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_tqdm&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[92m=&gt; Running experiment: </span><span class="si">%s</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="n">flush</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Experiment.model"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the model to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (nn.Module): The model to use.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_obj</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.solver"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.solver">[docs]</a>    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseSolver</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the solver to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            solver (Type[BaseSolver]): The solver class (not object)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_cls</span> <span class="o">=</span> <span class="n">solver</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.optimizer"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Optimizer</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the optimizer to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            optimizer_cls (Type[Optimizer]): The optimizer class (not an object)</span>
+<span class="sd">            **kwargs: The keyword arguments to be passed onto the optimizer.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: Raised when there is no model attached to this experiment</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the model before setting optimizer&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizer_cls</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.scheduler"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.scheduler">[docs]</a>    <span class="k">def</span> <span class="nf">scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_LRScheduler</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the scheduler to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scheduler_cls (Type[_LRScheduler]): The scheduler class (not an object)</span>
+<span class="sd">            **kwargs: The keyword arguments to be passed onto the scheduler.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: Raised when there is no optimizer attached to this experiment.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the optimizer before setting scheduler&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scheduler_cls</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.epochs"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.epochs">[docs]</a>    <span class="k">def</span> <span class="nf">epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the number of epochs to train for.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epochs (int): The epochs to train for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.train_loader"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.train_loader">[docs]</a>    <span class="k">def</span> <span class="nf">train_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The ``DataLoader`` to use while training the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            train_loader (DataLoader): The dataloader.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;train_loader&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_loader</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.test_loader"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.test_loader">[docs]</a>    <span class="k">def</span> <span class="nf">test_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The ``DataLoader`` to use while testing the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            test_loader (DataLoader): The dataloader</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;test_loader&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_loader</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.device"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.device">[docs]</a>    <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The device to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            device (str): A valid pytorch device string.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: Raised when there is no model attached to this experiment.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the model before setting the device&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_obj</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.use_tqdm"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.use_tqdm">[docs]</a>    <span class="k">def</span> <span class="nf">use_tqdm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses tqdm for the progress bar, instead of the keras style progress bar.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;use_tqdm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.loss_fn"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.loss_fn">[docs]</a>    <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The loss function to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loss_fn (Callable): The loss function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;loss_fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_fn</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.acc_fn"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.acc_fn">[docs]</a>    <span class="k">def</span> <span class="nf">acc_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The accuracy function to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            acc_fn (Callable): The accuracy function</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">[</span><span class="s2">&quot;acc_fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">acc_fn</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Experiment.build"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Experiment&quot;</span><span class="p">,</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepares the experiment, so that it can be run.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[Experiment, Experiments]: The object of this class, if an ``Experiments`` object was \</span>
+<span class="sd">                not used to create this experiment, else the ``Experiments`` object used to create this \</span>
+<span class="sd">                experiment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Model and solver class should be specified&quot;</span>
+
+        <span class="c1"># creating the solver object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_obj</span><span class="p">)</span>
+
+        <span class="c1"># returning self, since this experiment was defined as a standalone experiment</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="c1"># else returning the chain this experiment is attached to</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the chain that this experiment should attach itself to.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chain (Experiments): The chain object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="o">=</span> <span class="n">chain</span></div>
+
+
+<div class="viewcode-block" id="Experiments"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiments">[docs]</a><span class="k">class</span> <span class="nc">Experiments</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines a list of experiments that has to be run one after the other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Experiments.add"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiments.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experiment</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an experiment to the chain of experiments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the experiment.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiment: The ``Experiment`` object that was added to the chain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_experiment</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">e</span></div>
+
+<div class="viewcode-block" id="Experiments.run"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiments.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs all the experiments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the experiment to the chain.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            experiment (Experiment): The experiment to add.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># sets the experiment&#39;s chain to the object of this class.</span>
+        <span class="n">experiment</span><span class="o">.</span><span class="n">_set_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># adding the experiment to the list of experiments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">experiment</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment</span>
+
+<div class="viewcode-block" id="Experiments.done"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiments.done">[docs]</a>    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Signifies the end of the chain of experiments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experiments: Object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">obj</span></div>
 </pre></div>
 
              </article>

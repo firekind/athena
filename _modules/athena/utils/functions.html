@@ -201,18 +201,18 @@
               
   <h1>Source code for athena.utils.functions</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">axes</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ClassificationSolver</span>
+<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ClassificationSolver</span><span class="p">,</span> <span class="n">Experiments</span>
 
 
 <div class="viewcode-block" id="plot_experiments"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.functions.plot_experiments">[docs]</a><span class="k">def</span> <span class="nf">plot_experiments</span><span class="p">(</span>
-    <span class="n">experiments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">],</span>
+    <span class="n">experiments</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Experiments</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">]],</span>
     <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
 <span class="p">):</span>
@@ -220,13 +220,15 @@
 <span class="sd">    Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        experiments (List[Experiment]): The list of ``Experiments`` to plot</span>
+<span class="sd">        experiments (Union[Experiments, List[Experiment]]): The list of ``Experiments`` to plot</span>
 <span class="sd">        save_path (str, optional): The path to save the plot. Defaults to None.</span>
 <span class="sd">        figsize (Tuple[int, int], optional): The size of the plot. Defaults to (18, 13).</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: When there are no metrics to plot.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiments</span><span class="p">,</span> <span class="n">Experiments</span><span class="p">):</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
 
     <span class="c1"># getting the list of metrics to plot</span>
     <span class="n">metric_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
