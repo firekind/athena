@@ -27,7 +27,7 @@ classification problems contains a helper method to get ``n`` misclassified imag
 ``base_solver`` module
 --------------------------------------------
 
-.. automodule:: athena.solvers.base_solver
+.. automodule:: athena.solvers.base_solver 
    :members:
    :undoc-members:
    :show-inheritance:

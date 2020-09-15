@@ -1,4 +1,5 @@
 import abc
+from functools import wraps
 from typing import Callable, Type
 
 import torch
@@ -9,10 +10,18 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 
 def _writer_wrapper(func):
+    """
+    Used to wrap ``SummaryWriter`` related functions. The decorated function won't \
+        execute if the writer object of the solver is None.
+    Args:
+        func (Callable): The function to decorate
+    """
+
+    @wraps(func)
     def wrappee(self, *args, **kwargs):
         if self.writer is not None:
             func(self, *args, **kwargs)
-    
+
     return wrappee
 
 class BaseSolver(abc.ABC):
@@ -46,15 +55,35 @@ class BaseSolver(abc.ABC):
     
     @_writer_wrapper
     def writer_add_model(self, model: nn.Module, input_data: torch.Tensor):
+        """
+        Adds the model to tensorboard
+
+        Args:
+            model (nn.Module): The model to add
+            input_data (torch.Tensor): The image data to be used to forward prop.
+        """
+
         self.writer.add_graph(model, input_data)
         self.writer.flush()
 
     @_writer_wrapper
     def writer_add_scalar(self, tag: str, value: float, step: int):
+        """
+        Adds a scalar to tensorboard.
+
+        Args:
+            tag (str): The tag of the scalar.
+            value (float): The value.
+            step (int): The step count at which the scalar should be added.
+        """
         self.writer.add_scalar(tag, value, step)
 
     @_writer_wrapper
     def writer_close(self):
+        """
+        Closes tensorboard writer.
+        """
+
         self.writer.close()
 
     def set_experiment(self, experiment: "Experiment"):
