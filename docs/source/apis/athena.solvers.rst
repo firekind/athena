@@ -23,3 +23,11 @@ classification problems contains a helper method to get ``n`` misclassified imag
    :members:
    :undoc-members:
    :show-inheritance:
+
+``base_solver`` module
+--------------------------------------------
+
+.. automodule:: athena.solvers.base_solver
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -11,3 +11,7 @@ Implementations of some of the layers used in ``athena.models`` subpackage
 
 .. autoclass:: athena.layers.ghostbatchnorm.GhostBatchNorm
 
+``depthwiseconv`` module
+-----------------------------------
+
+.. autoclass:: athena.layers.depthwiseconv.DepthwiseConv2d

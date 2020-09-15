@@ -1,4 +1,4 @@
-from typing import List, Callable, Tuple
+from typing import List, Callable, Tuple, Type
 
 import torch
 import torch.nn as nn
@@ -26,38 +26,59 @@ class ClassificationSolver(BaseSolver):
 
     def train(
         self,
-        epochs: int,
-        train_loader: DataLoader,
-        optimizer: Optimizer,
+        epochs: int = None,
+        train_loader: DataLoader = None,
+        optimizer: Optimizer = None,
         scheduler: LRScheduler = None,
         test_loader: DataLoader = None,
-        device: str = "cpu",
+        device: str = None,
         loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor] = None,
-        use_tqdm: bool = False,
+        use_tqdm: bool = None,
     ) -> History:
         """
         Trains the model.
 
         Args:
-            epochs (int): The number of epochs to train for.
-            train_loader (DataLoader): The ``DataLoader`` for the training data.
-            optimizer (Optimizer): The optimizer to use.
+            epochs (int, optional): The number of epochs to train for. Defaults to None.
+            train_loader (DataLoader, optional): The ``DataLoader`` for the training data. Defaults to None.
+            optimizer (Optimizer, optional): The optimizer to use. Defaults to None.
             scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.
             test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
-            device (str, optional): A valid pytorch device string. Defaults to ``cpu``.
+            device (str, optional): A valid pytorch device string. Defaults to None.
             loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model \
-                will be trained using negative log likelihood loss with reduction as 'mean'
-            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.
+                will be trained using negative log likelihood loss with reduction as ``mean``. Defaults to None.
+            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to None.
 
         Returns:
             History: An History object containing training information.
         """
+        # defining variables
         history = History()
+        if epochs is None:
+            epochs = self._epochs
+        if train_loader is None:
+            train_loader = self._train_loader
+        if optimizer is None:
+            optimizer = self._optimizer
+        if scheduler is None:
+            scheduler = self._scheduler
+        if test_loader is None:
+            test_loader = self._test_loader
+        if loss_fn is None:
+            loss_fn = self._loss_fn
+        if device is None:
+            device = self._device
+        if use_tqdm is None:
+            use_tqdm = self._use_tqdm
 
         if loss_fn is None:
-            print("\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.", flush=use_tqdm)
+            print(
+                "\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.",
+                flush=use_tqdm,
+            )
             loss_fn = F.nll_loss
 
+        # training
         for epoch in range(epochs):
             print("Epoch: %d / %d" % (epoch + 1, epochs), flush=use_tqdm)
 

@@ -24,19 +24,16 @@ class Experiment:
         Args:
             name (str): The name of the experiment.
             model (nn.Module, optional): The model to experiment on. Defaults to None.
+            solver_cls (BaseSolver, optional): The ``Solver`` class to use. Defaults to None.
             train_args (Dict[str, Any], optional): The arguments to be passed on to the ``Solver`` when training. \
                 Defaults to None.
-            solver_cls (BaseSolver, optional): The ``Solver`` class to use. Defaults to None
         """
 
         # the name of the experiment
         self.name = name
 
         # the model object
-        self.model_obj = model
-
-        # the solver class
-        self.solver_cls = None
+        self.net = model
 
         # creating the object of the solver if the class is not None
         if solver_cls is not None:
@@ -68,9 +65,8 @@ class Experiment:
         ``History``.
         """
 
-        flush: bool = self.train_args.get("use_tqdm", False)
         print(
-            "\033[1m\033[92m=> Running experiment: %s\033[0m" % self.name, flush=flush
+            "\033[1m\033[92m=> Running experiment: %s\033[0m" % self.name, flush=True
         )
 
         self.history = self.solver_obj.train(**self.train_args)
@@ -85,7 +81,7 @@ class Experiment:
         Returns:
             Experiment: object of this class.
         """
-        self.model_obj = model
+        self.net = model
         return self
 
     def solver(self, solver: Type[BaseSolver]) -> "Experiment":
@@ -95,159 +91,17 @@ class Experiment:
         Args:
             solver (Type[BaseSolver]): The solver class (not object)
 
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.solver_cls = solver
-        return self
-
-    def optimizer(self, optimizer_cls: Type[Optimizer], **kwargs) -> "Experiment":
-        """
-        Sets the optimizer to use.
-
-        Args:
-            optimizer_cls (Type[Optimizer]): The optimizer class (not an object)
-            **kwargs: The keyword arguments to be passed onto the optimizer.
-
         Raises:
-            AssertionError: Raised when there is no model attached to this experiment
+            AssertionError: When the model for the experiment is not defined.
 
         Returns:
             Experiment: object of this class.
         """
+        assert self.net is not None, "Set the model before setting the solver."
 
-        assert self.model is not None, "Set the model before setting optimizer"
-
-        self.train_args["optimizer"] = optimizer_cls(
-            self.model_obj.parameters(), **kwargs
-        )
-        return self
-
-    def scheduler(self, scheduler_cls: Type[_LRScheduler], **kwargs) -> "Experiment":
-        """
-        Sets the scheduler to use.
-
-        Args:
-            scheduler_cls (Type[_LRScheduler]): The scheduler class (not an object)
-            **kwargs: The keyword arguments to be passed onto the scheduler.
-
-        Raises:
-            AssertionError: Raised when there is no optimizer attached to this experiment.
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        assert (
-            self.train_args.get("optimizer", None) is not None
-        ), "Set the optimizer before setting scheduler"
-
-        self.train_args["scheduler"] = scheduler_cls(
-            self.train_args["optimizer"], **kwargs
-        )
-        return self
-
-    def epochs(self, epochs: int) -> "Experiment":
-        """
-        Sets the number of epochs to train for.
-
-        Args:
-            epochs (int): The epochs to train for.
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.train_args["epochs"] = epochs
-        return self
-
-    def train_loader(self, train_loader: DataLoader) -> "Experiment":
-        """
-        The ``DataLoader`` to use while training the model.
-
-        Args:
-            train_loader (DataLoader): The dataloader.
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.train_args["train_loader"] = train_loader
-        return self
-
-    def test_loader(self, test_loader: DataLoader) -> "Experiment":
-        """
-        The ``DataLoader`` to use while testing the model.
-
-        Args:
-            test_loader (DataLoader): The dataloader
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.train_args["test_loader"] = test_loader
-        return self
-
-    def device(self, device: str) -> "Experiment":
-        """
-        The device to use.
-
-        Args:
-            device (str): A valid pytorch device string.
-
-        Raises:
-            AssertionError: Raised when there is no model attached to this experiment.
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        assert self.model is not None, "Set the model before setting the device"
-
-        self.train_args["device"] = device
-        self.model_obj.to(device)
-        return self
-
-    def use_tqdm(self) -> "Experiment":
-        """
-        Uses tqdm for the progress bar, instead of the keras style progress bar.
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.train_args["use_tqdm"] = True
-        return self
-
-    def loss_fn(self, loss_fn: Callable) -> "Experiment":
-        """
-        The loss function to use.
-
-        Args:
-            loss_fn (Callable): The loss function
-
-        Returns:
-            Experiment: object of this class
-        """
-
-        self.train_args["loss_fn"] = loss_fn
-        return self
-
-    def acc_fn(self, acc_fn: Callable) -> "Experiment":
-        """
-        The accuracy function to use.
-
-        Args:
-            acc_fn (Callable): The accuracy function
-
-        Returns:
-            Experiment: object of this class.
-        """
-
-        self.train_args["acc_fn"] = acc_fn
-        return self
+        self.solver_obj = solver(self.net)
+        self.solver_obj.set_experiment(self)
+        return self.solver_obj
 
     def build(self) -> Union["Experiment", "Experiments"]:
         """
@@ -260,11 +114,8 @@ class Experiment:
         """
 
         assert (
-            self.model is not None and self.solver_cls is not None
-        ), "Model and solver class should be specified"
-
-        # creating the solver object
-        self.solver_obj = self.solver_cls(self.model_obj)
+            self.model is not None and self.solver_obj is not None
+        ), "Model and solver should be specified"
 
         # returning self, since this experiment was defined as a standalone experiment
         if self._chain is None:
