@@ -10,6 +10,7 @@ setuptools.setup(
         "pkbar==0.4",
         "torchsummary",
         "tqdm",
-        "matplotlib"
+        "matplotlib",
+        "tensorboard"
     ]
 )

@@ -14,15 +14,16 @@ from .base_solver import BaseSolver
 
 
 class ClassificationSolver(BaseSolver):
-    def __init__(self, model: nn.Module):
+    def __init__(self, model: nn.Module, log_dir: str = None):
         """
         A solver for classification problems.
 
         Args:
             model (nn.Module): The model to act on.
+            log_dir (str): The directory to store the logs.
         """
 
-        super(ClassificationSolver, self).__init__(model)
+        super(ClassificationSolver, self).__init__(model, log_dir)
 
     def train(
         self,
@@ -70,7 +71,6 @@ class ClassificationSolver(BaseSolver):
             device = self._device
         if use_tqdm is None:
             use_tqdm = self._use_tqdm
-
         if loss_fn is None:
             print(
                 "\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.",
@@ -78,6 +78,10 @@ class ClassificationSolver(BaseSolver):
             )
             loss_fn = F.nll_loss
 
+        # adding model to graph
+        images, labels = next(iter(train_loader))
+        self.writer_add_model(self.model, images.to(device))
+        
         # training
         for epoch in range(epochs):
             print("Epoch: %d / %d" % (epoch + 1, epochs), flush=use_tqdm)
@@ -90,6 +94,8 @@ class ClassificationSolver(BaseSolver):
             # adding metrics to history
             history.add_metric("train loss", avg_train_loss)
             history.add_metric("train accuracy", avg_train_acc)
+            self.writer_add_scalar("train loss", float(avg_train_loss), epoch)
+            self.writer_add_scalar("train accuracy", float(avg_train_acc), epoch)
 
             # stepping scheduler
             if scheduler is not None and not isinstance(scheduler, OneCycleLR):
@@ -102,7 +108,10 @@ class ClassificationSolver(BaseSolver):
                 )
                 history.add_metric("test loss", avg_test_loss)
                 history.add_metric("test accuracy", avg_test_acc)
+                self.writer_add_scalar("test loss", float(avg_test_loss), epoch)
+                self.writer_add_scalar("test accuracy", float(avg_test_acc), epoch)
 
+        self.writer_close()
         return history
 
     def train_step(

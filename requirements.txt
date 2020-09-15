@@ -6,4 +6,5 @@ tqdm==4.48.2
 torchvision==0.7.0
 matplotlib==3.3.1
 sphinx==3.2.1
+tensorboard==2.3.0
 git+https://github.com/firekind/pytorch_sphinx_theme

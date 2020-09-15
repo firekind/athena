@@ -1,14 +1,22 @@
 import abc
 from typing import Callable, Type
 
+import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import Optimizer
+from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 
+def _writer_wrapper(func):
+    def wrappee(self, *args, **kwargs):
+        if self.writer is not None:
+            func(self, *args, **kwargs)
+    
+    return wrappee
 
 class BaseSolver(abc.ABC):
-    def __init__(self, model: nn.Module):
+    def __init__(self, model: nn.Module, log_dir: str = None):
         """
         The base class for a ``Solver``.
 
@@ -17,6 +25,7 @@ class BaseSolver(abc.ABC):
         """
 
         self.model = model
+        self.log_dir = log_dir
         self.experiment = None
         self._device = "cpu"
         self._optimizer: Optimizer = None
@@ -27,13 +36,26 @@ class BaseSolver(abc.ABC):
         self._loss_fn: Callable = None
         self._acc_fn: Callable = None
         self._use_tqdm: bool = False
+        self.writer: SummaryWriter = None if log_dir is None else SummaryWriter(log_dir=log_dir)
 
     @abc.abstractmethod
     def train(self, *args):
         """
         Trains the model.
         """
-        
+    
+    @_writer_wrapper
+    def writer_add_model(self, model: nn.Module, input_data: torch.Tensor):
+        self.writer.add_graph(model, input_data)
+        self.writer.flush()
+
+    @_writer_wrapper
+    def writer_add_scalar(self, tag: str, value: float, step: int):
+        self.writer.add_scalar(tag, value, step)
+
+    @_writer_wrapper
+    def writer_close(self):
+        self.writer.close()
 
     def set_experiment(self, experiment: "Experiment"):
         """
