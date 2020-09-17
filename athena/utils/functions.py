@@ -30,7 +30,7 @@ def plot_experiments(
 
     # getting the list of metrics to plot
     metric_names = list(
-        {metric for exp in experiments for metric in exp.history.get_metric_names()}
+        {metric for exp in experiments for metric in exp.get_solver().get_history().get_metric_names()}
     )
     metric_names.sort()
     num_metrics = len(metric_names)
@@ -116,11 +116,11 @@ def _plot_experiment(metric: str, experiment: Experiment, ax: axes.Axes):
     """
 
     # if the experiment has not recorded that metric
-    if not experiment.history.has_metric(metric):
+    if not experiment.get_solver().get_history().has_metric(metric):
         return
 
     # plot the metric
-    ax.plot(experiment.history.get_metric(metric), label=experiment.name)
+    ax.plot(experiment.get_solver().get_history().get_metric(metric), label=experiment.name)
 
 
 def plot_misclassified(
@@ -149,13 +149,13 @@ def plot_misclassified(
             and when the number of misclassified images are less than the number of images being requested to plot.
     """
 
-    if not isinstance(experiment.solver, ClassificationSolver):
+    if not isinstance(experiment.get_solver(), ClassificationSolver):
         raise Exception(
             "Only experiments with a ClassificationSolver can be used to plot misclassified images."
         )
 
     # getting the misclassified images by forward proping the model
-    image_data, predicted, actual = experiment.solver.get_misclassified(
+    image_data, predicted, actual = experiment.get_solver().get_misclassified(
         data_loader, device
     )
 

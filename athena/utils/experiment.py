@@ -7,8 +7,6 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.utils.data import DataLoader
 
-from athena.solvers.base_solver import BaseSolver
-
 from . import History
 
 
@@ -17,7 +15,7 @@ class Experiment:
         self,
         name: str,
         model: nn.Module = None,
-        solver_cls: Type[BaseSolver] = None,
+        solver_cls: Type["BaseSolver"] = None,
         train_args: Dict[str, Any] = None,
         log_dir_parent: str = None,
     ):
@@ -98,7 +96,7 @@ class Experiment:
         self.net = model
         return self
 
-    def solver(self, solver: Type[BaseSolver]) -> "Experiment":
+    def solver(self, solver: Type["BaseSolver"]) -> "Experiment":
         """
         Sets the solver to use. Used in the builder api.
 
@@ -186,6 +184,16 @@ class Experiment:
 
         # creating the log directory
         Path(os.path.join(self.log_dir_parent, self.name)).mkdir()
+
+    def get_solver(self) -> "BaseSolver":
+        """
+        Getter that returns the solver object.
+
+        Returns:
+            BaseSolver: The solver object.
+        """
+
+        return self.solver_obj
 
 
 class Experiments:
