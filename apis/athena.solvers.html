@@ -216,83 +216,81 @@ classification problems contains a helper method to get <code class="docutils li
 <span id="classification-solver-module"></span><h2><code class="docutils literal notranslate"><span class="pre">classification_solver</span></code> module<a class="headerlink" href="#module-athena.solvers.classification_solver" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="athena.solvers.classification_solver.ClassificationSolver">
-<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.classification_solver.</code><code class="sig-name descname">ClassificationSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.classification_solver.</code><code class="sig-name descname">ClassificationSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">epochs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">train_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scheduler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">loss_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_tqdm</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></a></p>
 <p>A solver for classification problems.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>nn.Module</em>) – The model to act on.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – The model to act on.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of epochs to train for. Defaults to None.</p></li>
+<li><p><strong>train_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data. Defaults to None.</p></li>
+<li><p><strong>test_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data. Defaults to None.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em><em>, </em><em>optional</em>) – The optimizer to use. Defaults to None.</p></li>
+<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRScheduler</span></code> to use. Defaults to None.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>optional</em>) – The loss function to use. If not given, model                 will be trained using negative log likelihood loss with reduction as <code class="docutils literal notranslate"><span class="pre">mean</span></code>. Defaults to None.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to None.</p></li>
+<li><p><strong>use_tqdm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>). Defaults to False.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to store the logs. Defaults to None.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt id="athena.solvers.classification_solver.ClassificationSolver.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epochs</span></em>, <em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">scheduler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">loss_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_tqdm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.train" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.train" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the model.</p>
+<p>Args:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.classification_solver.ClassificationSolver.train_step">
+<code class="sig-name descname">train_step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.train_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single train step.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>epochs</strong> (<em>int</em>) – The number of epochs to train for.</p></li>
-<li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data.</p></li>
-<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use.</p></li>
-<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRScheduler</span></code> to use. Defaults to None.</p></li>
-<li><p><strong>test_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data. Defaults to None.</p></li>
-<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to <code class="docutils literal notranslate"><span class="pre">cpu</span></code>.</p></li>
-<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>optional</em>) – The loss function to use. If not given, model                 will be trained using negative log likelihood loss with reduction as ‘mean’</p></li>
-<li><p><strong>use_tqdm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>). Defaults to False.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple consisting of the average train loss and average
+train accuracy.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An History object containing training information.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.history.History" title="athena.utils.history.History">History</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.solvers.classification_solver.ClassificationSolver.train_step">
-<code class="sig-name descname">train_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">use_tqdm</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.train_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs a single train step.</p>
+<dt id="athena.solvers.classification_solver.ClassificationSolver.train_on_batch">
+<code class="sig-name descname">train_on_batch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch</span></em>, <em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">batch_idx</span></em>, <em class="sig-param"><span class="n">running_train_loss</span></em>, <em class="sig-param"><span class="n">running_correct</span></em>, <em class="sig-param"><span class="n">running_processed</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.train_on_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.train_on_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the model on a batch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data.</p></li>
-<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use.</p></li>
-<li><p><strong>scheduler</strong> (<em>LRScheduler</em>) – The LR scheduler to use.</p></li>
-<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
-<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em>) – The loss function to use.</p></li>
-<li><p><strong>use_tqdm</strong> (<em>bool</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>).</p></li>
+<li><p><strong>batch</strong> (<em>torch.Tensor</em>) – The batch to train on.</p></li>
+<li><p><strong>target</strong> (<em>torch.Tensor</em>) – The targets of the batch.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – The batch index</p></li>
+<li><p><strong>running_train_loss</strong> (<em>torch.Tensor</em>) – The running train loss.</p></li>
+<li><p><strong>running_correct</strong> (<em>int</em>) – The running count of correctly classified images.</p></li>
+<li><p><strong>running_processed</strong> (<em>int</em>) – The running count of processed images.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A tuple consisting of the average train loss and average
-train accuracy.</p>
+<dd class="field-even"><p>The results of training.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple[torch.Tensor, torch.Tensor]</p>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.solvers.base_solver.BatchResult" title="athena.solvers.base_solver.BatchResult">BatchResult</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="athena.solvers.classification_solver.ClassificationSolver.test_step">
-<code class="sig-name descname">test_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">loss_fn</span></em>, <em class="sig-param"><span class="n">flush_print</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.test_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.test_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">test_step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/classification_solver.html#ClassificationSolver.test_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.classification_solver.ClassificationSolver.test_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a single test step.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>test_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data.</p></li>
-<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
-<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em>) – The loss function to use.</p></li>
-<li><p><strong>flush_print</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to flush the print statement or not. Needed when tqdm is used in a notebook. Defaults to False.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple consisting of the average test loss and average test accuracy.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A tuple consisting of the average test loss and average test accuracy.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple[torch.Tensor, torch.Tensor]</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -326,7 +324,7 @@ train accuracy.</p>
 <dl class="py class">
 <dt id="athena.solvers.regression_solver.RegressionSolver">
 <em class="property">class </em><code class="sig-prename descclassname">athena.solvers.regression_solver.</code><code class="sig-name descname">RegressionSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/regression_solver.html#RegressionSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.regression_solver.RegressionSolver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></a></p>
 <p>A solver for regression problems. This solver supports models that have mulitple inputs, and thus,
 multiple losses</p>
 <dl class="field-list simple">
@@ -424,6 +422,525 @@ multiple losses</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-athena.solvers.base_solver">
+<span id="base-solver-module"></span><h2><code class="docutils literal notranslate"><span class="pre">base_solver</span></code> module<a class="headerlink" href="#module-athena.solvers.base_solver" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.solvers.base_solver.BaseSolver">
+<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.base_solver.</code><code class="sig-name descname">BaseSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">epochs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">train_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scheduler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">loss_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">acc_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_tqdm</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>The base class for a <code class="docutils literal notranslate"><span class="pre">Solver</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – The model the solver should act on.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of epochs to train for. Defaults to None.</p></li>
+<li><p><strong>train_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the training data. Defaults to None.</p></li>
+<li><p><strong>test_loader</strong> (<em>DataLoader</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> for the test data. Defaults to None.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em><em>, </em><em>optional</em>) – The optimizer to use. Defaults to None.</p></li>
+<li><p><strong>scheduler</strong> (<em>LRScheduler</em><em>, </em><em>optional</em>) – The <code class="docutils literal notranslate"><span class="pre">LRScheduler</span></code> to use. Defaults to None.</p></li>
+<li><p><strong>loss_fn</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>optional</em>) – The loss function to use. Defaults to None.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The accuracy function to use. Defaults to None.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to None.</p></li>
+<li><p><strong>use_tqdm</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses tqdm instead of a keras style progress bar (<code class="docutils literal notranslate"><span class="pre">pkbar</span></code>). Defaults to False.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to store the logs. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.train">
+<em class="property">abstract </em><code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.writer_add_model">
+<code class="sig-name descname">writer_add_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">input_data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.writer_add_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.writer_add_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the model to tensorboard</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – The model to add</p></li>
+<li><p><strong>input_data</strong> (<em>torch.Tensor</em>) – The image data to be used to forward prop.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.writer_add_scalar">
+<code class="sig-name descname">writer_add_scalar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">step</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.writer_add_scalar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.writer_add_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a scalar to tensorboard.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> (<em>str</em>) – The tag of the scalar.</p></li>
+<li><p><strong>value</strong> (<em>float</em>) – The value.</p></li>
+<li><p><strong>step</strong> (<em>int</em>) – The step count at which the scalar should be added.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.writer_close">
+<code class="sig-name descname">writer_close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.writer_close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.writer_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes tensorboard writer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.set_experiment">
+<code class="sig-name descname">set_experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">experiment</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.set_experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.set_experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the experiment that is attached to this solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>experiment</strong> (<a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.optimizer">
+<code class="sig-name descname">optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer_cls</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the optimizer to use. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimizer_cls</strong> (<em>Type</em><em>[</em><em>Optimizer</em><em>]</em>) – The optimizer class (not the object)</p></li>
+<li><p><strong>**kwargs</strong> – The keyword arguments to be passed onto the optimizer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – Raised when there is no model attached to this experiment</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.scheduler">
+<code class="sig-name descname">scheduler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scheduler_cls</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.scheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the scheduler to use. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scheduler_cls</strong> (<em>Type</em><em>[</em><em>_LRScheduler</em><em>]</em>) – The scheduler class (not the object)</p></li>
+<li><p><strong>**kwargs</strong> – The keyword arguments to be passed onto the scheduler.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – Raised when there is no optimizer attached to this experiment.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.epochs">
+<code class="sig-name descname">epochs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epochs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.epochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the number of epochs to train for. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>epochs</strong> (<em>int</em>) – The epochs to train for.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.train_loader">
+<code class="sig-name descname">train_loader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.train_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.train_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> to use while training the model. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>train_loader</strong> (<em>DataLoader</em>) – The dataloader.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.test_loader">
+<code class="sig-name descname">test_loader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.test_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.test_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> to use while testing the model. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>test_loader</strong> (<em>DataLoader</em>) – The dataloader</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.use_tqdm">
+<code class="sig-name descname">use_tqdm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.use_tqdm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.use_tqdm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses tqdm for the progress bar, instead of the keras style progress bar.             Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.loss_fn">
+<code class="sig-name descname">loss_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loss_fn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.loss_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.loss_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>The loss function to use. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>loss_fn</strong> (<em>Callable</em>) – The loss function</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of this class</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.acc_fn">
+<code class="sig-name descname">acc_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">acc_fn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.acc_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.acc_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>The accuracy function to use. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>acc_fn</strong> (<em>Callable</em>) – The accuracy function</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of this class</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.device">
+<code class="sig-name descname">device</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>The device to use. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – Raised when there is no model attached to this experiment.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Completes the build phase of the solver. Used in the builder api.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The experiment attached to this solver.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_model">
+<code class="sig-name descname">get_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The model</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_epochs">
+<code class="sig-name descname">get_epochs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_epochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the number of epochs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The number of epochs to train for.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_train_loader">
+<code class="sig-name descname">get_train_loader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_train_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_train_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the train data loader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The data loader for the train dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_test_loader">
+<code class="sig-name descname">get_test_loader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_test_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_test_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the test data loader</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The data loader for the test dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_optimizer">
+<code class="sig-name descname">get_optimizer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The optimizer.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Optimizer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_scheduler">
+<code class="sig-name descname">get_scheduler</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_scheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the scheduler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The scheduler.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>LRScheduler</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_loss_fn">
+<code class="sig-name descname">get_loss_fn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_loss_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_loss_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The loss function to use.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable[[torch.Tensor, torch.Tensor], torch.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.set_loss_fn">
+<code class="sig-name descname">set_loss_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.set_loss_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.set_loss_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter for the loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>, </em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em>) – The new loss function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_acc_fn">
+<code class="sig-name descname">get_acc_fn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_acc_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_acc_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the accuracy function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The accuracy function to use.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_device">
+<code class="sig-name descname">get_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the device string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The device string.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.should_use_tqdm">
+<code class="sig-name descname">should_use_tqdm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.should_use_tqdm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.should_use_tqdm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for whether tqdm should be used or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether tqdm should be used or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.get_progbar">
+<code class="sig-name descname">get_progbar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.get_progbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.get_progbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the progress bar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The progress bar.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Union[Kbar, tqdm]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.set_progbar">
+<code class="sig-name descname">set_progbar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.set_progbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.set_progbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter for the progress bar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Union</em><em>[</em><em>Kbar</em><em>, </em><em>tqdm</em><em>]</em>) – The new progress bar.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.log_results">
+<em class="property">static </em><code class="sig-name descname">log_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.log_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.log_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that is used log the returned value of <code class="docutils literal notranslate"><span class="pre">func</span></code> to the
+solver’s <code class="docutils literal notranslate"><span class="pre">history</span></code> and <code class="docutils literal notranslate"><span class="pre">SummaryWriter</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em>) – The decorated function. The return type of the function                 should be <a class="reference internal" href="#athena.solvers.base_solver.StepResult" title="athena.solvers.base_solver.StepResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepResult</span></code></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The wrapped function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.prog_bar">
+<em class="property">static </em><code class="sig-name descname">prog_bar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.prog_bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.prog_bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a decorator that is used to manage a progress bar.
+The decorator creates the progress bar, executes the function, and closes
+the progress bar.</p>
+<p>The function that is decorated is expected to call a function that is decorated
+with the <a class="reference internal" href="#athena.solvers.base_solver.BaseSolver.prog_bar_update" title="athena.solvers.base_solver.BaseSolver.prog_bar_update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">prog_bar_update()</span></code></a> decorator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>train</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use the train dataset of the solver or the test dataset. Defaults to True.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decorator.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.solvers.base_solver.BaseSolver.prog_bar_update">
+<em class="property">static </em><code class="sig-name descname">prog_bar_update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BaseSolver.prog_bar_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BaseSolver.prog_bar_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that updates the progress bar with the data returned by <code class="docutils literal notranslate"><span class="pre">func</span></code>. This decorator
+will only work if <code class="docutils literal notranslate"><span class="pre">func</span></code>’s caller is decorated with <a class="reference internal" href="#athena.solvers.base_solver.BaseSolver.prog_bar" title="athena.solvers.base_solver.BaseSolver.prog_bar"><code class="xref py py-meth docutils literal notranslate"><span class="pre">prog_bar()</span></code></a> decorator. <code class="docutils literal notranslate"><span class="pre">func</span></code>
+should return an instance of <a class="reference internal" href="#athena.solvers.base_solver.BatchResult" title="athena.solvers.base_solver.BatchResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">BatchResult</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em>) – The function to decorate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decorated function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.solvers.base_solver.StepResult">
+<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.base_solver.</code><code class="sig-name descname">StepResult</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#StepResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.StepResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Results of a train step (train epoch)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – The results.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.solvers.base_solver.BatchResult">
+<em class="property">class </em><code class="sig-prename descclassname">athena.solvers.base_solver.</code><code class="sig-name descname">BatchResult</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch_idx</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/solvers/base_solver.html#BatchResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.solvers.base_solver.BatchResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Results of training on a batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_idx</strong> (<em>int</em>) – The batch index.</p></li>
+<li><p><strong>data</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – The results of training on the batch.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -466,6 +983,7 @@ multiple losses</p>
 <li><a class="reference internal" href="#">athena.solvers package</a><ul>
 <li><a class="reference internal" href="#module-athena.solvers.classification_solver"><code class="docutils literal notranslate"><span class="pre">classification_solver</span></code> module</a></li>
 <li><a class="reference internal" href="#module-athena.solvers.regression_solver"><code class="docutils literal notranslate"><span class="pre">regression_solver</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.solvers.base_solver"><code class="docutils literal notranslate"><span class="pre">base_solver</span></code> module</a></li>
 </ul>
 </li>
 </ul>
