@@ -335,7 +335,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_create_log_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_log_directory</span><span class="p">()</span>
         
         <span class="c1"># setting the log directory in solver if it has already been created.</span>
         <span class="c1"># doing this just in case</span>
@@ -385,7 +385,17 @@
         <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># creating the log directory</span>
-        <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span></div>
+        <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Experiment.get_solver"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.get_solver">[docs]</a>    <span class="k">def</span> <span class="nf">get_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter that returns the solver object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            BaseSolver: The solver object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span></div></div>
 
 
 <div class="viewcode-block" id="Experiments"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiments">[docs]</a><span class="k">class</span> <span class="nc">Experiments</span><span class="p">:</span>
