@@ -133,7 +133,7 @@ class Experiment:
         """
 
         self.log_dir_parent = path
-        self._create_log_directory(self.log_dir_parent)
+        self._create_log_directory()
         
         # setting the log directory in solver if it has already been created.
         # doing this just in case

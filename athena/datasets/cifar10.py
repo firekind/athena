@@ -10,7 +10,7 @@ def cifar10(
     train: bool = True,
     transform: transforms.Compose = None,
     target_transform: transforms.Compose = None,
-    download: bool = False,
+    download: bool = True,
     batch_size: int = 64,
     shuffle: bool = True,
     sampler: Union[Sampler, Iterable] = None,
@@ -31,7 +31,7 @@ def cifar10(
         train (bool, optional): If True, creates training dataset. Defaults to True.
         transform (transforms.Compose, optional): Transform to apply to training data. Defaults to None.
         target_transform (transforms.Compose, optional): Transform to apply to the targets of the training data. Defaults to None.
-        download (bool, optional): If True, downloads the dataset. Defaults to False.
+        download (bool, optional): If True, downloads the dataset. Defaults to True.
         batch_size (int, optional): The batch size. Defaults to 64.
         shuffle (bool, optional): If True, shuffles the dataset. Defaults to True.
         sampler (Union[Sampler, Iterable], optional): Defines the strategy to draw samples from the dataset. If specified, shuffle must not be specified. Defaults to None.
