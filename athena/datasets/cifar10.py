@@ -87,7 +87,7 @@ def cifar10_train_transforms() -> transforms.Compose:
     Default CIFAR10 training data transforms.
     The transforms include:
 
-    * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
+    * Normalization with mean (0.4914, 0.4822, 0.4465) and std (0.2023, 0.1994, 0.2010)
 
     Returns:
         transforms.Compose: A transforms.Compose object.
@@ -96,7 +96,7 @@ def cifar10_train_transforms() -> transforms.Compose:
     return transforms.Compose(
         [
             transforms.ToTensor(),  # Converting to Tensor
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),  # Normalizing
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),  # Normalizing
         ]
     )
 
@@ -105,7 +105,7 @@ def cifar10_test_transforms() -> transforms.Compose:
     Default CIFAR10 test data transforms.
     The transforms include:
 
-    * Normalization with mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
+    * Normalization with mean (0.4914, 0.4822, 0.4465) and std (0.2023, 0.1994, 0.2010)
 
     Returns:
         transforms.Compose: A transforms.Compose object.
@@ -114,6 +114,6 @@ def cifar10_test_transforms() -> transforms.Compose:
     return transforms.Compose(
         [
             transforms.ToTensor(),  # Converting to Tensor
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),  # Normalizing
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),  # Normalizing
         ]
     )
