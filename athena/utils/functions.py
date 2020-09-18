@@ -30,7 +30,11 @@ def plot_experiments(
 
     # getting the list of metrics to plot
     metric_names = list(
-        {metric for exp in experiments for metric in exp.get_solver().get_history().get_metric_names()}
+        {
+            metric
+            for exp in experiments
+            for metric in exp.get_solver().get_history().get_metric_names()
+        }
     )
     metric_names.sort()
     num_metrics = len(metric_names)
@@ -120,7 +124,9 @@ def _plot_experiment(metric: str, experiment: Experiment, ax: axes.Axes):
         return
 
     # plot the metric
-    ax.plot(experiment.get_solver().get_history().get_metric(metric), label=experiment.name)
+    ax.plot(
+        experiment.get_solver().get_history().get_metric(metric), label=experiment.name
+    )
 
 
 def plot_misclassified(
@@ -131,6 +137,7 @@ def plot_misclassified(
     save_path: str = None,
     figsize: Tuple[int, int] = (10, 15),
     cmap: str = "gray_r",
+    class_labels: Tuple[str] = None,
 ):
     """
     Plots the misclassified images.
@@ -143,6 +150,7 @@ def plot_misclassified(
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).
         cmap (str, optional): The cmap to use while plotting. Defaults to 'gray_r'
+        class_labels (Tuple[str], optional): The class labels to use. Defaults to None.
     
     Raises:
         Exception: When solver of type :class:`athena.solvers.classification_solver.ClassificationSolver` is not being used, \
@@ -174,12 +182,12 @@ def plot_misclassified(
 
     # if there is only one image to plot
     if nrows == 1 and ncols == 1:
-        _plot_image(image_data[0], predicted[0], actual[0], ax)
+        _plot_image(image_data[0], predicted[0], actual[0], ax, class_labels)
 
     # if there is only one row of images to plot
     elif nrows == 1:
         for i in range(len(ax)):
-            _plot_image(image_data[i], predicted[i], actual[i], ax[i])
+            _plot_image(image_data[i], predicted[i], actual[i], ax[i], class_labels)
 
     # if there are multiple rows of images to plot
     else:
@@ -196,7 +204,11 @@ def plot_misclassified(
 
                 # plotting image
                 _plot_image(
-                    image_data[index], predicted[index], actual[index], ax[i, j]
+                    image_data[index],
+                    predicted[index],
+                    actual[index],
+                    ax[i, j],
+                    class_labels,
                 )
 
             if index >= number:
@@ -207,7 +219,13 @@ def plot_misclassified(
         fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
 
 
-def _plot_image(image_data: torch.Tensor, predicted: int, actual: int, ax: axes.Axes):
+def _plot_image(
+    image_data: torch.Tensor,
+    predicted: int,
+    actual: int,
+    ax: axes.Axes,
+    class_labels: Tuple[str] = None,
+):
     """
     Plots an image.
 
@@ -216,13 +234,26 @@ def _plot_image(image_data: torch.Tensor, predicted: int, actual: int, ax: axes.
         predicted (int): The class which the model predicted the image belongs to.
         actual (int): The actual class the image belongs to.
         ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.
+        class_labels (Tuple[str], optional): The class labels to use. Defaults to None.
     """
 
     # turning off the axis lines in the plot
     ax.axis("off")
 
     # setting title
-    ax.set_title("Predicted: %d\nActual: %d" % (predicted, actual))
+    ax.set_title(
+        "Predicted: %s\nActual: %s"
+        % (
+            int(predicted) if class_labels is None else class_labels[predicted],
+            int(actual) if class_labels is None else class_labels[actual],
+        )
+    )
+
+    # clipping input range
+    if torch.is_floating_point(image_data):
+        image_data = torch.clamp(image_data, 0, 1)
+    else:
+        image_data = torch.clamp(image_data, 0, 255)
 
     # plotting image
-    ax.imshow(image_data.cpu().numpy(), cmap="gray_r")
+    ax.imshow(image_data.permute(1, 2, 0).cpu().numpy(), cmap="gray_r")

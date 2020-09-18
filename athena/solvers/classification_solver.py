@@ -279,7 +279,7 @@ class ClassificationSolver(BaseSolver):
 
                 # get the current misclassified in this batch
                 list_misclassified = pred.eq(target.view_as(pred)) == False
-                batch_misclassified = data[list_misclassified]
+                batch_misclassified = data[list_misclassified.squeeze()]
                 batch_mis_pred = pred[list_misclassified]
                 batch_mis_target = target.view_as(pred)[list_misclassified]
 
