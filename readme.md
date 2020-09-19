@@ -52,12 +52,13 @@ exp = (
     Experiment("Ghost batch norm with 2 splits")
     .model(MnistNet(use_ghost_batch_norm=True))
     .solver(ClassificationSolver)
-    .optimizer(optim.SGD, lr=0.01, momentum=0.9)
-    .scheduler(StepLR, step_size=8, gamma=0.1)
-    .epochs(epochs)
-    .train_loader(train_loader)
-    .test_loader(test_loader)
-    .device(device)
+        .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+        .scheduler(StepLR, step_size=8, gamma=0.1)
+        .epochs(epochs)
+        .train_loader(train_loader)
+        .test_loader(test_loader)
+        .device(device)
+        .build()
     .build()
 )
 
@@ -65,31 +66,4 @@ exp = (
 exp.run()
 ```
 
-The older API (still supported) to create and run the experiment is:
-
-``` python
-...
-
-# creating experiment
-model = MnistNet(use_ghost_batch_norm=True).to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-scheduler = StepLR(optimizer, step_size=8, gamma=0.1)
-exp = Experiment(
-    name="With Ghost Batch Norm",
-    model=model,
-    solver_cls=ClassificationSolver,
-    train_args=dict(
-        epochs=25,
-        train_loader=train_loader,
-        test_loader=test_loader,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        device=device,
-    )
-)
-
-# running experiment
-exp.run()
-```
-
-For more details, have a look at the [documentation](https://firekind.github.io/athena)
+For more details, have a look at the [documentation](https://firekind.github.io/athena).
