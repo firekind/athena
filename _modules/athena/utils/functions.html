@@ -232,7 +232,11 @@
 
     <span class="c1"># getting the list of metrics to plot</span>
     <span class="n">metric_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="p">{</span><span class="n">metric</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">()}</span>
+        <span class="p">{</span>
+            <span class="n">metric</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">()</span>
+        <span class="p">}</span>
     <span class="p">)</span>
     <span class="n">metric_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
     <span class="n">num_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)</span>
@@ -322,7 +326,9 @@
         <span class="k">return</span>
 
     <span class="c1"># plot the metric</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">experiment</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">experiment</span><span class="o">.</span><span class="n">name</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="plot_misclassified"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.functions.plot_misclassified">[docs]</a><span class="k">def</span> <span class="nf">plot_misclassified</span><span class="p">(</span>
@@ -333,6 +339,7 @@
     <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
     <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gray_r&quot;</span><span class="p">,</span>
+    <span class="n">class_labels</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots the misclassified images.</span>
@@ -345,6 +352,7 @@
 <span class="sd">        save_path (str, optional): The path to save the plot. Defaults to None.</span>
 <span class="sd">        figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).</span>
 <span class="sd">        cmap (str, optional): The cmap to use while plotting. Defaults to &#39;gray_r&#39;</span>
+<span class="sd">        class_labels (Tuple[str], optional): The class labels to use. Defaults to None.</span>
 <span class="sd">    </span>
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: When solver of type :class:`athena.solvers.classification_solver.ClassificationSolver` is not being used, \</span>
@@ -376,12 +384,12 @@
 
     <span class="c1"># if there is only one image to plot</span>
     <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ncols</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">_plot_image</span><span class="p">(</span><span class="n">image_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">predicted</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">actual</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="p">)</span>
+        <span class="n">_plot_image</span><span class="p">(</span><span class="n">image_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">predicted</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">actual</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="p">,</span> <span class="n">class_labels</span><span class="p">)</span>
 
     <span class="c1"># if there is only one row of images to plot</span>
     <span class="k">elif</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">)):</span>
-            <span class="n">_plot_image</span><span class="p">(</span><span class="n">image_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">predicted</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">actual</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">_plot_image</span><span class="p">(</span><span class="n">image_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">predicted</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">actual</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">class_labels</span><span class="p">)</span>
 
     <span class="c1"># if there are multiple rows of images to plot</span>
     <span class="k">else</span><span class="p">:</span>
@@ -398,7 +406,11 @@
 
                 <span class="c1"># plotting image</span>
                 <span class="n">_plot_image</span><span class="p">(</span>
-                    <span class="n">image_data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">predicted</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">actual</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                    <span class="n">image_data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">predicted</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">actual</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span>
+                    <span class="n">class_labels</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">number</span><span class="p">:</span>
@@ -409,7 +421,13 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_plot_image</span><span class="p">(</span><span class="n">image_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">actual</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_image</span><span class="p">(</span>
+    <span class="n">image_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">predicted</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">actual</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
+    <span class="n">class_labels</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots an image.</span>
 
@@ -418,16 +436,29 @@
 <span class="sd">        predicted (int): The class which the model predicted the image belongs to.</span>
 <span class="sd">        actual (int): The actual class the image belongs to.</span>
 <span class="sd">        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.</span>
+<span class="sd">        class_labels (Tuple[str], optional): The class labels to use. Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># turning off the axis lines in the plot</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 
     <span class="c1"># setting title</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Predicted: </span><span class="si">%d</span><span class="se">\n</span><span class="s2">Actual: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s2">&quot;Predicted: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">Actual: </span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span> <span class="k">if</span> <span class="n">class_labels</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">class_labels</span><span class="p">[</span><span class="n">predicted</span><span class="p">],</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="k">if</span> <span class="n">class_labels</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">class_labels</span><span class="p">[</span><span class="n">actual</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># clipping input range</span>
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_floating_point</span><span class="p">(</span><span class="n">image_data</span><span class="p">):</span>
+        <span class="n">image_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">image_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
 
     <span class="c1"># plotting image</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">image_data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray_r&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">image_data</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray_r&quot;</span><span class="p">)</span>
 </pre></div>
 
              </article>

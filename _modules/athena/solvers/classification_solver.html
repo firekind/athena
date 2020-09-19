@@ -205,7 +205,6 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
-<span class="kn">from</span> <span class="nn">pkbar</span> <span class="kn">import</span> <span class="n">Kbar</span>
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">OneCycleLR</span><span class="p">,</span> <span class="n">Optimizer</span>
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">_LRScheduler</span> <span class="k">as</span> <span class="n">LRScheduler</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
@@ -481,7 +480,7 @@
 
                 <span class="c1"># get the current misclassified in this batch</span>
                 <span class="n">list_misclassified</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">pred</span><span class="p">))</span> <span class="o">==</span> <span class="kc">False</span>
-                <span class="n">batch_misclassified</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">list_misclassified</span><span class="p">]</span>
+                <span class="n">batch_misclassified</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">list_misclassified</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()]</span>
                 <span class="n">batch_mis_pred</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[</span><span class="n">list_misclassified</span><span class="p">]</span>
                 <span class="n">batch_mis_target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">pred</span><span class="p">)[</span><span class="n">list_misclassified</span><span class="p">]</span>
 

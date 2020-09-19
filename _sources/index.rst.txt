@@ -55,19 +55,20 @@ various parameters that are to be used for the experiment.
       Experiment("Ghost batch norm with 2 splits")
       .model(MnistNet(use_ghost_batch_norm=True))
       .solver(ClassificationSolver)
-      .optimizer(optim.SGD, lr=0.01, momentum=0.9)
-      .scheduler(StepLR, step_size=8, gamma=0.1)
-      .epochs(epochs)
-      .train_loader(train_loader)
-      .test_loader(test_loader)
-      .device(device)
+         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+         .scheduler(StepLR, step_size=8, gamma=0.1)
+         .epochs(epochs)
+         .train_loader(train_loader)
+         .test_loader(test_loader)
+         .device(device)
+         .build()
       .build()
    )
 
    # running experiment
    exp.run()
 
-To run mulitple experiments one after the other, the :class:`athena.utils.experiment.Experiments` class is used.
+To run multiple experiments one after the other, the :class:`athena.utils.experiment.Experiments` class is used.
 
 .. code-block:: python
 
@@ -76,34 +77,63 @@ To run mulitple experiments one after the other, the :class:`athena.utils.experi
    ...
 
    exps = (
-      Experiments()
+      Experiments("MNIST experiments)
+      .log_directory("./logs") # optional. if not given, tensorboard will not be used.
       .add("Ghost batch norm with 2 splits")
          .model(MnistNet(use_ghost_batch_norm=True))
          .solver(ClassificationSolver)
-         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
-         .scheduler(StepLR, step_size=8, gamma=0.1)
-         .epochs(epochs)
-         .train_loader(train_loader)
-         .test_loader(test_loader)
-         .device(device)
+            .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+            .scheduler(StepLR, step_size=8, gamma=0.1)
+            .epochs(epochs)
+            .train_loader(train_loader)
+            .test_loader(test_loader)
+            .device(device)
+            .build()
          .build()
 
       .add("Ghost batch norm with 4 splits")
          .model(MnistNet(use_ghost_batch_norm=True))
          .solver(ClassificationSolver)
-         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
-         .scheduler(StepLR, step_size=8, gamma=0.1)
-         .epochs(epochs)
-         .train_loader(train_loader)
-         .test_loader(test_loader)
-         .device(device)
+            .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+            .scheduler(StepLR, step_size=8, gamma=0.1)
+            .epochs(epochs)
+            .train_loader(train_loader)
+            .test_loader(test_loader)
+            .device(device)
+            .build()
          .build()
       .done()
    )
 
    exps.run()
 
-The older API (still supported) to create and run a single experiment is:
+You can specify a custom loss function to use as well, for example:
+
+.. code-block:: python
+
+   ...
+   def custom_loss_fn(y_pred, y_true):
+      y_pred = F.log_softmax(y_pred)
+      return F.nll_loss(y_pred, y_true)
+
+   exp = (
+      Experiment("ResNet with custom loss function")
+      .model(ResNet32())
+      .solver(ClassificationSolver)
+         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
+         .scheduler(StepLR, step_size=8, gamma=0.1)
+         .epochs(epochs)
+         .train_loader(train_loader)
+         .test_loader(test_loader)
+         .loss_fn(custom_loss_fn) # specifying loss function to use
+         .device(device)
+         .build()
+      .build()
+   )
+
+   exp.run()
+
+The older API (still supported...probably) to create and run a single experiment is:
 
 .. code-block:: python
 

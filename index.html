@@ -240,12 +240,13 @@ various parameters that are to be used for the experiment.</p>
    <span class="n">Experiment</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
    <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
    <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">build</span><span class="p">()</span>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 
@@ -253,33 +254,36 @@ various parameters that are to be used for the experiment.</p>
 <span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>To run mulitple experiments one after the other, the <a class="reference internal" href="apis/athena.utils.html#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.experiment.Experiments</span></code></a> class is used.</p>
+<p>To run multiple experiments one after the other, the <a class="reference internal" href="apis/athena.utils.html#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.experiment.Experiments</span></code></a> class is used.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiments</span>
 <span class="o">...</span>
 
 <span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">Experiments</span><span class="p">()</span>
+   <span class="n">Experiments</span><span class="p">(</span><span class="s2">&quot;MNIST experiments)</span>
+   <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span> <span class="c1"># optional. if not given, tensorboard will not be used.</span>
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
       <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">build</span><span class="p">()</span>
       <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 4 splits&quot;</span><span class="p">)</span>
       <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">build</span><span class="p">()</span>
       <span class="o">.</span><span class="n">build</span><span class="p">()</span>
    <span class="o">.</span><span class="n">done</span><span class="p">()</span>
 <span class="p">)</span>
@@ -287,7 +291,31 @@ various parameters that are to be used for the experiment.</p>
 <span class="n">exps</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The older API (still supported) to create and run a single experiment is:</p>
+<p>You can specify a custom loss function to use as well, for example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="k">def</span> <span class="nf">custom_loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_true</span><span class="p">):</span>
+   <span class="n">y_pred</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">nll_loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_true</span><span class="p">)</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
+   <span class="n">Experiment</span><span class="p">(</span><span class="s2">&quot;ResNet with custom loss function&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">ResNet32</span><span class="p">())</span>
+   <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">custom_loss_fn</span><span class="p">)</span> <span class="c1"># specifying loss function to use</span>
+      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">build</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The older API (still supported…probably) to create and run a single experiment is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="c1"># creating experiment</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
