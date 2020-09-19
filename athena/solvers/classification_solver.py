@@ -3,7 +3,6 @@ from typing import Callable, List, Tuple, Type
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pkbar import Kbar
 from torch.optim.lr_scheduler import OneCycleLR, Optimizer
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 from torch.utils.data import DataLoader

@@ -8,8 +8,7 @@ from torch.optim.lr_scheduler import OneCycleLR, Optimizer
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 import numpy as np
 from tqdm import tqdm
-from pkbar import Kbar
-
+from athena.utils.progbar import Kbar
 from athena.utils import History
 from .base_solver import BaseSolver
 
