@@ -7,7 +7,7 @@ Project Athena is a python package which helps in experimenting with various ite
 Make sure pytorch version 1.6.0 or any other compatible version is installed, along with torchvision version 0.7.0. Then run,
 
 ```
-$ pip install git+https://github.com/firekind/athena
+$ pip install git+https://github.com/firekind/athena@v0.0.1
 ```
 to install the package.
 
