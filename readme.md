@@ -36,15 +36,19 @@ batch_size = 128 if torch.cuda.is_available() else 64
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # creating the datasets 
-train_loader = datasets.mnist(
-    batch_size=batch_size,
-    use_default_transforms=True,
+train_loader = (
+    datasets.mnist()
+    .batch_size(batch_size)
+    .use_default_transforms()
+    .build()
 )
 
-test_loader = datasets.mnist(
-    train=False,
-    batch_size=batch_size,
-    use_default_transforms=True,
+test_loader = (
+    datasets.mnist()
+    .test()
+    .batch_size(batch_size)
+    .use_default_transforms()
+    .build()
 )
 
 # creating the experiment
