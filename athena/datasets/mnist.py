@@ -10,7 +10,23 @@ from .base_dataset import BaseDataset
 
 
 class mnist(BaseDataset):
-    def build(self):
+
+    mean = (0.1307,) #: mean of the dataset.
+    std = (0.3081,) #: std of the dataset.
+
+    def __init__(self):
+        """
+        The mnist dataset.
+        """
+        super(mnist, self).__init__()
+
+    def build(self) -> DataLoader:
+        """
+        Builds the dataset and returns a pytorch ``DataLoader``.
+
+        Returns:
+            DataLoader: The mnist ``DataLoader``.
+        """
         super(mnist, self).build()
 
         return DataLoader(
@@ -33,18 +49,36 @@ class mnist(BaseDataset):
             worker_init_fn=self._worker_init_fn,
         )
 
-    def _default_train_transform(self):
+    def default_train_transform(self) -> Callable:
+        """
+        Default mnist training transforms. Performs
+
+        * Random Rotation between -5 and 5 degrees
+
+        * Normalization using mean: (0.1307,) and std: (0.3081,)
+        
+        Returns:
+            Callable: The transform, an ``albumentations.Compose`` object.
+        """
         return A.Compose(
             [
                 A.Rotate(limit=5),  # Randomly rotating the image in the range -5,5 degrees
-                A.Normalize(mean=(0.1307,), std=(0.3081,)),  # Normalizing
+                A.Normalize(mean=mnist.mean, std=mnist.std),  # Normalizing
             ]
         )
 
-    def _default_test_transform(self):
+    def default_test_transform(self):
+        """
+        Default mnist test transforms. Performs
+
+        * Normalization using mean: (0.1307,) and std: (0.3081,)
+        
+        Returns:
+            Callable: The transform, an ``albumentations.Compose`` object.
+        """
         return A.Compose(
             [
-                A.Normalize(mean=(0.1307,), std=(0.3081,)),  # Normalizing
+                A.Normalize(mean=mnist.mean, std=mnist.std),  # Normalizing
             ]
         )
 
@@ -65,7 +99,14 @@ class _mnist_dataset(datasets.MNIST):
     def __getitem__(self, index) -> Tuple[np.ndarray, int]:
         img, target = self.data[index].numpy(), int(self.targets[index])
         if self.transform is not None:
-            img = self.transform(image=img)["image"]
+            try:
+                img = self.transform(image=img)["image"]
+            except TypeError:
+                # at this stage, assuming that the transform isnt an albumentations transform
+                # this error will occur if the transform given does not have an ``image`` keyword argument,
+                # or the return type isnt a dict (like albumentations)
+                img = self.transform(img)
+            
             img = np.expand_dims(img, 0)
 
         if self.target_transform is not None:

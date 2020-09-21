@@ -26,3 +26,13 @@ The CIFAR10 dataset. This module contains a function to obtain a ``DataLoader`` 
    :members:
    :undoc-members:
    :show-inheritance:
+
+``athena.datasets.base_dataset`` module
+---------------------------------------
+
+The base class which all datasets that want to use the builder API must implement.
+
+.. automodule:: athena.datasets.base_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

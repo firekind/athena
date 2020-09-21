@@ -10,7 +10,23 @@ from .base_dataset import BaseDataset
 
 
 class cifar10(BaseDataset):
-    def build(self):
+
+    mean = (0.4914, 0.4822, 0.4465) #: mean of the dataset.
+    std = (0.2023, 0.1994, 0.2010) #: std of the dataset.
+
+    def __init__(self):
+        """
+        The cifar 10 dataset.
+        """
+        super(cifar10, self).__init__()
+
+    def build(self) -> DataLoader:
+        """
+        Builds the dataset and returns a pytorch ``DataLoader``.
+
+        Returns:
+            DataLoader: The cifar10 ``DataLoader``.
+        """
         super(cifar10, self).build()
 
         return DataLoader(
@@ -33,20 +49,36 @@ class cifar10(BaseDataset):
             worker_init_fn=self._worker_init_fn,
         )
 
-    def _default_train_transform(self):
+    def default_train_transform(self):
+        """
+        Default cifar10 training transforms. Performs
+
+        * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)
+        
+        Returns:
+            Callable: The transform, an ``albumentations.Compose`` object.
+        """
         return A.Compose(
             [
                 A.Normalize(
-                    mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010)
+                    mean=cifar10.mean, std=cifar10.std
                 ),  # Normalizing
             ]
         )
 
-    def _default_test_transform(self):
+    def default_test_transform(self):
+        """
+        Default cifar10 test transforms. Performs
+
+        * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)
+        
+        Returns:
+            Callable: The transform, an ``albumentations.Compose`` object.
+        """
         return A.Compose(
             [
                 A.Normalize(
-                    mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010)
+                    mean=cifar10.mean, std=cifar10.std
                 ),  # Normalizing
             ]
         )
@@ -69,9 +101,21 @@ class _cifar10_dataset(datasets.CIFAR10):
         img, target = self.data[index], int(self.targets[index])
 
         if self.transform is not None:
-            img = self.transform(image=img)["image"].transpose(2, 1, 0)
+            try:
+                img = self.transform(image=img)["image"].transpose(2, 1, 0)
+            except TypeError:
+                # at this stage, assuming that the transform isnt an albumentations transform
+                # this error will occur if the transform given does not have an ``image`` keyword argument,
+                # or the return type isnt a dict (like albumentations)
+                img = self.transform(img).transpose(2, 1, 0)
 
         if self.target_transform is not None:
-            target = self.target_transform(target)["image"].transpose(2, 1, 0)
+            try:
+                target = self.target_transform(image=target)["image"].transpose(2, 1, 0)
+            except TypeError:
+                # at this stage, assuming that the transform isnt an albumentations transform
+                # this error will occur if the transform given does not have an ``image`` keyword argument,
+                # or the return type isnt a dict (like albumentations)
+                target = self.target_transform(target).transpose(2, 1, 0)
 
         return img, target
