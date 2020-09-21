@@ -7,58 +7,28 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.utils.data import DataLoader
 
-from . import History
-
 
 class Experiment:
-    def __init__(
-        self,
-        name: str,
-        model: nn.Module = None,
-        solver_cls: Type["BaseSolver"] = None,
-        train_args: Dict[str, Any] = None,
-        log_dir_parent: str = None,
-    ):
+    def __init__(self, name: str, log_dir_parent: str = None):
         """
         Bundles information regarding an experiment. An experiment is performed on a model, with
         a ``Solver`` and the arguments that have to be used to train the model.
 
-        Args:
-            name (str): The name of the experiment.
-            model (nn.Module, optional): The model to experiment on. Defaults to None.
-            solver_cls (BaseSolver, optional): The ``Solver`` class to use. Defaults to None.
-            train_args (Dict[str, Any], optional): The arguments to be passed on to the ``Solver`` when training. \
-                Defaults to None.
-            log_dir_parent (str, optional): Parent of the log directory. The directory to store tensorboard logs and checkpoints. \
-                The log directory's name will be the name of the experiment. Defaults to None.
+        Default values of various parameters that can be set using the builder API:
+            * **model** *(nn.Module)*: ``None``.
+
+            * **solver** *(BaseSolver)*: ``None``.
+
+            * **log_directory** *(str)*: ``None``.
+
         """
 
         # the name of the experiment
         self.name = name
 
-        # the model object
-        self.net = model
-
-        # creating the object of the solver if the class is not None
-        if solver_cls is not None:
-            self.solver_obj = solver_cls(
-                model,
-                log_dir=None
-                if log_dir_parent is None
-                else os.path.join(log_dir_parent, name),
-            )
-        else:
-            self.solver_obj = None
-
-        # the arguments to be passed to the solver while training. If it is None,
-        # initialize it to an empty dictionary
-        self.train_args = train_args
-        if self.train_args is None:
-            self.train_args = {}
-
-        # the history object, stores info about the losses and accuracies
-        # once the training is over.
-        self.history: History = None
+        self.net = None
+        self.solver_obj = None
+        self.log_dir_parent = log_dir_parent
 
         # the chain is used when ``Experiments`` class is used to define multiple experiments
         # to run. This chain attribute keeps track of the ``Experiments`` object that was
@@ -68,11 +38,6 @@ class Experiment:
         # experiments can be added to the ``Experiments`` object.
         self._chain = None
 
-        # the log dir
-        self.log_dir_parent = log_dir_parent
-        if self.log_dir_parent is not None:
-            self._create_log_directory()
-
     def run(self):
         """
         Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the
@@ -81,7 +46,7 @@ class Experiment:
 
         print("\033[1m\033[92m=> Running experiment: %s\033[0m" % self.name, flush=True)
 
-        self.history = self.solver_obj.train(**self.train_args)
+        self.history = self.solver_obj.train()
 
     def model(self, model: nn.Module) -> "Experiment":
         """
@@ -114,7 +79,9 @@ class Experiment:
         # the log directory can be set before or after setting the solver
         # so checking if the log directory was set already
         if self.log_dir_parent is not None:
-            self.solver_obj = solver(self.net, log_dir=os.path.join(self.log_dir_parent, self.name))
+            self.solver_obj = solver(
+                self.net, log_dir=os.path.join(self.log_dir_parent, self.name)
+            )
         else:
             self.solver_obj = solver(self.net)
         self.solver_obj.set_experiment(self)
@@ -122,8 +89,9 @@ class Experiment:
 
     def log_directory(self, path: str) -> "Experiment":
         """
-        Sets the parent of directory where all the logs will be stored. The name of the directory \
-            that contains the logs will be the name of the experiment. Used in the builder api.
+        Sets the parent of directory where all the logs (tensorboard, checkpoints, etc.) will be stored. \
+            The name of the directory that contains the logs will be the name of the experiment. Used in \
+            the builder api.
 
         Args:
             path (str): The path to the parent of the log directory
@@ -134,11 +102,10 @@ class Experiment:
 
         self.log_dir_parent = path
         self._create_log_directory()
-        
-        # setting the log directory in solver if it has already been created.
-        # doing this just in case
+
+        # setting the log directory in solver in case it has already been created.
         if self.solver_obj is not None:
-            self.solver_obj.log_dir = os.path.join(self.log_dir_parent, self.name)
+            self.solver_obj.set_log_dir(os.path.join(self.log_dir_parent, self.name))
 
         return self
 
@@ -217,7 +184,14 @@ class Experiments:
             Experiment: The ``Experiment`` object that was added to the chain.
         """
 
-        e = Experiment(name, log_dir_parent=os.path.join(self.log_dir, self.name))
+        e = Experiment(
+            name,
+            log_dir_parent=(
+                os.path.join(self.log_dir, self.name)
+                if self.log_dir is not None
+                else None
+            ),
+        )
         self._add_experiment(e)
 
         return e

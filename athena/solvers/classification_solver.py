@@ -8,8 +8,6 @@ from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from athena.utils import History
-
 from .base_solver import BaseSolver, BatchResult, StepResult
 
 
@@ -17,14 +15,6 @@ class ClassificationSolver(BaseSolver):
     def __init__(
         self,
         model: nn.Module,
-        epochs: int = None,
-        train_loader: DataLoader = None,
-        test_loader: DataLoader = None,
-        optimizer: Optimizer = None,
-        scheduler: LRScheduler = None,
-        loss_fn: Callable = None,
-        device: str = None,
-        use_tqdm: bool = False,
         log_dir: str = None,
     ):
         """
@@ -32,30 +22,11 @@ class ClassificationSolver(BaseSolver):
 
         Args:
             model (nn.Module): The model to act on.
-            epochs (int, optional): The number of epochs to train for. Defaults to None.
-            train_loader (DataLoader, optional): The ``DataLoader`` for the training data. Defaults to None.
-            test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
-            optimizer (Optimizer, optional): The optimizer to use. Defaults to None.
-            scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.
-            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. If not given, model \
-                will be trained using negative log likelihood loss with reduction as ``mean``. Defaults to None.
-            device (str, optional): A valid pytorch device string. Defaults to None.
-            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.
             log_dir (str, optional): The directory to store the logs. Defaults to None.
         """
 
-        super(ClassificationSolver, self).__init__(
-            model=model,
-            epochs=epochs,
-            train_loader=train_loader,
-            test_loader=test_loader,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            loss_fn=loss_fn,
-            device=device,
-            use_tqdm=use_tqdm,
-            log_dir=log_dir,
-        )
+        super(ClassificationSolver, self).__init__(model, log_dir)
+
 
     def train(self):
         """
@@ -64,23 +35,12 @@ class ClassificationSolver(BaseSolver):
         Args:
 
         """
-        # defining variables
-        self.history = History()
-        if self.get_loss_fn() is None:
-            print(
-                "\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.",
-                flush=self.should_use_tqdm(),
-            )
-            self.set_loss_fn(F.nll_loss)
-
-        # adding model to graph
-        images, labels = next(iter(self.get_train_loader()))
-        self.writer_add_model(self.get_model(), images.to(self.get_device()))
+        super(ClassificationSolver, self).train()
 
         # training
-        for self.current_epoch in range(self.get_epochs()):
+        for epoch in range(self.get_start_epoch(), self.get_epochs()):
             print(
-                "Epoch: %d / %d" % (self.current_epoch + 1, self.get_epochs()),
+                "Epoch: %d / %d" % (epoch + 1, self.get_epochs()),
                 flush=self.should_use_tqdm(),
             )
 
@@ -99,15 +59,13 @@ class ClassificationSolver(BaseSolver):
 
         self.writer_close()
 
-    @BaseSolver.log_results
-    @BaseSolver.prog_bar()
-    def train_step(self) -> List[Tuple[str, float]]:
+    @BaseSolver.train_step
+    def train_step(self) -> StepResult:
         """
         Performs a single train step.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average train loss and average
-            train accuracy.
+            StepResult: A :class:`StepResult` object that contains the epoch data.
         """
 
         # setting model in train mode
@@ -132,9 +90,9 @@ class ClassificationSolver(BaseSolver):
 
         return StepResult(
             data=[
-                ("loss", float(train_loss / len(self.get_train_loader()))),
+                ("train loss", float(train_loss / len(self.get_train_loader()))),
                 (
-                    "accuracy",
+                    "train accuracy",
                     float(100 * correct / len(self.get_train_loader().dataset)),
                 ),
             ]
@@ -190,7 +148,7 @@ class ClassificationSolver(BaseSolver):
 
         return BatchResult(
             batch_idx=batch_idx,
-            data=[("loss", loss.item()), ("accuracy", acc)],
+            data=[("train loss", loss.item()), ("train accuracy", acc)],
             running_correct=running_correct,
             running_processed=running_processed,
             running_train_loss=running_train_loss,
@@ -242,6 +200,35 @@ class ClassificationSolver(BaseSolver):
         )
 
         return StepResult(data=[("test loss", test_loss), ("test accuracy", test_acc)])
+
+    def default_loss_fn(self) -> Callable:
+        """
+        In case no loss function is specified, setting it to nll loss.
+
+        Returns:
+            Callable: The loss function.
+        """
+
+        print(
+            "\033[1m\033[93mWarning:\033[0m Loss function not specified. Using nll loss.",
+            flush=self.should_use_tqdm(),
+        )
+
+        return F.nll_loss
+
+    def track(self) -> List:
+        """
+        List of objects to checkpoint.
+
+        Returns:
+            List
+        """
+        
+        return [
+            self.get_model(),
+            self.get_optimizer(),
+            self.get_scheduler()
+        ]
 
     def get_misclassified(
         self, data_loader: DataLoader, device: str

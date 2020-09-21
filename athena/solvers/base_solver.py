@@ -1,3 +1,4 @@
+import os
 import abc
 from functools import wraps
 from typing import Any, Callable, List, Tuple, Type, Union
@@ -11,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from athena.utils.progbar import Kbar
+from athena.utils import History, Checkpoint, Checkpointable
 
 
 def _writer_wrapper(func: Callable) -> Callable:
@@ -26,68 +28,99 @@ def _writer_wrapper(func: Callable) -> Callable:
 
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        if self.writer is not None:
+        if self._writer is not None:
             func(self, *args, **kwargs)
 
     return wrapper
 
 
 class BaseSolver(abc.ABC):
-    def __init__(
-        self,
-        model: nn.Module,
-        epochs: int = None,
-        train_loader: DataLoader = None,
-        test_loader: DataLoader = None,
-        optimizer: Optimizer = None,
-        scheduler: LRScheduler = None,
-        loss_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor] = None,
-        acc_fn: Callable = None,
-        device: str = None,
-        use_tqdm: bool = False,
-        log_dir: str = None,
-    ):
+    def __init__(self, model: nn.Module, log_dir: str = None):
         """
         The base class for a ``Solver``.
 
-        Args:
-            model (nn.Module): The model the solver should act on.
-            epochs (int, optional): The number of epochs to train for. Defaults to None.
-            train_loader (DataLoader, optional): The ``DataLoader`` for the training data. Defaults to None.
-            test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.
-            optimizer (Optimizer, optional): The optimizer to use. Defaults to None.
-            scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.
-            loss_fn (Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional): The loss function to use. Defaults to None.
-            acc_fn (Callable, optional): The accuracy function to use. Defaults to None.
-            device (str, optional): A valid pytorch device string. Defaults to None.
-            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.
-            log_dir (str, optional): The directory to store the logs. Defaults to None.
+        Default values of various parameters that can be set using the builder API:
+            * **epochs** *(int)*: ``None``.
+
+            * **train_loader** *(DataLoader)*: ``None``.
+
+            * **test_loader** *(DataLoader)*: ``None``.
+
+            * **optimizer** *(Optimizer)*: ``None``.
+
+            * **scheduler** *(LRScheduler)*: ``None``.
+
+            * **loss_fn** *(Callable[[torch.Tensor, torch.Tensor], torch.Tensor])*: ``None``.
+
+            * **acc_fn** *(Callable)*: ``None``.
+
+            * **device** *(str)*: ``"cpu"``.
+
+            * **use_tqdm** *(bool)*: ``False``.
+
+            * **max_to_keep** *(Union[str, int])*: ``"all"`` (Checkpoints won't be created if log directory is not set).
+
         """
 
-        self.model = model
+        self._model = model
+        self._log_dir = log_dir
         self._epochs: int = None
         self._train_loader: DataLoader = None
         self._test_loader: DataLoader = None
         self._optimizer: Optimizer = None
         self._scheduler: LRScheduler = None
-        self._loss_fn = loss_fn
-        self._acc_fn = acc_fn
+        self._loss_fn = None
+        self._acc_fn = None
         self._device = "cpu"
         self._use_tqdm: bool = False
-        self.log_dir = log_dir
+        self._max_to_keep = "all"
 
-        self.experiment = None
-        self.history = None
-        self.current_epoch = 0
-        self.writer: SummaryWriter = (
+        self._experiment = None
+        self._history = History()
+        self._writer: SummaryWriter = (
             None if log_dir is None else SummaryWriter(log_dir=log_dir)
         )
-        self.progbar = None
+        self._progbar = None
+        self._checkpoint = None
+        self._checkpointable_epoch = _CheckpointableEpoch()
 
     @abc.abstractmethod
     def train(self, *args):
         """
         Trains the model.
+        """
+
+        # restoring latest checkpoint
+        if self._checkpoint is not None:
+            self._checkpoint.restore()
+
+        # checking to see if experiment has already been completed
+        if self._checkpointable_epoch.get_value() >= self.get_epochs():
+            print("Experiment has already been completed.\n", flush=True)
+            return
+
+        # adding model to graph if training is happening for the first time
+        if self._checkpointable_epoch.get_value() == 0:
+            images, labels = next(iter(self.get_train_loader()))
+            self.writer_add_model(self.get_model(), images.to(self.get_device()))
+
+        # setting default loss function in case loss function is not specified
+        if self.get_loss_fn() is None:
+            self.set_loss_fn(self.default_loss_fn())
+
+    @abc.abstractmethod
+    def default_loss_fn(self) -> Callable:
+        """
+        The default loss function to use, in case no loss function is set.
+
+        Returns:
+            Callable: The default loss function to use
+        """
+
+    @abc.abstractmethod
+    def track(self) -> List:
+        """
+        Returns a list of objects to checkpoint during training
         """
 
     @_writer_wrapper
@@ -100,8 +133,8 @@ class BaseSolver(abc.ABC):
             input_data (torch.Tensor): The image data to be used to forward prop.
         """
 
-        self.writer.add_graph(model, input_data)
-        self.writer.flush()
+        self._writer.add_graph(model, input_data)
+        self._writer.flush()
 
     @_writer_wrapper
     def writer_add_scalar(self, tag: str, value: float, step: int):
@@ -113,7 +146,7 @@ class BaseSolver(abc.ABC):
             value (float): The value.
             step (int): The step count at which the scalar should be added.
         """
-        self.writer.add_scalar(tag, value, step)
+        self._writer.add_scalar(tag, value, step)
 
     @_writer_wrapper
     def writer_close(self):
@@ -121,7 +154,7 @@ class BaseSolver(abc.ABC):
         Closes tensorboard writer.
         """
 
-        self.writer.close()
+        self._writer.close()
 
     def set_experiment(self, experiment: "Experiment"):
         """
@@ -130,11 +163,11 @@ class BaseSolver(abc.ABC):
         Args:
             experiment (Experiment): The ``Experiment`` object.
         """
-        self.experiment = experiment
+        self._experiment = experiment
 
     def optimizer(self, optimizer_cls: Type[Optimizer], **kwargs) -> "BaseSolver":
         """
-        Sets the optimizer to use. Used in the builder api.
+        Sets the optimizer to use. Used in the builder API.
 
         Args:
             optimizer_cls (Type[Optimizer]): The optimizer class (not the object)
@@ -144,15 +177,15 @@ class BaseSolver(abc.ABC):
             AssertionError: Raised when there is no model attached to this experiment
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
-        self._optimizer = optimizer_cls(self.model.parameters(), **kwargs)
+        self._optimizer = optimizer_cls(self._model.parameters(), **kwargs)
         return self
 
     def scheduler(self, scheduler_cls: Type[LRScheduler], **kwargs) -> "BaseSolver":
         """
-        Sets the scheduler to use. Used in the builder api.
+        Sets the scheduler to use. Used in the builder API.
 
         Args:
             scheduler_cls (Type[_LRScheduler]): The scheduler class (not the object)
@@ -162,7 +195,7 @@ class BaseSolver(abc.ABC):
             AssertionError: Raised when there is no optimizer attached to this experiment.
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         assert self._optimizer is not None, "Set the optimizer before setting scheduler"
@@ -172,13 +205,13 @@ class BaseSolver(abc.ABC):
 
     def epochs(self, epochs: int) -> "BaseSolver":
         """
-        Sets the number of epochs to train for. Used in the builder api.
+        Sets the number of epochs to train for. Used in the builder API.
 
         Args:
             epochs (int): The epochs to train for.
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         self._epochs = epochs
@@ -186,13 +219,13 @@ class BaseSolver(abc.ABC):
 
     def train_loader(self, train_loader: DataLoader) -> "BaseSolver":
         """
-        The ``DataLoader`` to use while training the model. Used in the builder api.
+        The ``DataLoader`` to use while training the model. Used in the builder API.
 
         Args:
             train_loader (DataLoader): The dataloader.
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         self._train_loader = train_loader
@@ -200,13 +233,13 @@ class BaseSolver(abc.ABC):
 
     def test_loader(self, test_loader: DataLoader) -> "BaseSolver":
         """
-        The ``DataLoader`` to use while testing the model. Used in the builder api.
+        The ``DataLoader`` to use while testing the model. Used in the builder API.
 
         Args:
             test_loader (DataLoader): The dataloader
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         self._test_loader = test_loader
@@ -215,10 +248,10 @@ class BaseSolver(abc.ABC):
     def use_tqdm(self) -> "BaseSolver":
         """
         Uses tqdm for the progress bar, instead of the keras style progress bar. \
-            Used in the builder api.
+            Used in the builder API.
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         self._use_tqdm = True
@@ -226,13 +259,13 @@ class BaseSolver(abc.ABC):
 
     def loss_fn(self, loss_fn: Callable) -> "BaseSolver":
         """
-        The loss function to use. Used in the builder api.
+        The loss function to use. Used in the builder API.
 
         Args:
             loss_fn (Callable): The loss function
 
         Returns:
-            Experiment: object of this class
+            BaseSolver: object of this class
         """
 
         self._loss_fn = loss_fn
@@ -240,13 +273,13 @@ class BaseSolver(abc.ABC):
 
     def acc_fn(self, acc_fn: Callable) -> "BaseSolver":
         """
-        The accuracy function to use. Used in the builder api.
+        The accuracy function to use. Used in the builder API.
 
         Args:
             acc_fn (Callable): The accuracy function
 
         Returns:
-            Experiment: object of this class
+            BaseSolver: object of this class
         """
 
         self._acc_fn = acc_fn
@@ -254,7 +287,7 @@ class BaseSolver(abc.ABC):
 
     def device(self, device: str) -> "BaseSolver":
         """
-        The device to use. Used in the builder api.
+        The device to use. Used in the builder API.
 
         Args:
             device (str): A valid pytorch device string.
@@ -263,22 +296,43 @@ class BaseSolver(abc.ABC):
             AssertionError: Raised when there is no model attached to this experiment.
 
         Returns:
-            Experiment: object of this class.
+            BaseSolver: object of this class.
         """
 
         self._device = device
-        self.model.to(device)
+        self._model.to(device)
+        return self
+
+    def max_checkpoints_to_keep(self, max_to_keep) -> "BaseSolver":
+        """
+        Sets the max checkpoints to keep. Used in the builder API.
+
+        Returns:
+            BaseSolver: object of this class.
+        """
+        assert self._log_dir is not None, "Set log directory to make checkpoints"
+
+        self._max_to_keep = max_to_keep
         return self
 
     def build(self) -> "Experiment":
         """
-        Completes the build phase of the solver. Used in the builder api.
+        Completes the build phase of the solver. Used in the builder API.
 
         Returns:
             Experiment: The experiment attached to this solver.
         """
 
-        return self.experiment
+        if self._log_dir is not None:
+            to_track = self.track()
+            to_track.append(self._checkpointable_epoch)
+            to_track.append(self._history)
+            self._checkpoint = Checkpoint(
+                os.path.join(self._log_dir, "checkpoints"),
+                to_track,
+                self._max_to_keep,
+            )
+        return self._experiment
 
     def get_model(self) -> nn.Module:
         """
@@ -288,7 +342,7 @@ class BaseSolver(abc.ABC):
             nn.Module: The model
         """
 
-        return self.model
+        return self._model
 
     def get_epochs(self) -> int:
         """
@@ -398,7 +452,7 @@ class BaseSolver(abc.ABC):
             Union[Kbar, tqdm]: The progress bar.
         """
 
-        return self.progbar
+        return self._progbar
 
     def set_progbar(self, value: Union[Kbar, tqdm]):
         """
@@ -409,7 +463,7 @@ class BaseSolver(abc.ABC):
 
         """
 
-        self.progbar = value
+        self._progbar = value
 
     def get_history(self) -> "History":
         """
@@ -419,7 +473,27 @@ class BaseSolver(abc.ABC):
             History: The history object.
         """
 
-        return self.history
+        return self._history
+
+    def set_log_dir(self, path: str):
+        """
+        Setter for the log directory.
+
+        Args:
+            path (str): The path.
+        """
+
+        self._log_dir = path
+
+    def get_start_epoch(self) -> int:
+        """
+        Gets the epoch to start training from.
+
+        Returns:
+            int
+        """
+
+        return self._checkpointable_epoch.get_value()
 
     @staticmethod
     def log_results(func: Callable) -> Callable:
@@ -444,7 +518,9 @@ class BaseSolver(abc.ABC):
             # summary writer.
             for label, value in res.data:
                 self.get_history().add_metric(label, value)
-                self.writer_add_scalar(label, value, self.current_epoch)
+                self.writer_add_scalar(
+                    label, value, self._checkpointable_epoch.get_value()
+                )
 
             # returing the result of the function
             return res
@@ -533,6 +609,80 @@ class BaseSolver(abc.ABC):
 
         return wrapper
 
+    @staticmethod
+    def epoch(func: Callable):
+        """
+        Decorator that manages epoch count, so that it can be checkpointed.
+
+        Args:
+            func (Callable): The function to decorate.
+
+        Returns:
+            Callable: The decorated function.
+        """
+
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            # calling the function
+            res: StepResult = func(self, *args, **kwargs)
+
+            # incrementing epoch count
+            self._checkpointable_epoch.increment()
+
+            # returning function result
+            return res
+
+        return wrapper
+
+    @staticmethod
+    def checkpoint(func: Callable) -> Callable:
+        """
+        Makes a checkpoint after ``func`` is called.
+
+        Args:
+            func (Callable): The function to decorate
+
+        Returns:
+            Callable: The decorated function.
+        """
+
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            # calling function
+            res = func(self, *args, **kwargs)
+
+            # checkpointing
+            if self._checkpoint is not None:
+                self._checkpoint.save()
+
+            # returning result of the function
+            return res
+
+        return wrapper
+
+    @staticmethod
+    def train_step(func: Callable) -> Callable:
+        """
+        A convenience decorator that is a combination of :func:`checkpoint` decorator, 
+        :func:`epoch` decorator, :func:`log_results` decorator and :func:`prog_bar` decorator.
+
+        Args:
+            func (Callable): The function to decorate.
+
+        Returns:
+            Callable: The decorated function.
+        """
+
+        @wraps(func)
+        @BaseSolver.checkpoint
+        @BaseSolver.epoch
+        @BaseSolver.log_results
+        @BaseSolver.prog_bar()
+        def wrapper(self, *args, **kwargs):
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
 
 class StepResult:
     def __init__(self, data: List[Tuple[str, Any]], **kwargs):
@@ -568,3 +718,24 @@ class BatchResult:
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+
+class _CheckpointableEpoch(Checkpoint):
+    def __init__(self):
+        """
+        An epoch value that is checkpointable.
+        """
+
+        self.value = 0
+
+    def state_dict(self):
+        return {"epoch": self.value}
+
+    def load_state_dict(self, data):
+        self.value = data["epoch"]
+
+    def increment(self):
+        self.value += 1
+
+    def get_value(self):
+        return self.value

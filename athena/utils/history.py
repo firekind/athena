@@ -3,14 +3,15 @@ from typing import List, Dict
 from collections import defaultdict
 import torch
 
+from .checkpoint import Checkpointable
 
-class History:
+class History(Checkpointable):
     def __init__(self):
         """
         Contains the information of the losses and accuracies that are recorded during training.
         """
 
-        self.data: Dict[str, List[torch.Tensor]] = defaultdict(lambda: [])
+        self.data: Dict[str, List[torch.Tensor]] = defaultdict(list)
 
     def add_metric(self, name: str, value: torch.Tensor):
         """
@@ -58,3 +59,24 @@ class History:
         """
 
         return metric in self.data
+
+    def state_dict(self):
+        """
+        Returns a state dict to checkpoint.
+
+        Returns:
+            Dict
+        """
+
+        return {
+            "data": self.data
+        }
+
+    def load_state_dict(self, data: Dict):
+        """
+        Loads the state from the checkpoint.
+
+        Args:
+            data (Dict): The checkpoint data
+        """
+        self.data = data["data"]

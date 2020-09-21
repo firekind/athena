@@ -82,7 +82,7 @@ To run multiple experiments one after the other, the :class:`athena.utils.experi
 
    exps = (
       Experiments("MNIST experiments)
-      .log_directory("./logs") # optional. if not given, tensorboard will not be used.
+      .log_directory("./logs") # optional. if not given, tensorboard will not be used and checkpoints will not be created
       .add("Ghost batch norm with 2 splits")
          .model(MnistNet(use_ghost_batch_norm=True))
          .solver(ClassificationSolver)
@@ -135,32 +135,6 @@ You can specify a custom loss function to use as well, for example:
       .build()
    )
 
-   exp.run()
-
-The older API (still supported...probably) to create and run a single experiment is:
-
-.. code-block:: python
-
-   ...
-   # creating experiment
-   model = MnistNet(use_ghost_batch_norm=True).to(device)
-   optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-   scheduler = StepLR(optimizer, step_size=8, gamma=0.1)
-   exp = Experiment(
-      name="With Ghost Batch Norm",
-      model=model,
-      solver_cls=ClassificationSolver,
-      train_args=dict(
-         epochs=25,
-         train_loader=train_loader,
-         test_loader=test_loader,
-         optimizer=optimizer,
-         scheduler=scheduler,
-         device=device,
-      )
-   )
-
-   # running experiment
    exp.run()
 
 Index
