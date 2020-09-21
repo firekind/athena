@@ -213,149 +213,503 @@
 <div class="section" id="athena-datasets-mnist-module">
 <h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.mnist</span></code> module<a class="headerlink" href="#athena-datasets-mnist-module" title="Permalink to this headline">¶</a></h2>
 <p>The good old MNIST dataset. This module contains a function to obtain a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the MNIST dataset, as well as some default train and test transforms that are commonly applied.</p>
-<span class="target" id="module-athena.datasets.mnist"></span><dl class="py function">
+<span class="target" id="module-athena.datasets.mnist"></span><dl class="py class">
 <dt id="athena.datasets.mnist.mnist">
-<code class="sig-prename descclassname">athena.datasets.mnist.</code><code class="sig-name descname">mnist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">'./data'</span></em>, <em class="sig-param"><span class="n">train</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">download</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">batch_size</span><span class="o">=</span><span class="default_value">64</span></em>, <em class="sig-param"><span class="n">shuffle</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">sampler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">batch_sampler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_workers</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">collate_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pin_memory</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">drop_last</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">worker_init_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_default_transforms</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates an MNIST dataloader given the arguments.</p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.mnist.</code><code class="sig-name descname">mnist</code><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.datasets.base_dataset.BaseDataset</span></code></a></p>
+<p>The mnist dataset.</p>
+<dl class="py attribute">
+<dt id="athena.datasets.mnist.mnist.mean">
+<code class="sig-name descname">mean</code><em class="property"> = (0.1307,)</em><a class="headerlink" href="#athena.datasets.mnist.mnist.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>mean of the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="athena.datasets.mnist.mnist.std">
+<code class="sig-name descname">std</code><em class="property"> = (0.3081,)</em><a class="headerlink" href="#athena.datasets.mnist.mnist.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>std of the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.mnist.mnist.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<em>str</em><em>, </em><em>optional</em>) – Root directory of dataset. Defaults to “./data”.</p></li>
-<li><p><strong>train</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, creates training dataset. Defaults to True.</p></li>
-<li><p><strong>transform</strong> (<em>transforms.Compose</em><em>, </em><em>optional</em>) – Transform to apply to training data. Defaults to None.</p></li>
-<li><p><strong>target_transform</strong> (<em>transforms.Compose</em><em>, </em><em>optional</em>) – Transform to apply to the targets of the training data. Defaults to None.</p></li>
-<li><p><strong>download</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, downloads the dataset. Defaults to True.</p></li>
-<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – The batch size. Defaults to 64.</p></li>
-<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, shuffles the dataset. Defaults to True.</p></li>
-<li><p><strong>sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em><em>, </em><em>optional</em>) – Defines the strategy to draw samples from the dataset. If specified, shuffle must not be specified. Defaults to None.</p></li>
-<li><p><strong>batch_sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em><em>, </em><em>optional</em>) – Like sampler, but returns a batch of indices at a time. Mutually exclusive with batch_size, shuffle, sampler, and drop_last. Defaults to None.</p></li>
-<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – How many subprocesses to use for data loading. Defaults to 4.</p></li>
-<li><p><strong>collate_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a map-style dataset. Defaults to None.</p></li>
-<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, copies Tensors to cuda pinned memory. Defaults to True.</p></li>
-<li><p><strong>drop_last</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set to True to drop the last incomplete batch. Defaults to False.</p></li>
-<li><p><strong>timeout</strong> (<em>float</em><em>, </em><em>optional</em>) – If positive, the timeout value for collecting a batch from workers. Should always be non-negative. Defaults to 0.</p></li>
-<li><p><strong>worker_init_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – If not None, this will be called on each worker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. Defaults to None.</p></li>
-<li><p><strong>use_default_transforms</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will use the default train and test transforms specified in this module.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mnist <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> with the given parameters.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>DataLoader</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataLoader</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt id="athena.datasets.mnist.mnist_train_transforms">
-<code class="sig-prename descclassname">athena.datasets.mnist.</code><code class="sig-name descname">mnist_train_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist_train_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist_train_transforms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default MNIST training data transforms.
-The transforms include:</p>
+<dl class="py method">
+<dt id="athena.datasets.mnist.mnist.default_train_transform">
+<code class="sig-name descname">default_train_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.default_train_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.default_train_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default mnist training transforms. Performs</p>
 <ul class="simple">
-<li><p>A random rotation between -5 and 5 degrees</p></li>
-<li><p>Normalization with mean 0.1307 and std 0.3081</p></li>
+<li><p>Random Rotation between -5 and 5 degrees</p></li>
+<li><p>Normalization using mean: (0.1307,) and std: (0.3081,)</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A transforms.Compose object.</p>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>transforms.Compose</p>
+<dd class="field-even"><p>Callable</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt id="athena.datasets.mnist.mnist_test_transforms">
-<code class="sig-prename descclassname">athena.datasets.mnist.</code><code class="sig-name descname">mnist_test_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist_test_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist_test_transforms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default MNIST test data transforms.
-The transforms include:</p>
+<dl class="py method">
+<dt id="athena.datasets.mnist.mnist.default_test_transform">
+<code class="sig-name descname">default_test_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.default_test_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.default_test_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default mnist test transforms. Performs</p>
 <ul class="simple">
-<li><p>Normalization with mean 0.1307 and std 0.3081</p></li>
+<li><p>Normalization using mean: (0.1307,) and std: (0.3081,)</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A transforms.Compose object.</p>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>transforms.Compose</p>
+<dd class="field-even"><p>Callable</p>
 </dd>
 </dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
 <div class="section" id="athena-datasets-cifar10-module">
 <h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.cifar10</span></code> module<a class="headerlink" href="#athena-datasets-cifar10-module" title="Permalink to this headline">¶</a></h2>
 <p>The CIFAR10 dataset. This module contains a function to obtain a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the CIFAR10 dataset, as well as some default train and test transforms that are commonly applied.</p>
-<span class="target" id="module-athena.datasets.cifar10"></span><dl class="py function">
+<span class="target" id="module-athena.datasets.cifar10"></span><dl class="py class">
 <dt id="athena.datasets.cifar10.cifar10">
-<code class="sig-prename descclassname">athena.datasets.cifar10.</code><code class="sig-name descname">cifar10</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">'./data'</span></em>, <em class="sig-param"><span class="n">train</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">download</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">batch_size</span><span class="o">=</span><span class="default_value">64</span></em>, <em class="sig-param"><span class="n">shuffle</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">sampler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">batch_sampler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_workers</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">collate_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pin_memory</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">drop_last</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">worker_init_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_default_transforms</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates an CIFAR10 dataloader given the arguments.</p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.cifar10.</code><code class="sig-name descname">cifar10</code><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.datasets.base_dataset.BaseDataset</span></code></a></p>
+<p>The cifar 10 dataset.</p>
+<dl class="py attribute">
+<dt id="athena.datasets.cifar10.cifar10.mean">
+<code class="sig-name descname">mean</code><em class="property"> = (0.4914, 0.4822, 0.4465)</em><a class="headerlink" href="#athena.datasets.cifar10.cifar10.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>mean of the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="athena.datasets.cifar10.cifar10.std">
+<code class="sig-name descname">std</code><em class="property"> = (0.2023, 0.1994, 0.201)</em><a class="headerlink" href="#athena.datasets.cifar10.cifar10.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>std of the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.cifar10.cifar10.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The cifar10 <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.cifar10.cifar10.default_train_transform">
+<code class="sig-name descname">default_train_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.default_train_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.default_train_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default cifar10 training transforms. Performs</p>
+<ul class="simple">
+<li><p>Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.cifar10.cifar10.default_test_transform">
+<code class="sig-name descname">default_test_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.default_test_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.default_test_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default cifar10 test transforms. Performs</p>
+<ul class="simple">
+<li><p>Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="athena-datasets-base-dataset-module">
+<h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.base_dataset</span></code> module<a class="headerlink" href="#athena-datasets-base-dataset-module" title="Permalink to this headline">¶</a></h2>
+<p>The base class which all datasets that want to use the builder API must implement.</p>
+<span class="target" id="module-athena.datasets.base_dataset"></span><dl class="py class">
+<dt id="athena.datasets.base_dataset.BaseDataset">
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.base_dataset.</code><code class="sig-name descname">BaseDataset</code><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>The base class for datasets. Enables the use of a builder style API.</p>
+<dl class="simple">
+<dt>Default values of various parameters (if not set using the builder API):</dt><dd><ul class="simple">
+<li><p><strong>root</strong> <em>(str)</em>: <code class="docutils literal notranslate"><span class="pre">&quot;./data&quot;</span></code>.</p></li>
+<li><p><strong>train</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>transform</strong> <em>(transforms.Compose)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>target_transform</strong> <em>(transforms.Compose)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>download</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>batch_size</strong> <em>(int)</em>: 64.</p></li>
+<li><p><strong>shuffle</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>sampler</strong> <em>(Union[Sampler, Iterable])</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>batch_sampler</strong> <em>(Union[Sampler, Iterable])</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>num_workers</strong> <em>(int)</em>: 4.</p></li>
+<li><p><strong>collate_fn</strong> <em>(Callable)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>pin_memory</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>drop_last</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>timeout</strong> <em>(float)</em>: 0.</p></li>
+<li><p><strong>worker_init_fn</strong> <em>(Callable)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>use_default_transforms</strong> <em>(bool)</em>: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.root">
+<code class="sig-name descname">root</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.root"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.root" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">root</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Root directory of dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the train data flag. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>train</strong> (<em>str</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, creates training dataset. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.test">
+<code class="sig-name descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the train data flag to <code class="docutils literal notranslate"><span class="pre">False</span></code>, so that a test dataset is created. Used in the             builder API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Object of this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the transforms to use. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>transform</strong> (<em>Callable</em>) – Transform to apply to training data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.target_transform">
+<code class="sig-name descname">target_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_transform</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.target_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.target_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the transforms to use on the target data (labels). Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target_transform</strong> (<em>Callable</em>) – Transform to apply to training data’s targets.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.download">
+<code class="sig-name descname">download</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">download</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">download</span></code> flag. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>download</strong> (<em>bool</em>) – If True, downloads the dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.batch_size">
+<code class="sig-name descname">batch_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.batch_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.batch_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the batch size. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_size</strong> (<em>int</em>) – The batch size.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.shuffle">
+<code class="sig-name descname">shuffle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shuffle</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.shuffle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether to shuffle the dataset. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shuffle</strong> (<em>bool</em>) – If True, shuffles the dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.sampler">
+<code class="sig-name descname">sampler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sampler</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.sampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">sampler</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em>) – Defines the strategy to draw samples from the                 dataset. If specified, shuffle must not be specified.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.batch_sampler">
+<code class="sig-name descname">batch_sampler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch_sampler</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.batch_sampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.batch_sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">batch_sampler</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em>) – Like sampler, but returns a batch of indices                 at a time. Mutually exclusive with batch_size, shuffle, sampler, and drop_last.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.num_workers">
+<code class="sig-name descname">num_workers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_workers</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.num_workers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.num_workers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the number of workers to use. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_workers</strong> (<em>int</em>) – How many subprocesses to use for data loading.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.collate_fn">
+<code class="sig-name descname">collate_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">collate_fn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.collate_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.collate_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the collate_fn. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>collate_fn</strong> (<em>Callable</em>) – Merges a list of samples to form a mini-batch of Tensor(s).                 Used when using batched loading from a map-style dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.pin_memory">
+<code class="sig-name descname">pin_memory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pin_memory</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.pin_memory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.pin_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether to pin memory. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pin_memory</strong> (<em>bool</em>) – If True, copies Tensors to cuda pinned memory.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.drop_last">
+<code class="sig-name descname">drop_last</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">drop_last</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.drop_last"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.drop_last" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets <code class="docutils literal notranslate"><span class="pre">drop_last</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>drop_last</strong> (<em>bool</em>) – Set to True to drop the last incomplete batch.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.timeout">
+<code class="sig-name descname">timeout</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.timeout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">timeout</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> (<em>float</em>) – If positive, the timeout value for collecting a batch from workers.                 Should always be non-negative.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.worker_init_fn">
+<code class="sig-name descname">worker_init_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">worker_init_fn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.worker_init_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.worker_init_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">worker_init_fn</span></code>. Used in the builder API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>worker_init_fn</strong> (<em>Callable</em>) – If not None, this will be called on each worker subprocess with                 the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.use_default_transforms">
+<code class="sig-name descname">use_default_transforms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_default_transforms</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.use_default_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.use_default_transforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">use_default_transforms</span></code>. Used in the builder API</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<em>str</em><em>, </em><em>optional</em>) – Root directory of dataset. Defaults to “./data”.</p></li>
-<li><p><strong>train</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, creates training dataset. Defaults to True.</p></li>
-<li><p><strong>transform</strong> (<em>transforms.Compose</em><em>, </em><em>optional</em>) – Transform to apply to training data. Defaults to None.</p></li>
-<li><p><strong>target_transform</strong> (<em>transforms.Compose</em><em>, </em><em>optional</em>) – Transform to apply to the targets of the training data. Defaults to None.</p></li>
-<li><p><strong>download</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, downloads the dataset. Defaults to True.</p></li>
-<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – The batch size. Defaults to 64.</p></li>
-<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, shuffles the dataset. Defaults to True.</p></li>
-<li><p><strong>sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em><em>, </em><em>optional</em>) – Defines the strategy to draw samples from the dataset. If specified, shuffle must not be specified. Defaults to None.</p></li>
-<li><p><strong>batch_sampler</strong> (<em>Union</em><em>[</em><em>Sampler</em><em>, </em><em>Iterable</em><em>]</em><em>, </em><em>optional</em>) – Like sampler, but returns a batch of indices at a time. Mutually exclusive with batch_size, shuffle, sampler, and drop_last. Defaults to None.</p></li>
-<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – How many subprocesses to use for data loading. Defaults to 4.</p></li>
-<li><p><strong>collate_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a map-style dataset. Defaults to None.</p></li>
-<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, copies Tensors to cuda pinned memory. Defaults to True.</p></li>
-<li><p><strong>drop_last</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set to True to drop the last incomplete batch. Defaults to False.</p></li>
-<li><p><strong>timeout</strong> (<em>float</em><em>, </em><em>optional</em>) – If positive, the timeout value for collecting a batch from workers. Should always be non-negative. Defaults to 0.</p></li>
-<li><p><strong>worker_init_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – If not None, this will be called on each worker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. Defaults to None.</p></li>
-<li><p><strong>use_default_transforms</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will use the default train and test transforms specified in this module.</p></li>
+<li><p><strong>batch_size</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will use the default train and test transforms specified in <a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset.default_train_transform" title="athena.datasets.base_dataset.BaseDataset.default_train_transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">default_train_transform()</span></code></a> and <a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset.default_test_transform" title="athena.datasets.base_dataset.BaseDataset.default_test_transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">default_test_transform()</span></code></a>. Defaults to True.</p></li>
+<li><p><strong>use_default_transforms</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> with the given parameters.</p>
+<dd class="field-even"><p>Object of this class.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>DataLoader</p>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.datasets.base_dataset.BaseDataset" title="athena.datasets.base_dataset.BaseDataset">BaseDataset</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt id="athena.datasets.cifar10.cifar10_train_transforms">
-<code class="sig-prename descclassname">athena.datasets.cifar10.</code><code class="sig-name descname">cifar10_train_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10_train_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10_train_transforms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default CIFAR10 training data transforms.
-The transforms include:</p>
-<ul class="simple">
-<li><p>Normalization with mean (0.4914, 0.4822, 0.4465) and std (0.2023, 0.1994, 0.2010)</p></li>
-</ul>
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.build">
+<em class="property">abstract </em><code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dataset and returns the dataloader.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A transforms.Compose object.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>transforms.Compose</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.utils.data.dataloader.DataLoader</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt id="athena.datasets.cifar10.cifar10_test_transforms">
-<code class="sig-prename descclassname">athena.datasets.cifar10.</code><code class="sig-name descname">cifar10_test_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10_test_transforms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10_test_transforms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default CIFAR10 test data transforms.
-The transforms include:</p>
-<ul class="simple">
-<li><p>Normalization with mean (0.4914, 0.4822, 0.4465) and std (0.2023, 0.1994, 0.2010)</p></li>
-</ul>
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.default_train_transform">
+<em class="property">abstract </em><code class="sig-name descname">default_train_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.default_train_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.default_train_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default train transforms. The transform should taken in a <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> and return a <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A transforms.Compose object.</p>
+<dd class="field-odd"><p>The transform.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>transforms.Compose</p>
+<dd class="field-even"><p>Callable</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.default_test_transform">
+<em class="property">abstract </em><code class="sig-name descname">default_test_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.default_test_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.default_test_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default test transforms.  The transform should taken in a <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> and return a <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The transform.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -401,6 +755,7 @@ The transforms include:</p>
 <li><a class="reference internal" href="#">athena.datasets package</a><ul>
 <li><a class="reference internal" href="#athena-datasets-mnist-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.mnist</span></code> module</a></li>
 <li><a class="reference internal" href="#athena-datasets-cifar10-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.cifar10</span></code> module</a></li>
+<li><a class="reference internal" href="#athena-datasets-base-dataset-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.base_dataset</span></code> module</a></li>
 </ul>
 </li>
 </ul>

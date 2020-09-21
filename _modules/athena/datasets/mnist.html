@@ -200,133 +200,121 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <h1>Source code for athena.datasets.mnist</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>
 
+<span class="kn">import</span> <span class="nn">albumentations</span> <span class="k">as</span> <span class="nn">A</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span>
-<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Sampler</span><span class="p">,</span> <span class="n">DataLoader</span>
+
+<span class="kn">from</span> <span class="nn">.base_dataset</span> <span class="kn">import</span> <span class="n">BaseDataset</span>
 
 
-<div class="viewcode-block" id="mnist"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist">[docs]</a><span class="k">def</span> <span class="nf">mnist</span><span class="p">(</span>
-    <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
-    <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">transform</span><span class="p">:</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">target_transform</span><span class="p">:</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">sampler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sampler</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">batch_sampler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sampler</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">collate_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">drop_last</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">worker_init_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">use_default_transforms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates an MNIST dataloader given the arguments.</span>
+<div class="viewcode-block" id="mnist"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist">[docs]</a><span class="k">class</span> <span class="nc">mnist</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        root (str, optional): Root directory of dataset. Defaults to &quot;./data&quot;.</span>
-<span class="sd">        train (bool, optional): If True, creates training dataset. Defaults to True.</span>
-<span class="sd">        transform (transforms.Compose, optional): Transform to apply to training data. Defaults to None.</span>
-<span class="sd">        target_transform (transforms.Compose, optional): Transform to apply to the targets of the training data. Defaults to None.</span>
-<span class="sd">        download (bool, optional): If True, downloads the dataset. Defaults to True.</span>
-<span class="sd">        batch_size (int, optional): The batch size. Defaults to 64.</span>
-<span class="sd">        shuffle (bool, optional): If True, shuffles the dataset. Defaults to True.</span>
-<span class="sd">        sampler (Union[Sampler, Iterable], optional): Defines the strategy to draw samples from the dataset. If specified, shuffle must not be specified. Defaults to None.</span>
-<span class="sd">        batch_sampler (Union[Sampler, Iterable], optional): Like sampler, but returns a batch of indices at a time. Mutually exclusive with batch_size, shuffle, sampler, and drop_last. Defaults to None.</span>
-<span class="sd">        num_workers (int, optional): How many subprocesses to use for data loading. Defaults to 4.</span>
-<span class="sd">        collate_fn (Callable, optional): Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a map-style dataset. Defaults to None.</span>
-<span class="sd">        pin_memory (bool, optional): If True, copies Tensors to cuda pinned memory. Defaults to True.</span>
-<span class="sd">        drop_last (bool, optional): Set to True to drop the last incomplete batch. Defaults to False.</span>
-<span class="sd">        timeout (float, optional): If positive, the timeout value for collecting a batch from workers. Should always be non-negative. Defaults to 0.</span>
-<span class="sd">        worker_init_fn (Callable, optional): If not None, this will be called on each worker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. Defaults to None.</span>
-<span class="sd">        use_default_transforms (bool, optional): If true, will use the default train and test transforms specified in this module.</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1307</span><span class="p">,)</span> <span class="c1">#: mean of the dataset.</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,)</span> <span class="c1">#: std of the dataset.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        DataLoader: The ``DataLoader`` with the given parameters.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The mnist dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    <span class="c1"># checking whether ``use_default_transforms`` is specified and ``transform`` is specified. If so, throw an error.</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="n">use_default_transforms</span> <span class="ow">and</span> <span class="n">transform</span>
-    <span class="p">),</span> <span class="s2">&quot;Specify only `use_default_transforms` or `transform`, not both.&quot;</span>
+<div class="viewcode-block" id="mnist.build"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the dataset and returns a pytorch ``DataLoader``.</span>
 
-    <span class="c1"># if ``use_default_transform`` is specified, use them.</span>
-    <span class="k">if</span> <span class="n">use_default_transforms</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">train</span><span class="p">:</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="n">mnist_train_transforms</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="n">mnist_test_transforms</span><span class="p">()</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            DataLoader: The mnist ``DataLoader``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">mnist</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span>
-        <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
-        <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span>
-        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
-        <span class="n">target_transform</span><span class="o">=</span><span class="n">target_transform</span><span class="p">,</span>
-        <span class="n">download</span><span class="o">=</span><span class="n">download</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
-        <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
-        <span class="n">batch_sampler</span><span class="o">=</span><span class="n">batch_sampler</span><span class="p">,</span>
-        <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
-        <span class="n">collate_fn</span><span class="o">=</span><span class="n">collate_fn</span><span class="p">,</span>
-        <span class="n">pin_memory</span><span class="o">=</span><span class="n">pin_memory</span><span class="p">,</span>
-        <span class="n">drop_last</span><span class="o">=</span><span class="n">drop_last</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-        <span class="n">worker_init_fn</span><span class="o">=</span><span class="n">worker_init_fn</span><span class="p">,</span>
-    <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
+            <span class="n">_mnist_dataset</span><span class="p">(</span>
+                <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span>
+                <span class="n">train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">,</span>
+                <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">,</span>
+                <span class="n">target_transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_transform</span><span class="p">,</span>
+                <span class="n">download</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_download</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">,</span>
+            <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="p">,</span>
+            <span class="n">batch_sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_sampler</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span><span class="p">,</span>
+            <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_collate_fn</span><span class="p">,</span>
+            <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pin_memory</span><span class="p">,</span>
+            <span class="n">drop_last</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_drop_last</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span>
+            <span class="n">worker_init_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_init_fn</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="mnist.default_train_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist.default_train_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_train_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Default mnist training transforms. Performs</span>
+
+<span class="sd">        * Random Rotation between -5 and 5 degrees</span>
+
+<span class="sd">        * Normalization using mean: (0.1307,) and std: (0.3081,)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable: The transform, an ``albumentations.Compose`` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Rotate</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>  <span class="c1"># Randomly rotating the image in the range -5,5 degrees</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">std</span><span class="p">),</span>  <span class="c1"># Normalizing</span>
+            <span class="p">]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="mnist.default_test_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist.default_test_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_test_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Default mnist test transforms. Performs</span>
+
+<span class="sd">        * Normalization using mean: (0.1307,) and std: (0.3081,)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable: The transform, an ``albumentations.Compose`` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">std</span><span class="p">),</span>  <span class="c1"># Normalizing</span>
+            <span class="p">]</span>
+        <span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="mnist_train_transforms"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist_train_transforms">[docs]</a><span class="k">def</span> <span class="nf">mnist_train_transforms</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Default MNIST training data transforms.</span>
-<span class="sd">    The transforms include:</span>
+<span class="k">class</span> <span class="nc">_mnist_dataset</span><span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_mnist_dataset</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">target_transform</span><span class="p">,</span> <span class="n">download</span>
+        <span class="p">)</span>
 
-<span class="sd">    * A random rotation between -5 and 5 degrees</span>
-<span class="sd">    * Normalization with mean 0.1307 and std 0.3081</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">)[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># at this stage, assuming that the transform isnt an albumentations transform</span>
+                <span class="c1"># this error will occur if the transform given does not have an ``image`` keyword argument,</span>
+                <span class="c1"># or the return type isnt a dict (like albumentations)</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            
+            <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        transforms.Compose: A transforms.Compose object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">transforms</span><span class="o">.</span><span class="n">RandomRotation</span><span class="p">(</span>
-                <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="n">degrees</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-            <span class="p">),</span>  <span class="c1"># Randomly rotating the image in the range -5,5 degrees</span>
-            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  <span class="c1"># Converting to Tensor</span>
-            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.1307</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,)),</span>  <span class="c1"># Normalizing</span>
-        <span class="p">]</span>
-    <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="mnist_test_transforms"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.mnist.mnist_test_transforms">[docs]</a><span class="k">def</span> <span class="nf">mnist_test_transforms</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Default MNIST test data transforms.</span>
-<span class="sd">    The transforms include:</span>
-
-<span class="sd">    * Normalization with mean 0.1307 and std 0.3081</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        transforms.Compose: A transforms.Compose object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  <span class="c1"># Converting to Tensor</span>
-            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span>
-                <span class="p">(</span><span class="mf">0.1307</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,)</span>
-            <span class="p">),</span>  <span class="c1"># Normalizing the dataset using mean and std</span>
-        <span class="p">]</span>
-    <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">img</span><span class="p">,</span> <span class="n">target</span>
 </pre></div>
 
              </article>

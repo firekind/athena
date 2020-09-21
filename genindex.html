@@ -212,6 +212,7 @@
  | <a href="#H"><strong>H</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -230,6 +231,13 @@
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.history.History.add_metric">add_metric() (athena.utils.history.History method)</a>
 </li>
+      <li>
+    athena.datasets.base_dataset
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#module-athena.datasets.base_dataset">module</a>
+</li>
+      </ul></li>
       <li>
     athena.datasets.cifar10
 
@@ -294,15 +302,27 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset">BaseDataset (class in athena.datasets.base_dataset)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver">BaseSolver (class in athena.solvers.base_solver)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.batch_sampler">batch_sampler() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.batch_size">batch_size() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BatchResult">BatchResult (class in athena.solvers.base_solver)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.build">build() (athena.solvers.base_solver.BaseSolver method)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.build">build() (athena.datasets.base_dataset.BaseDataset method)</a>
 
       <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.build">(athena.datasets.cifar10.cifar10 method)</a>
+</li>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.build">(athena.datasets.mnist.mnist method)</a>
+</li>
+        <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.build">(athena.solvers.base_solver.BaseSolver method)</a>
+</li>
         <li><a href="apis/athena.utils.html#athena.utils.experiment.Experiment.build">(athena.utils.experiment.Experiment method)</a>
 </li>
       </ul></li>
@@ -312,19 +332,17 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10">cifar10() (in module athena.datasets.cifar10)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10">cifar10 (class in athena.datasets.cifar10)</a>
 </li>
-      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10_test_transforms">cifar10_test_transforms() (in module athena.datasets.cifar10)</a>
-</li>
-      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10_train_transforms">cifar10_train_transforms() (in module athena.datasets.cifar10)</a>
+      <li><a href="apis/athena.models.html#athena.models.cifar10_v1.Cifar10V1">Cifar10V1 (class in athena.models.cifar10_v1)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.models.html#athena.models.cifar10_v1.Cifar10V1">Cifar10V1 (class in athena.models.cifar10_v1)</a>
-</li>
       <li><a href="apis/athena.models.html#athena.models.cifar10_v2.Cifar10V2">Cifar10V2 (class in athena.models.cifar10_v2)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver">ClassificationSolver (class in athena.solvers.classification_solver)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.collate_fn">collate_fn() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -332,13 +350,33 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.layers.html#athena.layers.depthwiseconv.DepthwiseConv2d">DepthwiseConv2d (class in athena.layers.depthwiseconv)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.default_test_transform">default_test_transform() (athena.datasets.base_dataset.BaseDataset method)</a>
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.default_test_transform">(athena.datasets.cifar10.cifar10 method)</a>
 </li>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.default_test_transform">(athena.datasets.mnist.mnist method)</a>
+</li>
+      </ul></li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.default_train_transform">default_train_transform() (athena.datasets.base_dataset.BaseDataset method)</a>
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.default_train_transform">(athena.datasets.cifar10.cifar10 method)</a>
+</li>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.default_train_transform">(athena.datasets.mnist.mnist method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.layers.html#athena.layers.depthwiseconv.DepthwiseConv2d">DepthwiseConv2d (class in athena.layers.depthwiseconv)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.device">device() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.experiment.Experiments.done">done() (athena.utils.experiment.Experiments method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.download">download() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.drop_last">drop_last() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -430,11 +468,13 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist">mnist() (in module athena.datasets.mnist)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.mean">mean (athena.datasets.cifar10.cifar10 attribute)</a>
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.mean">(athena.datasets.mnist.mnist attribute)</a>
 </li>
-      <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist_test_transforms">mnist_test_transforms() (in module athena.datasets.mnist)</a>
-</li>
-      <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist_train_transforms">mnist_train_transforms() (in module athena.datasets.mnist)</a>
+      </ul></li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist">mnist (class in athena.datasets.mnist)</a>
 </li>
       <li><a href="apis/athena.models.html#athena.models.mnist.MnistNet">MnistNet (class in athena.models.mnist)</a>
 </li>
@@ -444,6 +484,8 @@
     module
 
       <ul>
+        <li><a href="apis/athena.datasets.html#module-athena.datasets.base_dataset">athena.datasets.base_dataset</a>
+</li>
         <li><a href="apis/athena.datasets.html#module-athena.datasets.cifar10">athena.datasets.cifar10</a>
 </li>
         <li><a href="apis/athena.datasets.html#module-athena.datasets.mnist">athena.datasets.mnist</a>
@@ -464,6 +506,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.num_workers">num_workers() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -475,12 +525,14 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_experiments">plot_experiments() (in module athena.utils.functions)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.pin_memory">pin_memory() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_misclassified">plot_misclassified() (in module athena.utils.functions)</a>
+      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_experiments">plot_experiments() (in module athena.utils.functions)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_misclassified">plot_misclassified() (in module athena.utils.functions)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.prog_bar">prog_bar() (athena.solvers.base_solver.BaseSolver static method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.prog_bar_update">prog_bar_update() (athena.solvers.base_solver.BaseSolver static method)</a>
@@ -492,6 +544,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver">RegressionSolver (class in athena.solvers.regression_solver)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.root">root() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -507,20 +561,30 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.sampler">sampler() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.scheduler">scheduler() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_experiment">set_experiment() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_loss_fn">set_loss_fn() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_progbar">set_progbar() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.should_use_tqdm">should_use_tqdm() (athena.solvers.base_solver.BaseSolver method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.shuffle">shuffle() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.experiment.Experiment.solver">solver() (athena.utils.experiment.Experiment method)</a>
 </li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.std">std (athena.datasets.cifar10.cifar10 attribute)</a>
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.std">(athena.datasets.mnist.mnist attribute)</a>
+</li>
+      </ul></li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.StepResult">StepResult (class in athena.solvers.base_solver)</a>
 </li>
   </ul></td>
@@ -529,6 +593,10 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.target_transform">target_transform() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.test">test() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.test_loader">test_loader() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.test_step">test_step() (athena.solvers.classification_solver.ClassificationSolver method)</a>
@@ -537,9 +605,13 @@
         <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.test_step">(athena.solvers.regression_solver.RegressionSolver method)</a>
 </li>
       </ul></li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train">train() (athena.solvers.base_solver.BaseSolver method)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.timeout">timeout() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.train">train() (athena.datasets.base_dataset.BaseDataset method)</a>
 
       <ul>
+        <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train">(athena.solvers.base_solver.BaseSolver method)</a>
+</li>
         <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train">(athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
         <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train">(athena.solvers.regression_solver.RegressionSolver method)</a>
@@ -557,11 +629,17 @@
         <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train_step">(athena.solvers.regression_solver.RegressionSolver method)</a>
 </li>
       </ul></li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.transform">transform() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.use_default_transforms">use_default_transforms() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.use_tqdm">use_tqdm() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
@@ -571,6 +649,8 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.worker_init_fn">worker_init_fn() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.writer_add_model">writer_add_model() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
   </ul></td>
