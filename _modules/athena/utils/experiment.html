@@ -209,58 +209,28 @@
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">_LRScheduler</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">History</span>
-
 
 <div class="viewcode-block" id="Experiment"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment">[docs]</a><span class="k">class</span> <span class="nc">Experiment</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">solver_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="s2">&quot;BaseSolver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">train_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">log_dir_parent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_dir_parent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bundles information regarding an experiment. An experiment is performed on a model, with</span>
 <span class="sd">        a ``Solver`` and the arguments that have to be used to train the model.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            name (str): The name of the experiment.</span>
-<span class="sd">            model (nn.Module, optional): The model to experiment on. Defaults to None.</span>
-<span class="sd">            solver_cls (BaseSolver, optional): The ``Solver`` class to use. Defaults to None.</span>
-<span class="sd">            train_args (Dict[str, Any], optional): The arguments to be passed on to the ``Solver`` when training. \</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            log_dir_parent (str, optional): Parent of the log directory. The directory to store tensorboard logs and checkpoints. \</span>
-<span class="sd">                The log directory&#39;s name will be the name of the experiment. Defaults to None.</span>
+<span class="sd">        Default values of various parameters that can be set using the builder API:</span>
+<span class="sd">            * **model** *(nn.Module)*: ``None``.</span>
+
+<span class="sd">            * **solver** *(BaseSolver)*: ``None``.</span>
+
+<span class="sd">            * **log_directory** *(str)*: ``None``.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># the name of the experiment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-        <span class="c1"># the model object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">model</span>
-
-        <span class="c1"># creating the object of the solver if the class is not None</span>
-        <span class="k">if</span> <span class="n">solver_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="n">solver_cls</span><span class="p">(</span>
-                <span class="n">model</span><span class="p">,</span>
-                <span class="n">log_dir</span><span class="o">=</span><span class="kc">None</span>
-                <span class="k">if</span> <span class="n">log_dir_parent</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># the arguments to be passed to the solver while training. If it is None,</span>
-        <span class="c1"># initialize it to an empty dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="o">=</span> <span class="n">train_args</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_args</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># the history object, stores info about the losses and accuracies</span>
-        <span class="c1"># once the training is over.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="o">=</span> <span class="n">log_dir_parent</span>
 
         <span class="c1"># the chain is used when ``Experiments`` class is used to define multiple experiments</span>
         <span class="c1"># to run. This chain attribute keeps track of the ``Experiments`` object that was</span>
@@ -270,11 +240,6 @@
         <span class="c1"># experiments can be added to the ``Experiments`` object.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># the log dir</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="o">=</span> <span class="n">log_dir_parent</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_create_log_directory</span><span class="p">()</span>
-
 <div class="viewcode-block" id="Experiment.run"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the</span>
@@ -283,7 +248,7 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[92m=&gt; Running experiment: </span><span class="si">%s</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">train_args</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">train</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Experiment.model"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -316,7 +281,9 @@
         <span class="c1"># the log directory can be set before or after setting the solver</span>
         <span class="c1"># so checking if the log directory was set already</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">log_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">log_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -324,8 +291,9 @@
 
 <div class="viewcode-block" id="Experiment.log_directory"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.experiment.Experiment.log_directory">[docs]</a>    <span class="k">def</span> <span class="nf">log_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the parent of directory where all the logs will be stored. The name of the directory \</span>
-<span class="sd">            that contains the logs will be the name of the experiment. Used in the builder api.</span>
+<span class="sd">        Sets the parent of directory where all the logs (tensorboard, checkpoints, etc.) will be stored. \</span>
+<span class="sd">            The name of the directory that contains the logs will be the name of the experiment. Used in \</span>
+<span class="sd">            the builder api.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            path (str): The path to the parent of the log directory</span>
@@ -336,11 +304,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_log_directory</span><span class="p">()</span>
-        
-        <span class="c1"># setting the log directory in solver if it has already been created.</span>
-        <span class="c1"># doing this just in case</span>
+
+        <span class="c1"># setting the log directory in solver in case it has already been created.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver_obj</span><span class="o">.</span><span class="n">set_log_dir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -419,7 +386,14 @@
 <span class="sd">            Experiment: The ``Experiment`` object that was added to the chain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">e</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">log_dir_parent</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">log_dir_parent</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_experiment</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">e</span></div>

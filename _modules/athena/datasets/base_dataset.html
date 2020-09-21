@@ -244,7 +244,7 @@
 
 <span class="sd">            * **use_default_transforms** *(bool)*: ``False``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-            
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_train</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="kc">None</span>
@@ -499,9 +499,9 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_default_transforms</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_train_transform</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_train_transform</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_test_transform</span><span class="p">()</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_test_transform</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseDataset.default_train_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.default_train_transform">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">default_train_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>

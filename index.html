@@ -265,7 +265,7 @@ various parameters that are to be used for the experiment.</p>
 
 <span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
    <span class="n">Experiments</span><span class="p">(</span><span class="s2">&quot;MNIST experiments)</span>
-   <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span> <span class="c1"># optional. if not given, tensorboard will not be used.</span>
+   <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span> <span class="c1"># optional. if not given, tensorboard will not be used and checkpoints will not be created</span>
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
       <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
@@ -316,30 +316,6 @@ various parameters that are to be used for the experiment.</p>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 
-<span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>The older API (still supported…probably) to create and run a single experiment is:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="c1"># creating experiment</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
-<span class="n">scheduler</span> <span class="o">=</span> <span class="n">StepLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-<span class="n">exp</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span>
-   <span class="n">name</span><span class="o">=</span><span class="s2">&quot;With Ghost Batch Norm&quot;</span><span class="p">,</span>
-   <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-   <span class="n">solver_cls</span><span class="o">=</span><span class="n">ClassificationSolver</span><span class="p">,</span>
-   <span class="n">train_args</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-      <span class="n">epochs</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
-      <span class="n">train_loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span>
-      <span class="n">test_loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">,</span>
-      <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
-      <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
-      <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
-   <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1"># running experiment</span>
 <span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>

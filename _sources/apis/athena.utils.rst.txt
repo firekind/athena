@@ -30,3 +30,10 @@ This package contains various utility classes.
    :undoc-members:
    :show-inheritance:
 
+``checkpoint`` module
+---------------------
+
+.. automodule:: athena.utils.checkpoint
+   :members:
+   :undoc-members:
+   :show-inheritance:
