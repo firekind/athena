@@ -11,6 +11,7 @@ setuptools.setup(
         "tqdm~=4.48.2",
         "matplotlib~=3.3.1",
         "tensorboard~=2.3.0",
-        "albumentations~=0.4.6"
+        "albumentations~=0.4.6",
+        "opencv-python~=4.4.0.42"
     ]
 )
