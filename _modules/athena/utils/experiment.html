@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
 
             
@@ -222,6 +223,11 @@
 <span class="sd">            * **solver** *(BaseSolver)*: ``None``.</span>
 
 <span class="sd">            * **log_directory** *(str)*: ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the experiment.</span>
+<span class="sd">            log_dir_parent (str, optional): The parent of the directory where the logs should be stored. \</span>
+<span class="sd">                the directory where the logs will be stored will be the name of the experiment.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -369,6 +375,11 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines a list of experiments that has to be run one after the other.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the list of experiments.</span>
+<span class="sd">            log_dir (str, optional): The parent of the directory where the logs should be stored. \</span>
+<span class="sd">                the directory where the logs will be stored will be the ``name`` parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="p">{}</span>

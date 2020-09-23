@@ -29,6 +29,7 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="athena.visualizations package" href="athena.visualizations.html" />
     <link rel="prev" title="athena.solvers package" href="athena.solvers.html" /> 
 
   
@@ -132,6 +133,7 @@
 <li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
 
             
@@ -209,6 +211,79 @@
 <div class="toctree-wrapper compound">
 </div>
 <p>This package contains various utility classes.</p>
+<div class="section" id="module-athena.utils.checkpoint">
+<span id="checkpoint-module"></span><h2><code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> module<a class="headerlink" href="#module-athena.utils.checkpoint" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.utils.checkpoint.Checkpoint">
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.checkpoint.</code><code class="sig-name descname">Checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">max_to_keep</span><span class="o">=</span><span class="default_value">'all'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates, restores and manages checkpoint files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The path to the checkpoint directory.</p></li>
+<li><p><strong>track</strong> (<em>List</em>) – a list of objects that either extends <a class="reference internal" href="#athena.utils.checkpoint.Checkpointable" title="athena.utils.checkpoint.Checkpointable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Checkpointable</span></code></a> or a                 valid pytorch object that has <code class="docutils literal notranslate"><span class="pre">state_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">load_state_dict</span></code> attributes.</p></li>
+<li><p><strong>max_to_keep</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The max number of checkpoint files to keep.                 Defaults to “all”.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.utils.checkpoint.Checkpoint.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a checkpoint file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.checkpoint.Checkpoint.restore">
+<code class="sig-name descname">restore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint.restore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.restore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores data from a checkpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to the checkpoint file. If None, restores from the                 latest checkpoint. Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.checkpoint.Checkpoint.current_checkpoint_path">
+<em class="property">property </em><code class="sig-name descname">current_checkpoint_path</code><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.current_checkpoint_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to the current checkpoint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.utils.checkpoint.Checkpointable">
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.checkpoint.</code><code class="sig-name descname">Checkpointable</code><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dl class="py method">
+<dt id="athena.utils.checkpoint.Checkpointable.load_state_dict">
+<em class="property">abstract </em><code class="sig-name descname">load_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable.load_state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable.load_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the state of the object from the given data. This data is the same             data that is returned from <a class="reference internal" href="#athena.utils.checkpoint.Checkpointable.state_dict" title="athena.utils.checkpoint.Checkpointable.state_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">state_dict()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em>) – The data from the checkpoint file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.utils.checkpoint.Checkpointable.state_dict">
+<em class="property">abstract </em><code class="sig-name descname">state_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable.state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable.state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the data in the instance that has to be checkpointed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary containing the data to be checkpointed.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-athena.utils.experiment">
 <span id="experiment-module"></span><h2><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module<a class="headerlink" href="#module-athena.utils.experiment" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -228,8 +303,8 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – </p></li>
-<li><p><strong>log_dir_parent</strong> (<em>str</em>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p></li>
+<li><p><strong>log_dir_parent</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the directory where the logs will be stored will be the name of the experiment.</p></li>
 </ul>
 </dd>
 </dl>
@@ -332,8 +407,8 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – </p></li>
-<li><p><strong>log_dir</strong> (<em>str</em>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the list of experiments.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the directory where the logs will be stored will be the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter.</p></li>
 </ul>
 </dd>
 </dl>
@@ -391,50 +466,6 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-</div>
-<div class="section" id="module-athena.utils.functions">
-<span id="functions-module"></span><h2><code class="docutils literal notranslate"><span class="pre">functions</span></code> module<a class="headerlink" href="#module-athena.utils.functions" title="Permalink to this headline">¶</a></h2>
-<dl class="py function">
-<dt id="athena.utils.functions.plot_experiments">
-<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_experiments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">experiments</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">18, 13</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_experiments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>experiments</strong> (<em>Union</em><em>[</em><a class="reference internal" href="#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments"><em>Experiments</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a><em>]</em><em>]</em>) – The list of <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> to plot</p></li>
-<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
-<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (18, 13).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>Exception</strong> – When there are no metrics to plot.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="athena.utils.functions.plot_misclassified">
-<code class="sig-prename descclassname">athena.utils.functions.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'gray_r'</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/functions.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.functions.plot_misclassified" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the misclassified images.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>number</strong> (<em>int</em>) – The number of misclassified images to plot.</p></li>
-<li><p><strong>experiment</strong> (<a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a>) – The experiment that should be used to get the misclassified images</p></li>
-<li><p><strong>data_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the input data</p></li>
-<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
-<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
-<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (10, 15).</p></li>
-<li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>optional</em>) – The cmap to use while plotting. Defaults to ‘gray_r’</p></li>
-<li><p><strong>class_labels</strong> (<em>Tuple</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The class labels to use. Defaults to None.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>Exception</strong> – When solver of type <a class="reference internal" href="athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver" title="athena.solvers.classification_solver.ClassificationSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.classification_solver.ClassificationSolver</span></code></a> is not being used,             and when the number of misclassified images are less than the number of images being requested to plot.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -532,76 +563,47 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 </dd></dl>
 
 </div>
-<div class="section" id="module-athena.utils.checkpoint">
-<span id="checkpoint-module"></span><h2><code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> module<a class="headerlink" href="#module-athena.utils.checkpoint" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="athena.utils.checkpoint.Checkpoint">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.checkpoint.</code><code class="sig-name descname">Checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">max_to_keep</span><span class="o">=</span><span class="default_value">'all'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Creates, restores and manages checkpoint files.</p>
+<div class="section" id="module-athena.utils.transforms">
+<span id="transforms-module"></span><h2><code class="docutils literal notranslate"><span class="pre">transforms</span></code> module<a class="headerlink" href="#module-athena.utils.transforms" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="athena.utils.transforms.ToNumpy">
+<code class="sig-prename descclassname">athena.utils.transforms.</code><code class="sig-name descname">ToNumpy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/transforms.html#ToNumpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.transforms.ToNumpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that converts a torch tensor to a numpy array. Valid for tensors with shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>
+or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W)</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – The path to the checkpoint directory.</p></li>
-<li><p><strong>track</strong> (<em>List</em>) – a list of objects that either extends <a class="reference internal" href="#athena.utils.checkpoint.Checkpointable" title="athena.utils.checkpoint.Checkpointable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Checkpointable</span></code></a> or a                 valid pytorch object that has <code class="docutils literal notranslate"><span class="pre">state_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">load_state_dict</span></code> attributes.</p></li>
-<li><p><strong>max_to_keep</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The max number of checkpoint files to keep.                 Defaults to “all”.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – The input to convert. If the input is a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>, it doesn’t             do anything.</p>
 </dd>
-</dl>
-<dl class="py method">
-<dt id="athena.utils.checkpoint.Checkpoint.save">
-<code class="sig-name descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a checkpoint file.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.checkpoint.Checkpoint.restore">
-<code class="sig-name descname">restore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpoint.restore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.restore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restores data from a checkpoint.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to the checkpoint file. If None, restores from the                 latest checkpoint. Defaults to None.</p>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the type of the input is not <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> or a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code></p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.checkpoint.Checkpoint.current_checkpoint_path">
-<em class="property">property </em><code class="sig-name descname">current_checkpoint_path</code><a class="headerlink" href="#athena.utils.checkpoint.Checkpoint.current_checkpoint_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Path to the current checkpoint.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="athena.utils.checkpoint.Checkpointable">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.checkpoint.</code><code class="sig-name descname">Checkpointable</code><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<dl class="py method">
-<dt id="athena.utils.checkpoint.Checkpointable.load_state_dict">
-<em class="property">abstract </em><code class="sig-name descname">load_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable.load_state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable.load_state_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads the state of the object from the given data. This data is the same             data that is returned from <a class="reference internal" href="#athena.utils.checkpoint.Checkpointable.state_dict" title="athena.utils.checkpoint.Checkpointable.state_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">state_dict()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em>) – The data from the checkpoint file.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.checkpoint.Checkpointable.state_dict">
-<em class="property">abstract </em><code class="sig-name descname">state_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/checkpoint.html#Checkpointable.state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.checkpoint.Checkpointable.state_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the data in the instance that has to be checkpointed.</p>
-<dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dictionary containing the data to be checkpointed.</p>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Dict</p>
+<dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt id="athena.utils.transforms.ToTensor">
+<code class="sig-prename descclassname">athena.utils.transforms.</code><code class="sig-name descname">ToTensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/transforms.html#ToTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.transforms.ToTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that converts a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code> or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W)</span></code> to a <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – The input to convert.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the input is not of type <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -614,6 +616,8 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
             <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="athena.visualizations.html" class="btn btn-neutral float-right" title="athena.visualizations package" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
         <a href="athena.solvers.html" class="btn btn-neutral" title="athena.solvers package" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
@@ -643,10 +647,10 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">athena.utils package</a><ul>
-<li><a class="reference internal" href="#module-athena.utils.experiment"><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module</a></li>
-<li><a class="reference internal" href="#module-athena.utils.functions"><code class="docutils literal notranslate"><span class="pre">functions</span></code> module</a></li>
-<li><a class="reference internal" href="#module-athena.utils.history"><code class="docutils literal notranslate"><span class="pre">history</span></code> module</a></li>
 <li><a class="reference internal" href="#module-athena.utils.checkpoint"><code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.utils.experiment"><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.utils.history"><code class="docutils literal notranslate"><span class="pre">history</span></code> module</a></li>
+<li><a class="reference internal" href="#module-athena.utils.transforms"><code class="docutils literal notranslate"><span class="pre">transforms</span></code> module</a></li>
 </ul>
 </li>
 </ul>

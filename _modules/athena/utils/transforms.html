@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>athena.layers.depthwiseconv &mdash; Athena  documentation</title>
+  <title>athena.utils.transforms &mdash; Athena  documentation</title>
   
 
   
@@ -174,7 +174,7 @@
         
           <li><a href="../../index.html">Module code</a> &gt;</li>
         
-      <li>athena.layers.depthwiseconv</li>
+      <li>athena.utils.transforms</li>
     
     
       <li class="pytorch-breadcrumbs-aside">
@@ -200,47 +200,67 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
-  <h1>Source code for athena.layers.depthwiseconv</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+  <h1>Source code for athena.utils.transforms</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 
+<div class="viewcode-block" id="ToNumpy"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.transforms.ToNumpy">[docs]</a><span class="k">def</span> <span class="nf">ToNumpy</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that converts a torch tensor to a numpy array. Valid for tensors with shape ``(C, H, W)``</span>
+<span class="sd">    or ``(H, W)``</span>
 
-<div class="viewcode-block" id="DepthwiseConv2d"><a class="viewcode-back" href="../../../apis/athena.layers.html#athena.layers.depthwiseconv.DepthwiseConv2d">[docs]</a><span class="k">class</span> <span class="nc">DepthwiseConv2d</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">kernel_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
-        <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">dilation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Implementation of the depth wise convolution.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        x (torch.Tensor): The input to convert. If the input is a ``np.ndarray``, it doesn&#39;t \</span>
+<span class="sd">            do anything.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            in_channels (int): The number of input channels</span>
-<span class="sd">            out_channels (int): The number of output channels</span>
-<span class="sd">            kernel_size (Union[int, Tuple[int, int]]): The size of the kernel.</span>
-<span class="sd">            padding (int, optional): The padding. Defaults to 0.</span>
-<span class="sd">            dilation (int, optional): The dilation to use. Defaults to 1.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the type of the input is not ``torch.Tensor`` or a ``np.ndarray``</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">DepthwiseConv2d</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A ``np.ndarray`` with shape ``(C, H, W)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span>
-            <span class="n">in_channels</span><span class="p">,</span>
-            <span class="n">in_channels</span><span class="p">,</span>
-            <span class="n">kernel_size</span><span class="p">,</span>
-            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
-            <span class="n">groups</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
-            <span class="n">dilation</span><span class="o">=</span><span class="n">dilation</span><span class="p">,</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Expected numpy array or torch.Tensor, but got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ToTensor"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.transforms.ToTensor">[docs]</a><span class="k">def</span> <span class="nf">ToTensor</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that converts a numpy array of shape ``(C, H, W)`` or ``(H, W)`` to a ``torch.Tensor``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): The input to convert.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input is not of type ``np.ndarray``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        torch.Tensor: A ``torch.Tensor`` with shape ``(C, H, W)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected np.ndarray, but got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+    
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+    
+    <span class="c1"># code from torchvision.functional.to_tensor</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ByteTensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
 </pre></div>
 
              </article>

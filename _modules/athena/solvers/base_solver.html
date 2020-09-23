@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
 
             
@@ -303,8 +304,17 @@
 
         <span class="c1"># adding model to graph if training is happening for the first time</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
             <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer_add_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span> <span class="n">images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer_add_model</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span>
+                    <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()</span>
+                <span class="p">),</span>  <span class="c1"># using a random tensor as input since using the image from the dataset sometimes causes jit trace warnings</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># setting default loss function in case loss function is not specified</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_loss_fn</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -865,7 +875,7 @@
 <div class="viewcode-block" id="BaseSolver.train_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train_step">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A convenience decorator that is a combination of :func:`checkpoint` decorator, </span>
+<span class="sd">        A convenience decorator that is a combination of :func:`checkpoint` decorator,</span>
 <span class="sd">        :func:`epoch` decorator, :func:`log_results` decorator and :func:`prog_bar` decorator.</span>
 
 <span class="sd">        Args:</span>

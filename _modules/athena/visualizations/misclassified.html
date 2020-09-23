@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>athena.utils.functions &mdash; Athena  documentation</title>
+  <title>athena.visualizations.misclassified &mdash; Athena  documentation</title>
   
 
   
@@ -174,7 +174,7 @@
         
           <li><a href="../../index.html">Module code</a> &gt;</li>
         
-      <li>athena.utils.functions</li>
+      <li>athena.visualizations.misclassified</li>
     
     
       <li class="pytorch-breadcrumbs-aside">
@@ -200,139 +200,18 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
-  <h1>Source code for athena.utils.functions</h1><div class="highlight"><pre>
+  <h1>Source code for athena.visualizations.misclassified</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">axes</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">axes</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ClassificationSolver</span><span class="p">,</span> <span class="n">Experiments</span>
+<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">ClassificationSolver</span><span class="p">,</span> <span class="n">Experiment</span>
 
-
-<div class="viewcode-block" id="plot_experiments"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.functions.plot_experiments">[docs]</a><span class="k">def</span> <span class="nf">plot_experiments</span><span class="p">(</span>
-    <span class="n">experiments</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Experiments</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">]],</span>
-    <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        experiments (Union[Experiments, List[Experiment]]): The list of ``Experiments`` to plot</span>
-<span class="sd">        save_path (str, optional): The path to save the plot. Defaults to None.</span>
-<span class="sd">        figsize (Tuple[int, int], optional): The size of the plot. Defaults to (18, 13).</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        Exception: When there are no metrics to plot.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiments</span><span class="p">,</span> <span class="n">Experiments</span><span class="p">):</span>
-        <span class="n">experiments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
-
-    <span class="c1"># getting the list of metrics to plot</span>
-    <span class="n">metric_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="n">metric</span>
-            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span>
-            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">()</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-    <span class="n">metric_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="n">num_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)</span>
-
-    <span class="c1"># checking if number of metrics to plot is &gt; 0</span>
-    <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No metrics to plot.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># calculating the number of rows and column in the plot</span>
-    <span class="n">nrows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">))</span>
-    <span class="n">ncols</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_metrics</span> <span class="o">/</span> <span class="n">nrows</span><span class="p">)</span>
-
-    <span class="c1"># creating the empty plot</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-
-    <span class="c1"># if there is only one metric to plot</span>
-    <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ncols</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
-
-    <span class="c1"># if there is only one row of metrics to plot</span>
-    <span class="k">elif</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># for every plot,</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">)):</span>
-            <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-    <span class="c1"># if there is more than one row of metrics to plot</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
-            <span class="n">metric_idx</span> <span class="o">=</span> <span class="mi">0</span>
-
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">):</span>
-
-                <span class="c1"># coverting i and j values into a single value that can be used</span>
-                <span class="c1"># to index a 1 dimensional array</span>
-                <span class="n">metric_idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">ncols</span> <span class="o">+</span> <span class="n">j</span>
-
-                <span class="c1"># if the converted index is greater than the number of metrics to plot,</span>
-                <span class="c1"># that means there are no more metrics to plot, so break</span>
-                <span class="k">if</span> <span class="n">metric_idx</span> <span class="o">&gt;=</span> <span class="n">num_metrics</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-                <span class="c1"># plot the metric for all the experiments</span>
-                <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">metric_idx</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
-
-            <span class="k">if</span> <span class="n">metric_idx</span> <span class="o">==</span> <span class="n">num_metrics</span><span class="p">:</span>
-                <span class="k">break</span>
-
-    <span class="c1"># saving the plot if path is provided</span>
-    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span></div>
-
-
-<span class="k">def</span> <span class="nf">_plot_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">],</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots a metric for the given list of experiments.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        metric (str): The metric to plot.</span>
-<span class="sd">        experiments (List[Experiment]): The list of experiments whose metrics have to be plotted.</span>
-<span class="sd">        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># setting title of the plot</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
-
-    <span class="c1"># for every experiment</span>
-    <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
-        <span class="c1"># plot the metric of the experiment</span>
-        <span class="n">_plot_experiment</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
-
-    <span class="c1"># enable legend</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-
-
-<span class="k">def</span> <span class="nf">_plot_experiment</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots a metric of a given experiment.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        metric (str): The metric to plot.</span>
-<span class="sd">        experiment (Experiment): The experiment to plot.</span>
-<span class="sd">        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># if the experiment has not recorded that metric</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">has_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">):</span>
-        <span class="k">return</span>
-
-    <span class="c1"># plot the metric</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">experiment</span><span class="o">.</span><span class="n">name</span>
-    <span class="p">)</span>
-
-
-<div class="viewcode-block" id="plot_misclassified"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.functions.plot_misclassified">[docs]</a><span class="k">def</span> <span class="nf">plot_misclassified</span><span class="p">(</span>
+<div class="viewcode-block" id="plot_misclassified"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.misclassified.plot_misclassified">[docs]</a><span class="k">def</span> <span class="nf">plot_misclassified</span><span class="p">(</span>
     <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">experiment</span><span class="p">:</span> <span class="n">Experiment</span><span class="p">,</span>
     <span class="n">data_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>

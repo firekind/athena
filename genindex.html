@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.solvers.html">athena.solvers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
 
             
@@ -208,6 +209,7 @@
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#L"><strong>L</strong></a>
@@ -230,6 +232,8 @@
       <li><a href="apis/athena.utils.html#athena.utils.experiment.Experiments.add">add() (athena.utils.experiment.Experiments method)</a>
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.history.History.add_metric">add_metric() (athena.utils.history.History method)</a>
+</li>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.apply_gradcam">apply_gradcam() (in module athena.visualizations.gradcam)</a>
 </li>
       <li>
     athena.datasets.base_dataset
@@ -259,8 +263,6 @@
         <li><a href="apis/athena.solvers.html#module-athena.solvers.base_solver">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     athena.solvers.classification_solver
 
@@ -275,6 +277,8 @@
         <li><a href="apis/athena.solvers.html#module-athena.solvers.regression_solver">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     athena.utils.checkpoint
 
@@ -290,17 +294,38 @@
 </li>
       </ul></li>
       <li>
-    athena.utils.functions
-
-      <ul>
-        <li><a href="apis/athena.utils.html#module-athena.utils.functions">module</a>
-</li>
-      </ul></li>
-      <li>
     athena.utils.history
 
       <ul>
         <li><a href="apis/athena.utils.html#module-athena.utils.history">module</a>
+</li>
+      </ul></li>
+      <li>
+    athena.utils.transforms
+
+      <ul>
+        <li><a href="apis/athena.utils.html#module-athena.utils.transforms">module</a>
+</li>
+      </ul></li>
+      <li>
+    athena.visualizations.experiment
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.experiment">module</a>
+</li>
+      </ul></li>
+      <li>
+    athena.visualizations.gradcam
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.gradcam">module</a>
+</li>
+      </ul></li>
+      <li>
+    athena.visualizations.misclassified
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.misclassified">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -418,6 +443,18 @@
   </ul></td>
 </tr></table>
 
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCam.forward">forward() (athena.visualizations.gradcam.GradCam method)</a>
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCamPP.forward">(athena.visualizations.gradcam.GradCamPP method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -437,10 +474,10 @@
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.get_misclassified">get_misclassified() (athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_model">get_model() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_optimizer">get_optimizer() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_progbar">get_progbar() (athena.solvers.base_solver.BaseSolver method)</a>
@@ -456,6 +493,10 @@
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_train_loader">get_train_loader() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.layers.html#athena.layers.ghostbatchnorm.GhostBatchNorm">GhostBatchNorm (class in athena.layers.ghostbatchnorm)</a>
+</li>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCam">GradCam (class in athena.visualizations.gradcam)</a>
+</li>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCamPP">GradCamPP (class in athena.visualizations.gradcam)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -533,9 +574,15 @@
 </li>
         <li><a href="apis/athena.utils.html#module-athena.utils.experiment">athena.utils.experiment</a>
 </li>
-        <li><a href="apis/athena.utils.html#module-athena.utils.functions">athena.utils.functions</a>
-</li>
         <li><a href="apis/athena.utils.html#module-athena.utils.history">athena.utils.history</a>
+</li>
+        <li><a href="apis/athena.utils.html#module-athena.utils.transforms">athena.utils.transforms</a>
+</li>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.experiment">athena.visualizations.experiment</a>
+</li>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.gradcam">athena.visualizations.gradcam</a>
+</li>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.misclassified">athena.visualizations.misclassified</a>
 </li>
       </ul></li>
   </ul></td>
@@ -555,6 +602,10 @@
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.optimizer">optimizer() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.overlay_gradcam_mask">overlay_gradcam_mask() (in module athena.visualizations.gradcam)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
@@ -562,11 +613,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.pin_memory">pin_memory() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_experiments">plot_experiments() (in module athena.utils.functions)</a>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.experiment.plot_experiments">plot_experiments() (in module athena.visualizations.experiment)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.utils.html#athena.utils.functions.plot_misclassified">plot_misclassified() (in module athena.utils.functions)</a>
+      <li><a href="apis/athena.visualizations.html#athena.visualizations.misclassified.plot_misclassified">plot_misclassified() (in module athena.visualizations.misclassified)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.prog_bar">prog_bar() (athena.solvers.base_solver.BaseSolver static method)</a>
 </li>
@@ -654,12 +705,18 @@
       </ul></li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.timeout">timeout() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
+      <li><a href="apis/athena.utils.html#athena.utils.transforms.ToNumpy">ToNumpy() (in module athena.utils.transforms)</a>
+</li>
+      <li><a href="apis/athena.utils.html#athena.utils.transforms.ToTensor">ToTensor() (in module athena.utils.transforms)</a>
+</li>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.track">track() (athena.solvers.base_solver.BaseSolver method)</a>
 
       <ul>
         <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.track">(athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.train">train() (athena.datasets.base_dataset.BaseDataset method)</a>
 
       <ul>
@@ -670,8 +727,6 @@
         <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train">(athena.solvers.regression_solver.RegressionSolver method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train_loader">train_loader() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train_on_batch">train_on_batch() (athena.solvers.classification_solver.ClassificationSolver method)</a>

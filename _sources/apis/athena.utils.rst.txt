@@ -6,34 +6,34 @@ athena.utils package
 
 This package contains various utility classes.
 
+``checkpoint`` module
+---------------------
+
+.. automodule:: athena.utils.checkpoint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ``experiment`` module
-------------------------------
+---------------------
 
 .. automodule:: athena.utils.experiment
    :members:
    :undoc-members:
    :show-inheritance:
 
-``functions`` module
------------------------------
-
-.. automodule:: athena.utils.functions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ``history`` module
----------------------------
+------------------
 
 .. automodule:: athena.utils.history
    :members:
    :undoc-members:
    :show-inheritance:
 
-``checkpoint`` module
+``transforms`` module
 ---------------------
 
-.. automodule:: athena.utils.checkpoint
+.. automodule:: athena.utils.transforms
    :members:
    :undoc-members:
    :show-inheritance:
