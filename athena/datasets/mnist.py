@@ -7,12 +7,13 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 
 from .base_dataset import BaseDataset
+from athena.utils.transforms import ToNumpy, ToTensor
 
 
 class mnist(BaseDataset):
 
-    mean = (0.1307,) #: mean of the dataset.
-    std = (0.3081,) #: std of the dataset.
+    mean = (0.1307,)  #: mean of the dataset.
+    std = (0.3081,)  #: std of the dataset.
 
     def __init__(self):
         """
@@ -56,14 +57,20 @@ class mnist(BaseDataset):
         * Random Rotation between -5 and 5 degrees
 
         * Normalization using mean: (0.1307,) and std: (0.3081,)
-        
+
         Returns:
             Callable: The transform, an ``albumentations.Compose`` object.
         """
         return A.Compose(
             [
-                A.Rotate(limit=5),  # Randomly rotating the image in the range -5,5 degrees
-                A.Normalize(mean=mnist.mean, std=mnist.std),  # Normalizing
+                A.Lambda(ToNumpy),
+                A.Rotate(
+                    limit=5
+                ),  # Randomly rotating the image in the range -5,5 degrees
+                A.Normalize(
+                    mean=mnist.mean, std=mnist.std, max_pixel_value=1.0
+                ),  # Normalizing
+                A.Lambda(ToTensor),
             ]
         )
 
@@ -72,13 +79,17 @@ class mnist(BaseDataset):
         Default mnist test transforms. Performs
 
         * Normalization using mean: (0.1307,) and std: (0.3081,)
-        
+
         Returns:
             Callable: The transform, an ``albumentations.Compose`` object.
         """
         return A.Compose(
             [
-                A.Normalize(mean=mnist.mean, std=mnist.std),  # Normalizing
+                A.Lambda(ToNumpy),
+                A.Normalize(
+                    mean=mnist.mean, std=mnist.std, max_pixel_value=1.0
+                ),  # Normalizing
+                A.Lambda(ToTensor),
             ]
         )
 
@@ -98,16 +109,14 @@ class _mnist_dataset(datasets.MNIST):
 
     def __getitem__(self, index) -> Tuple[np.ndarray, int]:
         img, target = self.data[index].numpy(), int(self.targets[index])
+
         if self.transform is not None:
-            try:
+            if isinstance(
+                self.transform, (A.BasicTransform, A.core.composition.BaseCompose)
+            ):
                 img = self.transform(image=img)["image"]
-            except TypeError:
-                # at this stage, assuming that the transform isnt an albumentations transform
-                # this error will occur if the transform given does not have an ``image`` keyword argument,
-                # or the return type isnt a dict (like albumentations)
+            else:
                 img = self.transform(img)
-            
-            img = np.expand_dims(img, 0)
 
         if self.target_transform is not None:
             target = self.target_transform(target)

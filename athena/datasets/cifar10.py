@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from .base_dataset import BaseDataset
+from athena.utils.transforms import ToNumpy, ToTensor
 
 
 class cifar10(BaseDataset):
@@ -60,9 +61,11 @@ class cifar10(BaseDataset):
         """
         return A.Compose(
             [
+                A.Lambda(ToNumpy),
                 A.Normalize(
-                    mean=cifar10.mean, std=cifar10.std
+                    mean=cifar10.mean, std=cifar10.std, max_pixel_value=1.0
                 ),  # Normalizing
+                A.Lambda(ToTensor)
             ]
         )
 
@@ -77,9 +80,11 @@ class cifar10(BaseDataset):
         """
         return A.Compose(
             [
+                A.Lambda(ToNumpy),
                 A.Normalize(
-                    mean=cifar10.mean, std=cifar10.std
+                    mean=cifar10.mean, std=cifar10.std, max_pixel_value=1.0
                 ),  # Normalizing
+                A.Lambda(ToTensor)
             ]
         )
 
@@ -101,21 +106,15 @@ class _cifar10_dataset(datasets.CIFAR10):
         img, target = self.data[index], int(self.targets[index])
 
         if self.transform is not None:
-            try:
-                img = self.transform(image=img)["image"].transpose(2, 1, 0)
-            except TypeError:
-                # at this stage, assuming that the transform isnt an albumentations transform
-                # this error will occur if the transform given does not have an ``image`` keyword argument,
-                # or the return type isnt a dict (like albumentations)
-                img = self.transform(img).transpose(2, 1, 0)
+            if isinstance(self.transform, (A.BasicTransform, A.core.composition.BaseCompose)):
+                img = self.transform(image=img)["image"]
+            else:
+                img = self.transform(img)
 
         if self.target_transform is not None:
-            try:
-                target = self.target_transform(image=target)["image"].transpose(2, 1, 0)
-            except TypeError:
-                # at this stage, assuming that the transform isnt an albumentations transform
-                # this error will occur if the transform given does not have an ``image`` keyword argument,
-                # or the return type isnt a dict (like albumentations)
-                target = self.target_transform(target).transpose(2, 1, 0)
+            if isinstance(self.target_transform, (A.BasicTransform, A.core.composition.BaseCompose)):
+                target = self.target_transform(image=target)["image"]
+            else:
+                target = self.target_transform(target)
 
         return img, target

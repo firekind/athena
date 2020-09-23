@@ -101,8 +101,17 @@ class BaseSolver(abc.ABC):
 
         # adding model to graph if training is happening for the first time
         if self._checkpointable_epoch.get_value() == 0:
+            self.get_model().eval()
+
             images, labels = next(iter(self.get_train_loader()))
-            self.writer_add_model(self.get_model(), images.to(self.get_device()))
+            self.writer_add_model(
+                self.get_model(),
+                torch.randn(
+                    images.shape, device=self.get_device()
+                ),  # using a random tensor as input since using the image from the dataset sometimes causes jit trace warnings
+            )
+
+            self.get_model().train()
 
         # setting default loss function in case loss function is not specified
         if self.get_loss_fn() is None:
@@ -663,7 +672,7 @@ class BaseSolver(abc.ABC):
     @staticmethod
     def train_step(func: Callable) -> Callable:
         """
-        A convenience decorator that is a combination of :func:`checkpoint` decorator, 
+        A convenience decorator that is a combination of :func:`checkpoint` decorator,
         :func:`epoch` decorator, :func:`log_results` decorator and :func:`prog_bar` decorator.
 
         Args:

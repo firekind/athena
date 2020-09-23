@@ -1,5 +1,5 @@
 import math
-from typing import Tuple
+from typing import Tuple, Callable
 
 import cv2
 import matplotlib.pyplot as plt
@@ -105,52 +105,9 @@ class GradCam:
         return self.forward(x, class_idx, retain_graph)
 
 
-def apply_gradcam(
-    model: nn.Module,
-    target_layer: nn.Module,
-    image: torch.Tensor,
-    overlay_on: torch.Tensor = None,
-    class_idx: int = None,
-    retain_graph: bool = False,
-    save_path: str = None,
-    figsize: Tuple[int, int] = (10, 15),
-):
-    assert image.ndim == 3, "Input image should be a 3 dimensional array"
-
-    # creating the gradcam object
-    cam = GradCam(model, target_layer)
-
-    # generating mask
-    mask, logits = cam(image, class_idx, retain_graph)
-
-    # generating overlay
-    heatmap, overlaid = overlay_gradcam_mask(
-        mask, overlay_on if overlay_on is not None else image
-    )
-
-    # clipping input range
-    if torch.is_floating_point(overlaid):
-        overlaid = torch.clamp(overlaid, 0, 1)
-    else:
-        overlaid = torch.clamp(overlaid, 0, 255)
-
-    # creating figure
-    fig, ax = plt.subplots()
-
-    # turning of axis lines
-    ax.axis("off")
-
-    # drawing image
-    ax.imshow(overlaid.permute(1, 2, 0).cpu().numpy())
-
-    # saving model if save path is provided
-    if save_path is not None:
-        fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
-
-
 def overlay_gradcam_mask(
     mask: torch.Tensor, image: torch.Tensor, alpha: float = 1.0
-) -> torch.Tensor:
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Applies the heatmap mask onto the image.
 
@@ -160,7 +117,7 @@ def overlay_gradcam_mask(
         alpha (float, optional): The amount of transparency to apply to the heatmap mask. Defaults to 1.0.
 
     Returns:
-        torch.Tensor: The resultant image
+        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image.
     """
     # converting mask to numpy int type to apply cv2 functions
     heatmap = (255 * mask).type(torch.uint8).cpu().numpy()
@@ -181,3 +138,49 @@ def overlay_gradcam_mask(
     result = result / result.max()
 
     return heatmap, result
+
+
+def apply_gradcam(
+    model: nn.Module,
+    target_layer: nn.Module,
+    image: torch.Tensor,
+    transform: Callable = None,
+    class_idx: int = None,
+    retain_graph: bool = False,
+    save_path: str = None,
+    figsize: Tuple[int, int] = (10, 15),
+    device: str = "cpu",
+):
+    assert image.ndim == 3, "Input image should be a 3 dimensional array"
+
+    # creating the gradcam object
+    cam = GradCam(model.to(device), target_layer.to(device))
+
+    # transforming image
+    transformed_image = transform(image) if transform is not None else image
+    transformed_image = transformed_image.to(device) 
+
+    # generating mask
+    mask, logits = cam(transformed_image, class_idx, retain_graph)
+
+    # generating overlay
+    heatmap, overlaid = overlay_gradcam_mask(mask, image)
+
+    # clipping input range
+    if torch.is_floating_point(overlaid):
+        overlaid = torch.clamp(overlaid, 0, 1)
+    else:
+        overlaid = torch.clamp(overlaid, 0, 255)
+
+    # creating figure
+    fig, ax = plt.subplots()
+
+    # turning of axis lines
+    ax.axis("off")
+
+    # drawing image
+    ax.imshow(overlaid.permute(1, 2, 0).cpu().numpy())
+
+    # saving model if save path is provided
+    if save_path is not None:
+        fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
