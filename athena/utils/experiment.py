@@ -21,6 +21,11 @@ class Experiment:
 
             * **log_directory** *(str)*: ``None``.
 
+        Args:
+            name (str): The name of the experiment.
+            log_dir_parent (str, optional): The parent of the directory where the logs should be stored. \
+                the directory where the logs will be stored will be the name of the experiment.
+
         """
 
         # the name of the experiment
@@ -167,6 +172,11 @@ class Experiments:
     def __init__(self, name: str, log_dir: str = None):
         """
         Defines a list of experiments that has to be run one after the other.
+
+        Args:
+            name (str): The name of the list of experiments.
+            log_dir (str, optional): The parent of the directory where the logs should be stored. \
+                the directory where the logs will be stored will be the ``name`` parameter.
         """
 
         self.experiments = {}

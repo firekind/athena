@@ -14,3 +14,4 @@ The various subpackages within ``athena``
    athena.models
    athena.solvers
    athena.utils
+   athena.visualizations
