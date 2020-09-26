@@ -145,7 +145,7 @@ class GradCamPP(GradCam):
             model (nn.Module): The model to apply on.
             target_layer (nn.Module): The layer of the model to apply on.
         """
-        super(GradCamPP, self).__init__()
+        super(GradCamPP, self).__init__(model, target_layer)
 
     def forward(
         self, x: torch.Tensor, class_idx: int = None, retain_graph: bool = False
