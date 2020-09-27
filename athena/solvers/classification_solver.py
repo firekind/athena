@@ -406,5 +406,5 @@ class ClassificationSolverBuilder(Buildable):
             loss_fn=self.get_loss_fn(),
             device=self.get_device(),
             use_tqdm=self.get_use_tqdm(),
-            max_to_keep=self.get_max_checkpoints_to_keep(),
+            max_to_keep=self.get_max_checkpoints_to_keep() or "all",
         )
