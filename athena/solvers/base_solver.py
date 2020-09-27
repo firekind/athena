@@ -13,7 +13,8 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from athena.utils.progbar import Kbar
-from athena.utils import History, Checkpoint, Checkpointable
+from athena.utils import Checkpoint, Checkpointable
+from .history import History
 
 
 class _BaseSolverMeta(abc.ABCMeta):
@@ -109,11 +110,16 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         if self.checkpointable_epoch.get_value() == 0:
             self.model.eval()
 
-            images, labels = next(iter(self.train_loader))
+            if hasattr(self.train_loader.dataset, "input_shape"):
+                input_shape = (1,) + self.train_loader.dataset.input_shape
+            else:
+                images, labels = next(iter(self.train_loader))
+                input_shape = images.shape
+
             self.writer.add_graph(
                 self.model,
                 torch.randn(
-                    images.shape, device=self.device
+                    input_shape, device=self.device
                 ),  # using a random tensor as input since using the image from the dataset sometimes causes jit trace warnings
             )
 

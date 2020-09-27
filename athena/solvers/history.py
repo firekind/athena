@@ -3,7 +3,7 @@ from typing import List, Dict
 from collections import defaultdict
 import torch
 
-from .checkpoint import Checkpointable
+from athena.utils import Checkpointable
 
 class History(Checkpointable):
     def __init__(self):

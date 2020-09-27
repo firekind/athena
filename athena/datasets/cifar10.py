@@ -21,14 +21,14 @@ class cifar10(BaseDataset):
         """
         super(cifar10, self).__init__()
 
-    def build(self) -> DataLoader:
+    def create(self) -> DataLoader:
         """
         Builds the dataset and returns a pytorch ``DataLoader``.
 
         Returns:
             DataLoader: The cifar10 ``DataLoader``.
         """
-        super(cifar10, self).build()
+        super(cifar10, self).create()
 
         return DataLoader(
             _cifar10_dataset(
@@ -101,6 +101,8 @@ class _cifar10_dataset(datasets.CIFAR10):
         super(_cifar10_dataset, self).__init__(
             root, train, transform, target_transform, download
         )
+
+        self.input_shape = (3, 32, 32)
 
     def __getitem__(self, index) -> Tuple[np.ndarray, np.ndarray]:
         img, target = self.data[index], int(self.targets[index])

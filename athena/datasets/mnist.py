@@ -21,14 +21,14 @@ class mnist(BaseDataset):
         """
         super(mnist, self).__init__()
 
-    def build(self) -> DataLoader:
+    def create(self) -> DataLoader:
         """
         Builds the dataset and returns a pytorch ``DataLoader``.
 
         Returns:
             DataLoader: The mnist ``DataLoader``.
         """
-        super(mnist, self).build()
+        super(mnist, self).create()
 
         return DataLoader(
             _mnist_dataset(
@@ -106,6 +106,8 @@ class _mnist_dataset(datasets.MNIST):
         super(_mnist_dataset, self).__init__(
             root, train, transform, target_transform, download
         )
+
+        self.input_shape = (1, 28, 28)
 
     def __getitem__(self, index) -> Tuple[np.ndarray, int]:
         img, target = self.data[index].numpy(), int(self.targets[index])

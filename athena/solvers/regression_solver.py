@@ -9,7 +9,7 @@ from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 import numpy as np
 from tqdm import tqdm
 from athena.utils.progbar import Kbar
-from athena.utils import History
+from .history import History
 from .base_solver import BaseSolver
 
 
