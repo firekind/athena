@@ -40,8 +40,7 @@ class Checkpoint:
         torch.save(data, self.current_checkpoint_path)
 
         # updating state
-        to_remove = self.index.update(self.current_checkpoint_path, datetime.now())
-        self.index.increment_file_count()
+        to_remove = self.index.add_checkpoint(self.current_checkpoint_path, datetime.now())
 
         # delete old
         self._delete_checkpoint(to_remove)
@@ -85,7 +84,7 @@ class Checkpoint:
         """
         Path to the current checkpoint.
         """
-        return os.path.join(self.path, f"checkpoint_{self.index.get_file_count()}")
+        return os.path.join(self.path, f"checkpoint_{self.index.get_file_count() + 1}")
 
 
 class _Index:
@@ -104,7 +103,7 @@ class _Index:
 
         self.created_on = None
         self.timestamp_format = "%d-%m-%Y %H:%M:%S.%f"
-        self.file_count = 1
+        self.file_count = 0
         self.checkpoints = []
 
         self.load()
@@ -141,21 +140,9 @@ class _Index:
                 data["created_on"], self.timestamp_format
             )
             self.file_count = data["file_count"]
-
-            # incrementing file count by 1 only when it is not 1.
-            # this is because in an experiment chain, the checkpoint
-            # index files for all the experiments in the chain are created
-            # before the first experiment starts training. If a previous
-            # experiment is interrupted and then resumed, the checkpoint
-            # files will be labled from '2' onwards for the sucessive experiments
-            # if we blindly increment by 1 when loading the .index file (as
-            # the index file will have file_count as 1 since it was already created
-            # before the interruption)
-            if self.file_count != 1:
-                self.file_count += 1
             self.checkpoints = data["checkpoints"]
 
-    def update(self, checkpoint_file_path: str, timestamp: datetime) -> str:
+    def add_checkpoint(self, checkpoint_file_path: str, timestamp: datetime) -> str:
         """
         Updates the index file.
 
@@ -167,6 +154,9 @@ class _Index:
         Returns:
             str: The old checkpoint file to remove.
         """
+
+        # incrementing file count
+        self.increment_file_count()
 
         # getting the index file contents
         with open(self.path, "r") as f:
