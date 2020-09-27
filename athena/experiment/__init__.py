@@ -33,6 +33,15 @@ class Experiment:
 
         self.history = self.solver.train()
 
+    def get_solver(self) -> BaseSolver:
+        """
+        Getter method for the solver.
+
+        Returns:
+            BaseSolver: The solver used in this experiment.
+        """
+        return self.solver
+
     @staticmethod
     def builder(parent: Buildable = None) -> "ExperimentBuilder":
         """
@@ -78,7 +87,9 @@ class ExperimentBuilder(Buildable):
         """
         # asserting the values
         assert self._name is not None, "Set the name of the experiment."
-        assert self._model is not None, "Set the model for the experiment."
+        assert (
+            self._model is not None or self.find_in_context("model") is not None
+        ), "Set the model for the experiment."
         assert (
             self.find_in_context("log_dir") is not None
         ), "Set the log directory for the experiment."
@@ -86,7 +97,7 @@ class ExperimentBuilder(Buildable):
         # creating the experiment object
         return Experiment(
             name=self._name,
-            model=self._model,
+            model=self._model or self.find_in_context("model"),
             solver=self._solver,
         )
 
@@ -270,4 +281,18 @@ class ExperimentsBuilder(Buildable):
         self._log_directory = path
         self.add_to_context("log_dir", os.path.join(path, self.get_name()))
 
+        return self
+
+    def model(self, model: nn.Module) -> "ExperimentsBuilder":
+        """
+        Sets the model for all the experiments. Can be overriden per experiment.
+
+        Args:
+            model (nn.Module): The model.
+
+        Returns:
+            ExperimentsBuilder: Object of this class
+        """
+
+        self.add_to_context("model", model)
         return self

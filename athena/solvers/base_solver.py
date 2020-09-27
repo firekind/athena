@@ -71,7 +71,7 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         self.log_dir = log_dir
         self.checkpoint_dir = os.path.join(log_dir, "checkpoints")
         self.tensorboard_dir = os.path.join(log_dir, "tensorboard")
-        self.epochs = epochs
+        self.epochs = _CheckpointableEpoch(epochs, None)
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.optimizer = optimizer
@@ -86,7 +86,6 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         self.progbar = None
         self.history = History(epochs)
         self.writer = SummaryWriter(log_dir=self.tensorboard_dir)
-        self.checkpointable_epoch = _CheckpointableEpoch()
         self.checkpoint = None
 
         # creating log directory
@@ -102,12 +101,12 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         self.checkpoint.restore()
 
         # checking to see if experiment has already been completed
-        if self.checkpointable_epoch.get_value() >= self.epochs:
+        if self.epochs.get_current_epoch() >= self.epochs:
             print("Experiment has already been completed.\n", flush=True)
             return
 
         # adding model to graph if training is happening for the first time
-        if self.checkpointable_epoch.get_value() == 0:
+        if self.epochs.get_current_epoch() == -1:
             self.model.eval()
 
             if hasattr(self.train_loader.dataset, "input_shape"):
@@ -156,7 +155,7 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         # getting the list of objects to checkpoint
         objs = self.track() + [
             self.history,
-            self.checkpointable_epoch,
+            self.epochs,
             self.model,
             self.optimizer,
         ]
@@ -171,6 +170,8 @@ class BaseSolver(metaclass=_BaseSolverMeta):
             objs,
             self.max_to_keep,
         )
+
+        self.epochs.set_checkpoint(self.checkpoint)
 
     def _create_log_directory(self):
         """
@@ -189,16 +190,6 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         """
 
         return self.history
-
-    def get_start_epoch(self) -> int:
-        """
-        Gets the epoch to start training from.
-
-        Returns:
-            int
-        """
-
-        return self.checkpointable_epoch.get_value()
 
     def cleanup(self):
         """
@@ -229,9 +220,9 @@ class BaseSolver(metaclass=_BaseSolverMeta):
             # storing the returned data into history and
             # summary writer.
             for label, value in res.data:
-                self.history.add_metric(label, value, self.checkpointable_epoch.get_value() - 1)
+                self.history.add_metric(label, value, self.epochs.get_current_epoch())
                 self.writer.add_scalar(
-                    label, value, self.checkpointable_epoch.get_value()
+                    label, value, self.epochs.get_current_epoch()
                 )
 
             # returing the result of the function
@@ -320,60 +311,10 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         return wrapper
 
     @staticmethod
-    def epoch(func: Callable):
-        """
-        Decorator that manages epoch count, so that it can be checkpointed.
-
-        Args:
-            func (Callable): The function to decorate.
-
-        Returns:
-            Callable: The decorated function.
-        """
-
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            # calling the function
-            res: StepResult = func(self, *args, **kwargs)
-
-            # incrementing epoch count
-            self.checkpointable_epoch.increment()
-
-            # returning function result
-            return res
-
-        return wrapper
-
-    @staticmethod
-    def checkpoint(func: Callable) -> Callable:
-        """
-        Makes a checkpoint after ``func`` is called.
-
-        Args:
-            func (Callable): The function to decorate
-
-        Returns:
-            Callable: The decorated function.
-        """
-
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            # calling function
-            res = func(self, *args, **kwargs)
-
-            # checkpointing
-            self.checkpoint.save()
-
-            # returning result of the function
-            return res
-
-        return wrapper
-
-    @staticmethod
     def train_step(func: Callable) -> Callable:
         """
-        A convenience decorator that is a combination of :func:`checkpoint` decorator,
-        :func:`epoch` decorator, :func:`log_results` decorator and :func:`prog_bar` decorator.
+        A convenience decorator that is a combination of \
+            :func:`log_results` decorator and :func:`prog_bar` decorator.
 
         Args:
             func (Callable): The function to decorate.
@@ -383,8 +324,6 @@ class BaseSolver(metaclass=_BaseSolverMeta):
         """
 
         @wraps(func)
-        @BaseSolver.checkpoint
-        @BaseSolver.epoch
         @BaseSolver.log_results
         @BaseSolver.prog_bar()
         def wrapper(self, *args, **kwargs):
@@ -432,21 +371,75 @@ class BatchResult:
 
 
 class _CheckpointableEpoch(Checkpoint):
-    def __init__(self):
+    def __init__(self, epochs: int, checkpoint: Checkpoint):
         """
         An epoch value that is checkpointable.
+
+        Args:
+            epochs (int): The total number of epochs.
+            checkpoint (Checkpoint): The checkpoint object whose :meth:`save` is called\
+                after every epoch.
         """
 
-        self.value = 0
+        self.epochs = epochs
+        self.checkpoint = checkpoint
+        self.current = -1
+        self.just_restored = False
 
     def state_dict(self):
-        return {"epoch": self.value}
+        return {"epoch": self.current}
 
     def load_state_dict(self, data):
-        self.value = data["epoch"]
+        self.current = data["epoch"]
+        self.just_restored = True
+    
+    def get_current_epoch(self):
+        return self.current
 
-    def increment(self):
-        self.value += 1
+    def set_checkpoint(self, value):
+        self.checkpoint = value
 
-    def get_value(self):
-        return self.value
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # save checkpoint if training was not just started
+        # or the checkpoint was not just restored
+        if self.current != -1 and not self.just_restored:
+            self.checkpoint.save()
+        
+        # if the checkpoint was just restored, clear the 
+        # flag
+        if self.just_restored:
+            self.just_restored = False
+
+        self.current += 1
+
+        if self.current < self.epochs:
+            return self.current
+        
+        raise StopIteration
+
+    def __repr__(self):
+        return str(self.epochs)
+
+    def __int__(self):
+        return self.epochs
+
+    def __le__(self, value):
+        return self.epochs <= value
+
+    def __lt__(self, value):
+        return self.epochs < value
+
+    def __ge__(self, value):
+        return self.epochs >= value
+
+    def __gt__(self, value):
+        return self.epochs > value
+
+    def __eq__(self, value):
+        return self.epochs == value
+
+    def __ne__(self, value):
+        return self.epochs != value

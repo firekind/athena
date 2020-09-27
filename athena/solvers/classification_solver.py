@@ -69,7 +69,7 @@ class ClassificationSolver(BaseSolver):
         super(ClassificationSolver, self).train()
 
         # training
-        for epoch in range(self.get_start_epoch(), self.epochs):
+        for epoch in self.epochs:
             print(
                 "Epoch: %d / %d" % (epoch + 1, self.epochs),
                 flush=self.use_tqdm,
@@ -278,7 +278,7 @@ class ClassificationSolver(BaseSolver):
         misclassified_target = []
 
         # put the model to evaluation mode
-        self.get_model().eval()
+        self.model.eval()
 
         with torch.no_grad():
             for data, target in data_loader:
