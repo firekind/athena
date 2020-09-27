@@ -84,7 +84,7 @@ class BaseSolver(metaclass=_BaseSolverMeta):
 
         self.experiment = None
         self.progbar = None
-        self.history = History()
+        self.history = History(epochs)
         self.writer = SummaryWriter(log_dir=self.tensorboard_dir)
         self.checkpointable_epoch = _CheckpointableEpoch()
         self.checkpoint = None
@@ -229,7 +229,7 @@ class BaseSolver(metaclass=_BaseSolverMeta):
             # storing the returned data into history and
             # summary writer.
             for label, value in res.data:
-                self.history.add_metric(label, value)
+                self.history.add_metric(label, value, self.checkpointable_epoch.get_value() - 1)
                 self.writer.add_scalar(
                     label, value, self.checkpointable_epoch.get_value()
                 )

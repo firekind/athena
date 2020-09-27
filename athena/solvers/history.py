@@ -1,28 +1,44 @@
 from typing import List, Dict
 
-from collections import defaultdict
 import torch
+import numpy as np
 
 from athena.utils import Checkpointable
 
 class History(Checkpointable):
-    def __init__(self):
+    def __init__(self, size: int):
         """
         Contains the information of the losses and accuracies that are recorded during training.
+
+        Args:
+            size (int): The max number of losses and accuracies that will be stored.
         """
 
-        self.data: Dict[str, List[torch.Tensor]] = defaultdict(list)
+        self.data: Dict[str, np.ndarray] = {}
+        self.size = size
 
-    def add_metric(self, name: str, value: torch.Tensor):
+    def add_metric(self, name: str, value: torch.Tensor, step: int):
         """
         Adds an item to the history.
 
         Args:
             name (str): The name of the data to be added, eg. loss
             value (torch.Tensor): The value to be added.
-        """
+            step (int): The step (epoch) at which it is being added.
 
-        self.data[name].append(value)
+        Raises:
+            ValueError: If ``step`` is greater that ``size``.
+        """
+        if step >= self.size:
+            raise ValueError("step ({}) cannot be greater than size ({})".format(step, self.size))
+        
+        if name not in self.data:
+            self.data[name] = np.zeros((self.size,))
+
+        if isinstance(value, torch.Tensor):
+            value = value.cpu().numpy()
+
+        self.data[name][step] = value
 
     def get_metric_names(self) -> List[str]:
         """
@@ -69,7 +85,8 @@ class History(Checkpointable):
         """
 
         return {
-            "data": self.data
+            "data": self.data,
+            "size": self.size
         }
 
     def load_state_dict(self, data: Dict):
@@ -80,3 +97,4 @@ class History(Checkpointable):
             data (Dict): The checkpoint data
         """
         self.data = data["data"]
+        self.size = data["size"]
