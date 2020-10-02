@@ -7,6 +7,9 @@ import torch
 from torch.utils.data import DataLoader
 
 from athena import ClassificationSolver, Experiment
+from athena.utils.transforms import UnNormalize
+from .utils import plot_grid
+
 
 def plot_misclassified(
     number: int,
@@ -17,6 +20,8 @@ def plot_misclassified(
     figsize: Tuple[int, int] = (10, 15),
     cmap: str = "gray_r",
     class_labels: Tuple[str] = None,
+    mean: Tuple = None,
+    std: Tuple = None,
 ):
     """
     Plots the misclassified images.
@@ -30,6 +35,10 @@ def plot_misclassified(
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).
         cmap (str, optional): The cmap to use while plotting. Defaults to 'gray_r'
         class_labels (Tuple[str], optional): The class labels to use. Defaults to None.
+        mean (Tuple, optional): The mean of the dataset. If given, image will be unnormalized using \
+            this before overlaying. Defaults to None.
+        std (Tuple, optional): The std of the dataset. If given, image will be unnormalized using \
+            this before overlaying. Defaults to None.
     
     Raises:
         Exception: When solver of type :class:`athena.solvers.classification_solver.ClassificationSolver` is not being used, \
@@ -41,10 +50,18 @@ def plot_misclassified(
             "Only experiments with a ClassificationSolver can be used to plot misclassified images."
         )
 
+    if mean is not None and std is not None:
+        unorm = UnNormalize(mean, std)
+    else:
+        unorm = None
+
     # getting the misclassified images by forward proping the model
     image_data, predicted, actual = experiment.get_solver().get_misclassified(
         data_loader, device
     )
+
+    if image_data.ndim == 3:
+        image_data = image_data.unsqueeze(0)
 
     # checking if number of misclassified images < number of images to plot
     if len(image_data) < number:
@@ -52,68 +69,36 @@ def plot_misclassified(
             "Number of misclassified images are less than the number of images requested to plot."
         )
 
-    # calculating the number of rows and columns in the plot
-    nrows = math.floor(math.sqrt(number))
-    ncols = math.ceil(number / nrows)
-
-    # creating the empty plot
-    fig, ax = plt.subplots(nrows, ncols, figsize=figsize)
-
-    # if there is only one image to plot
-    if nrows == 1 and ncols == 1:
-        _plot_image(image_data[0], predicted[0], actual[0], ax, class_labels)
-
-    # if there is only one row of images to plot
-    elif nrows == 1:
-        for i in range(len(ax)):
-            _plot_image(image_data[i], predicted[i], actual[i], ax[i], class_labels)
-
-    # if there are multiple rows of images to plot
-    else:
-        for i in range(nrows):
-            index = 0
-
-            for j in range(ncols):
-                # converting i and j values to 1-D index value
-                index = i * ncols + j
-
-                # checking if the converted index is >= the number of images to plot
-                if index >= number:
-                    break
-
-                # plotting image
-                _plot_image(
-                    image_data[index],
-                    predicted[index],
-                    actual[index],
-                    ax[i, j],
-                    class_labels,
-                )
-
-            if index >= number:
-                break
-
-    # saving model if save path is provided
-    if save_path is not None:
-        fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
+    plot_grid(
+        number,
+        lambda idx, ax: _plot_image(
+            image_data[idx] if unorm is None else unorm(image_data[idx]),
+            predicted[idx],
+            actual[idx],
+            class_labels,
+            ax,
+        ),
+        figsize,
+        save_path,
+    )
 
 
 def _plot_image(
     image_data: torch.Tensor,
-    predicted: int,
-    actual: int,
+    predicted: torch.Tensor,
+    actual: torch.Tensor,
+    class_labels: torch.Tensor,
     ax: axes.Axes,
-    class_labels: Tuple[str] = None,
 ):
     """
     Plots an image.
 
     Args:
         image_data (torch.Tensor): The image data.
-        predicted (int): The class which the model predicted the image belongs to.
-        actual (int): The actual class the image belongs to.
-        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.
-        class_labels (Tuple[str], optional): The class labels to use. Defaults to None.
+        predicted (torch.Tensor): The predicted class
+        actual (torch.Tensor): The actual class
+        class_labels (torch.Tensor): The class labels
+        ax (axes.Axes): The axes to plot on.
     """
 
     # turning off the axis lines in the plot

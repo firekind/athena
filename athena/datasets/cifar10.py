@@ -102,10 +102,16 @@ class _cifar10_dataset(datasets.CIFAR10):
             root, train, transform, target_transform, download
         )
 
+        # channels first cuz this is used in solver while writing the model
+        # to tensorboard
         self.input_shape = (3, 32, 32)
 
     def __getitem__(self, index) -> Tuple[np.ndarray, np.ndarray]:
-        img, target = self.data[index], int(self.targets[index])
+        img, target = self.data[index], int(self.targets[index]) # img shape: (H, W, C)
+
+        # converting img from a uint8 np array (with range 0-255) to float32 np array (with range 0-1)
+        # and channels last.
+        img = img.astype(np.float32) / 255
 
         if self.transform is not None:
             if isinstance(self.transform, (A.BasicTransform, A.core.composition.BaseCompose)):

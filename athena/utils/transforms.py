@@ -1,3 +1,5 @@
+from typing import List
+
 import torch
 import numpy as np
 
@@ -15,7 +17,7 @@ def ToNumpy(x: torch.Tensor, **kwargs) -> np.ndarray:
         ValueError: If the type of the input is not ``torch.Tensor`` or a ``np.ndarray``
 
     Returns:
-        np.ndarray: A ``np.ndarray`` with shape ``(C, H, W)``.
+        np.ndarray: A ``np.ndarray`` with shape ``(H, W, C)``.
     """
 
     if not isinstance(x, (torch.Tensor, np.ndarray)):
@@ -34,7 +36,8 @@ def ToNumpy(x: torch.Tensor, **kwargs) -> np.ndarray:
 
 def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
     """
-    Function that converts a numpy array of shape ``(C, H, W)`` or ``(H, W)`` to a ``torch.Tensor``.
+    Function that converts a numpy array of shape ``(H, W, C)`` or ``(H, W)`` to a ``torch.Tensor`` 
+    of shape ``(C, H, W)``.
 
     Args:
         x (np.ndarray): The input to convert.
@@ -58,3 +61,16 @@ def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
     if isinstance(x, torch.ByteTensor):
         return x.float().div(255)
     return x
+
+
+class UnNormalize:
+    def __init__(self, mean: List, std: List):
+        self.mean = mean
+        self.std = std
+    
+    def __call__(self, x):
+        tensor = x.clone()
+        for t, m, s in zip(tensor, self.mean, self.std):
+            t.mul_(s).add_(m)
+
+        return tensor

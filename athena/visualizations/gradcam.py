@@ -10,12 +10,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
+from athena.utils.transforms import UnNormalize
+from .utils import plot_grid
+
 
 class GradCam:
     def __init__(self, model: nn.Module, target_layer: nn.Module):
         """
-        Performs Gradient-weighted Class Activation Mapping algorithm on the model and 
-        using the target layer. Code taken from 
+        Performs Gradient-weighted Class Activation Mapping algorithm on the model and
+        using the target layer. Code taken from
         `here <https://github.com/vickyliin/gradcam_plus_plus-pytorch>`_.
 
         Args:
@@ -248,16 +251,17 @@ def overlay_gradcam_mask(
     mask: torch.Tensor, image: torch.Tensor, alpha: float = 1.0
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    Overlays the heatmap mask on the image, and also converts the heatmap mask 
+    Overlays the heatmap mask on the image, and also converts the heatmap mask
     to an actual heatmap.
 
     Args:
         mask (torch.Tensor): The mask. Should have shape as ``(H, W)``
         image (torch.Tensor): The image to apply the mask on. Should have shape as ``(C, H, W)``
-        alpha (float, optional): The amount of transparency to apply to the heatmap mask. Defaults to 1.0.
+        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image.
+        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of 
+        both images is ``(C, H, W)``.
     """
     # converting mask to numpy int type to apply cv2 functions
     heatmap = (255 * mask).type(torch.uint8).cpu().numpy()
@@ -268,7 +272,7 @@ def overlay_gradcam_mask(
     # converting to float tensor
     heatmap = torch.from_numpy(heatmap).permute(2, 0, 1).float().div(255)
 
-    # converting bgr to rgb and applying transparency
+    # converting bgr to rgb (cuz of opencv) and applying transparency
     heatmap = heatmap[[2, 1, 0], :, :] * alpha
 
     # overlaying the heatmap with input image
@@ -287,32 +291,34 @@ def apply_gradcam(
     transform: Callable = None,
     class_idx: int = None,
     retain_graph: bool = False,
-    save_path: str = None,
-    figsize: Tuple[int, int] = (10, 15),
     device: str = "cpu",
     use_gradcampp: bool = True,
-):
+    alpha: float = 1.0
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    Applies the gradcam (or gradcam plus plus) algorithm using a model and target layer on an image, and 
-    displays the result on a matplotlib figure.
+    Applies the gradcam (or gradcam plus plus) algorithm using a model and target layer on an image, and
+    returns the result.
 
     Args:
         model (nn.Module): The model to use.
         target_layer (nn.Module): The layer the gradcam algorithm should be applied on.
-        image (torch.Tensor): The image to use.
+        image (torch.Tensor): The image to use. SHape: ``(C, H, W)``
         transform (Callable, optional): The transform to apply on the image before sending it\
             to the model. Defaults to None.
         class_idx (int, optional): The index of the class to using in the algorithm. If ``None``,\
             uses the class with the highest activation. Defaults to None.
         retain_graph (bool, optional): Whether to retain the computational graph or not. Look at \
             the pytorch documentations for info about this parameter. Defaults to False.
-        save_path (str, optional): The path to save the resultant overlaid image. Defaults to None.
-        figsize (Tuple[int, int], optional): The figure size of the plot.. Defaults to (10, 15).
         device (str, optional): A valid pytorch device string. Defaults to "cpu".
         use_gradcampp (bool, optional): Whether to use the gradcam plus plus algorithm or the \
             gradcam algorithm. Defaults to True.
+        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: The overlaid image and the generated heatmap.
     """
-    
+
     assert image.ndim == 3, "Input image should be a 3 dimensional array"
 
     # creating the gradcam object
@@ -329,7 +335,56 @@ def apply_gradcam(
     mask, logits = cam(transformed_image, class_idx, retain_graph)
 
     # generating overlay
-    heatmap, overlaid = overlay_gradcam_mask(mask, image)
+    heatmap, overlaid = overlay_gradcam_mask(mask, image, alpha)
+
+    return heatmap, overlaid
+
+
+def plot_gradcam(
+    model: nn.Module,
+    target_layer: nn.Module,
+    image: torch.Tensor,
+    transform: Callable = None,
+    class_idx: int = None,
+    retain_graph: bool = False,
+    device: str = "cpu",
+    use_gradcampp: bool = True,
+    alpha: float = 1.0,
+    figsize: Tuple[int, int] = (10, 15),
+    save_path: str = None,
+):
+    """
+    Applies gradcam and plots it on a matplotlib figure.
+
+    Args:
+        model (nn.Module): The model to use.
+        target_layer (nn.Module): The layer the gradcam algorithm should be applied on.
+        image (torch.Tensor): The image to use. SHape: ``(C, H, W)``
+        transform (Callable, optional): The transform to apply on the image before sending it\
+            to the model. Defaults to None.
+        class_idx (int, optional): The index of the class to using in the algorithm. If ``None``,\
+            uses the class with the highest activation. Defaults to None.
+        retain_graph (bool, optional): Whether to retain the computational graph or not. Look at \
+            the pytorch documentations for info about this parameter. Defaults to False.
+        device (str, optional): A valid pytorch device string. Defaults to "cpu".
+        use_gradcampp (bool, optional): Whether to use the gradcam plus plus algorithm or the \
+            gradcam algorithm. Defaults to True.
+        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+        figsize (Tuple[int, int], optional): The size of the matplotlib figure. Defaults to ``(10, 15)``.
+        save_path (str, optional): The path to save the matplotlib figure. Defaults to ``None``.
+    """
+    # generating overlaid image
+    _, overlaid = apply_gradcam(
+        model,
+        target_layer,
+        image,
+        transform,
+        class_idx,
+        retain_graph,
+        device,
+        use_gradcampp,
+        alpha
+    )
 
     # clipping input range
     if torch.is_floating_point(overlaid):
@@ -338,7 +393,7 @@ def apply_gradcam(
         overlaid = torch.clamp(overlaid, 0, 255)
 
     # creating figure
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
 
     # turning of axis lines
     ax.axis("off")
@@ -349,3 +404,120 @@ def apply_gradcam(
     # saving model if save path is provided
     if save_path is not None:
         fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
+
+
+def gradcam_misclassified(
+    number: int,
+    experiment: "Experiment",
+    target_layer: nn.Module,
+    dataloader: DataLoader,
+    device: str,
+    class_labels: Tuple = None,
+    figsize: Tuple[int, int] = (10, 15),
+    save_path: str = None,
+    mean: Tuple = None,
+    std: Tuple = None,
+    alpha: float = 1.0
+):
+    """
+    Plots gradcam to the misclassified images of the experiment.
+
+    Args:
+        number (int): The number of misclassified images on which gradcam should be applied.
+        experiment (Experiment): The experiment to use.
+        target_layer (nn.Module): The target layer for gradcam.
+        dataloader (DataLoader): The dataloader to use.
+        device (str): A valid pytorch device string.
+        class_labels (Tuple, optional): The class labels. Defaults to None.
+        figsize (Tuple[int, int], optional): Size of the plot. Defaults to (10, 15).
+        save_path (str, optional): Path to save the plot. Defaults to None.
+        mean (Tuple, optional): The mean of the dataset. If given, image will be unnormalized using \
+            this before overlaying. Defaults to None.
+        std (Tuple, optional): The std of the dataset. If given, image will be unnormalized using \
+            this before overlaying. Defaults to None.
+        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+    """
+
+    # getting data of the misclassified images
+    image_data, predicted, actual = experiment.get_solver().get_misclassified(
+        dataloader, device
+    )
+
+    # generating the array to store the misclassified images
+    overlays = torch.zeros(
+        number, image_data.size(1), image_data.size(2), image_data.size(3)
+    )
+
+    # creating the unnormalizer if needed
+    unnormalize = None if mean is None and std is None else UnNormalize(mean, std)
+
+    # initializing gradcam
+    cam = GradCamPP(experiment.get_model().to(device), target_layer.to(device))
+
+    # for every image in the misclassified images
+    for idx, image in enumerate(image_data):
+        if idx >= number:
+            break
+
+        # generate heatmap mask
+        heatmap_mask, _ = cam(
+            image.to(device),
+            class_idx=predicted[idx],
+        )
+
+        # generate overlay
+        overlays[idx] = overlay_gradcam_mask(
+            heatmap_mask,
+            image if unnormalize is None else unnormalize(image),
+            alpha
+        )[1]
+
+    # plot results
+    plot_grid(
+        number,
+        lambda idx, ax: _plot_image(
+            overlays[idx], predicted[idx], actual[idx], class_labels, ax
+        ),
+        figsize,
+        save_path,
+    )
+
+
+def _plot_image(
+    image_data: torch.Tensor,
+    predicted: torch.Tensor,
+    actual: torch.Tensor,
+    class_labels: torch.Tensor,
+    ax: axes.Axes,
+):
+    """
+    Plots an image.
+
+    Args:
+        image_data (torch.Tensor): The image data.
+        predicted (torch.Tensor): The predicted class
+        actual (torch.Tensor): The actual class
+        class_labels (torch.Tensor): The class labels
+        ax (axes.Axes): The axes to plot on.
+    """
+
+    # turning off the axis lines in the plot
+    ax.axis("off")
+
+    # setting title
+    ax.set_title(
+        "Predicted: %s\nActual: %s"
+        % (
+            int(predicted) if class_labels is None else class_labels[predicted],
+            int(actual) if class_labels is None else class_labels[actual],
+        )
+    )
+
+    # clipping input range
+    if torch.is_floating_point(image_data):
+        image_data = torch.clamp(image_data, 0, 1)
+    else:
+        image_data = torch.clamp(image_data, 0, 255)
+
+    # plotting image
+    ax.imshow(image_data.permute(1, 2, 0).cpu().numpy())

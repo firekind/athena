@@ -42,6 +42,15 @@ class Experiment:
         """
         return self.solver
 
+    def get_model(self) -> nn.Module:
+        """
+        Getter for the model.
+
+        Returns:
+            nn.Module: The model.
+        """
+        return self.model
+
     @staticmethod
     def builder(parent: Buildable = None) -> "ExperimentBuilder":
         """

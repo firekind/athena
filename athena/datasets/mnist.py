@@ -107,10 +107,18 @@ class _mnist_dataset(datasets.MNIST):
             root, train, transform, target_transform, download
         )
 
+        # channels first cuz this is used in solver while writing the model
+        # to tensorboard
         self.input_shape = (1, 28, 28)
 
     def __getitem__(self, index) -> Tuple[np.ndarray, int]:
         img, target = self.data[index].numpy(), int(self.targets[index])
+        
+        # converting uint8 numpy array (values range from 0-255)
+        # to float32 array (values ranging from 0-1)
+        img = img.astype(np.float32) / 255
+        # adding channel dimension at the end
+        img = img[:, :, None] # final shape: (H, W, C)
 
         if self.transform is not None:
             if isinstance(
