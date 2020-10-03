@@ -127,6 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
@@ -224,14 +225,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="cifar10.build"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+<div class="viewcode-block" id="cifar10.create"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds the dataset and returns a pytorch ``DataLoader``.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            DataLoader: The cifar10 ``DataLoader``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
             <span class="n">_cifar10_dataset</span><span class="p">(</span>
@@ -305,8 +306,16 @@
             <span class="n">root</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">target_transform</span><span class="p">,</span> <span class="n">download</span>
         <span class="p">)</span>
 
+        <span class="c1"># channels first cuz this is used in solver while writing the model</span>
+        <span class="c1"># to tensorboard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-        <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+        <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">index</span><span class="p">])</span> <span class="c1"># img shape: (H, W, C)</span>
+
+        <span class="c1"># converting img from a uint8 np array (with range 0-255) to float32 np array (with range 0-1)</span>
+        <span class="c1"># and channels last.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">BasicTransform</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">BaseCompose</span><span class="p">)):</span>

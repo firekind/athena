@@ -127,6 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
@@ -203,6 +204,7 @@
   <h1>Source code for athena.solvers.base_solver</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -215,110 +217,120 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">athena.utils.progbar</span> <span class="kn">import</span> <span class="n">Kbar</span>
-<span class="kn">from</span> <span class="nn">athena.utils</span> <span class="kn">import</span> <span class="n">History</span><span class="p">,</span> <span class="n">Checkpoint</span><span class="p">,</span> <span class="n">Checkpointable</span>
+<span class="kn">from</span> <span class="nn">athena.utils</span> <span class="kn">import</span> <span class="n">Checkpoint</span><span class="p">,</span> <span class="n">Checkpointable</span>
+<span class="kn">from</span> <span class="nn">.history</span> <span class="kn">import</span> <span class="n">History</span>
 
 
-<span class="k">def</span> <span class="nf">_writer_wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">_BaseSolverMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Used to wrap ``SummaryWriter`` related functions. The decorated function won&#39;t \</span>
-<span class="sd">        execute if the writer object of the solver is None.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        func (Callable): The function to decorate.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Callable: The decorated function.</span>
+<span class="sd">    Metaclass for the :class:`BaseSolver`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># creating the solver object</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">wrapper</span>
+        <span class="c1"># initializing the checkpoints after object creation</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_init_checkpoint</span><span class="p">()</span>
+
+        <span class="c1"># returning the created object.</span>
+        <span class="k">return</span> <span class="n">obj</span>
 
 
-<div class="viewcode-block" id="BaseSolver"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver">[docs]</a><span class="k">class</span> <span class="nc">BaseSolver</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSolver"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver">[docs]</a><span class="k">class</span> <span class="nc">BaseSolver</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">_BaseSolverMeta</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+        <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">scheduler</span><span class="p">:</span> <span class="n">LRScheduler</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">use_tqdm</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">max_to_keep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The base class for a ``Solver``.</span>
+<span class="sd">        The base class of a Solver.</span>
 
-<span class="sd">        Default values of various parameters that can be set using the builder API:</span>
-<span class="sd">            * **epochs** *(int)*: ``None``.</span>
-
-<span class="sd">            * **train_loader** *(DataLoader)*: ``None``.</span>
-
-<span class="sd">            * **test_loader** *(DataLoader)*: ``None``.</span>
-
-<span class="sd">            * **optimizer** *(Optimizer)*: ``None``.</span>
-
-<span class="sd">            * **scheduler** *(LRScheduler)*: ``None``.</span>
-
-<span class="sd">            * **loss_fn** *(Callable[[torch.Tensor, torch.Tensor], torch.Tensor])*: ``None``.</span>
-
-<span class="sd">            * **acc_fn** *(Callable)*: ``None``.</span>
-
-<span class="sd">            * **device** *(str)*: ``&quot;cpu&quot;``.</span>
-
-<span class="sd">            * **use_tqdm** *(bool)*: ``False``.</span>
-
-<span class="sd">            * **max_to_keep** *(Union[str, int])*: ``&quot;all&quot;`` (Checkpoints won&#39;t be created if log directory is not set).</span>
-
+<span class="sd">        Args:</span>
+<span class="sd">            model (nn.Module): The model to train.</span>
+<span class="sd">            log_dir (str): The directory to store the logs.</span>
+<span class="sd">            epochs (int): The number of epochs to train for.</span>
+<span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
+<span class="sd">            test_loader (DataLoader): The ``DataLoader`` for the test data.</span>
+<span class="sd">            optimizer (Optimizer): The optimizer to use.</span>
+<span class="sd">            scheduler (LRScheduler, optional): The scheduler to use. Defaults to None.</span>
+<span class="sd">            loss_fn (Callable, optional): The loss function to use. If ``None``, the :meth:`default_loss_fn` \</span>
+<span class="sd">                will be used. Defaults to None.</span>
+<span class="sd">            device (str, optional): A valid pytorch device string. Defaults to &quot;cpu&quot;.</span>
+<span class="sd">            use_tqdm (bool, optional): Whether to use tqdm progress bar. Defaults to False.</span>
+<span class="sd">            max_to_keep (Union[int, str], optional): The max number of checkpoints to keep. Defaults to &quot;all&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span> <span class="o">=</span> <span class="n">log_dir</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_train_loader</span><span class="p">:</span> <span class="n">DataLoader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_test_loader</span><span class="p">:</span> <span class="n">DataLoader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="p">:</span> <span class="n">Optimizer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="p">:</span> <span class="n">LRScheduler</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_loss_fn</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_acc_fn</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_use_tqdm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_max_to_keep</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoints&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensorboard_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">_CheckpointableEpoch</span><span class="p">(</span><span class="n">epochs</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span> <span class="o">=</span> <span class="n">train_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span> <span class="o">=</span> <span class="n">test_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc_fn</span> <span class="o">=</span> <span class="n">acc_fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span> <span class="o">=</span> <span class="n">use_tqdm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span> <span class="o">=</span> <span class="n">max_to_keep</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_experiment</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="p">:</span> <span class="n">SummaryWriter</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="kc">None</span> <span class="k">if</span> <span class="n">log_dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_progbar</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span> <span class="o">=</span> <span class="n">_CheckpointableEpoch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tensorboard_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># creating log directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_log_directory</span><span class="p">()</span>
 
 <div class="viewcode-block" id="BaseSolver.train"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># restoring latest checkpoint</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
 
         <span class="c1"># checking to see if experiment has already been completed</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="o">.</span><span class="n">get_current_epoch</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Experiment has already been completed.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># adding model to graph if training is happening for the first time</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="o">.</span><span class="n">get_current_epoch</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
-            <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer_add_model</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;input_shape&quot;</span><span class="p">):</span>
+                <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">input_shape</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">))</span>
+                <span class="n">input_shape</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">add_graph</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span>
-                    <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()</span>
+                    <span class="n">input_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
                 <span class="p">),</span>  <span class="c1"># using a random tensor as input since using the image from the dataset sometimes causes jit trace warnings</span>
             <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># setting default loss function in case loss function is not specified</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_loss_fn</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_loss_fn</span><span class="p">())</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_loss_fn</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseSolver.default_loss_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.default_loss_fn">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">default_loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
@@ -332,350 +344,46 @@
 <div class="viewcode-block" id="BaseSolver.track"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.track">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">track</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a list of objects to checkpoint during training</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
-<div class="viewcode-block" id="BaseSolver.writer_add_model"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.writer_add_model">[docs]</a>    <span class="nd">@_writer_wrapper</span>
-    <span class="k">def</span> <span class="nf">writer_add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds the model to tensorboard</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            model (nn.Module): The model to add</span>
-<span class="sd">            input_data (torch.Tensor): The image data to be used to forward prop.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">add_graph</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="BaseSolver.writer_add_scalar"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.writer_add_scalar">[docs]</a>    <span class="nd">@_writer_wrapper</span>
-    <span class="k">def</span> <span class="nf">writer_add_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds a scalar to tensorboard.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            tag (str): The tag of the scalar.</span>
-<span class="sd">            value (float): The value.</span>
-<span class="sd">            step (int): The step count at which the scalar should be added.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="BaseSolver.writer_close"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.writer_close">[docs]</a>    <span class="nd">@_writer_wrapper</span>
-    <span class="k">def</span> <span class="nf">writer_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Closes tensorboard writer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="BaseSolver.set_experiment"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_experiment">[docs]</a>    <span class="k">def</span> <span class="nf">set_experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the experiment that is attached to this solver.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            experiment (Experiment): The ``Experiment`` object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_experiment</span> <span class="o">=</span> <span class="n">experiment</span></div>
-
-<div class="viewcode-block" id="BaseSolver.optimizer"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Optimizer</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the optimizer to use. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            optimizer_cls (Type[Optimizer]): The optimizer class (not the object)</span>
-<span class="sd">            **kwargs: The keyword arguments to be passed onto the optimizer.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            AssertionError: Raised when there is no model attached to this experiment</span>
+<span class="sd">        The objects to checkpoint, apart from the model, optimizer, scheduler and epoch.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
+<span class="sd">            List: The list of objects to checkpoint.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optimizer_cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.scheduler"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.scheduler">[docs]</a>    <span class="k">def</span> <span class="nf">scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">LRScheduler</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_init_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the scheduler to use. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            scheduler_cls (Type[_LRScheduler]): The scheduler class (not the object)</span>
-<span class="sd">            **kwargs: The keyword arguments to be passed onto the scheduler.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            AssertionError: Raised when there is no optimizer attached to this experiment.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
+<span class="sd">        Initializes and creates the checkpoint object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the optimizer before setting scheduler&quot;</span>
+        <span class="c1"># getting the list of objects to checkpoint</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">track</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
+        <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="o">=</span> <span class="n">scheduler_cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="c1"># adding the scheduler to the list if it is not None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">objs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BaseSolver.epochs"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.epochs">[docs]</a>    <span class="k">def</span> <span class="nf">epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
+        <span class="c1"># creating the checkpoint.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">Checkpoint</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">,</span>
+            <span class="n">objs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="o">.</span><span class="n">set_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_log_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the number of epochs to train for. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            epochs (int): The epochs to train for.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
+<span class="sd">        Creates the log directory and its parent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span> <span class="o">=</span> <span class="n">epochs</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.train_loader"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train_loader">[docs]</a>    <span class="k">def</span> <span class="nf">train_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The ``DataLoader`` to use while training the model. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            train_loader (DataLoader): The dataloader.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_train_loader</span> <span class="o">=</span> <span class="n">train_loader</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.test_loader"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.test_loader">[docs]</a>    <span class="k">def</span> <span class="nf">test_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The ``DataLoader`` to use while testing the model. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            test_loader (DataLoader): The dataloader</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_test_loader</span> <span class="o">=</span> <span class="n">test_loader</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.use_tqdm"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.use_tqdm">[docs]</a>    <span class="k">def</span> <span class="nf">use_tqdm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Uses tqdm for the progress bar, instead of the keras style progress bar. \</span>
-<span class="sd">            Used in the builder API.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_use_tqdm</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.loss_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.loss_fn">[docs]</a>    <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The loss function to use. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            loss_fn (Callable): The loss function</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.acc_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.acc_fn">[docs]</a>    <span class="k">def</span> <span class="nf">acc_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The accuracy function to use. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            acc_fn (Callable): The accuracy function</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_acc_fn</span> <span class="o">=</span> <span class="n">acc_fn</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.device"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.device">[docs]</a>    <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The device to use. Used in the builder API.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            device (str): A valid pytorch device string.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            AssertionError: Raised when there is no model attached to this experiment.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="n">device</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.max_checkpoints_to_keep"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.max_checkpoints_to_keep">[docs]</a>    <span class="k">def</span> <span class="nf">max_checkpoints_to_keep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the max checkpoints to keep. Used in the builder API.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: object of this class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set log directory to make checkpoints&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_max_to_keep</span> <span class="o">=</span> <span class="n">max_to_keep</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="BaseSolver.build"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Completes the build phase of the solver. Used in the builder API.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Experiment: The experiment attached to this solver.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">to_track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">track</span><span class="p">()</span>
-            <span class="n">to_track</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="p">)</span>
-            <span class="n">to_track</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span> <span class="o">=</span> <span class="n">Checkpoint</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoints&quot;</span><span class="p">),</span>
-                <span class="n">to_track</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_max_to_keep</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_experiment</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_model"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the model.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            nn.Module: The model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_epochs"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_epochs">[docs]</a>    <span class="k">def</span> <span class="nf">get_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the number of epochs.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            int: The number of epochs to train for.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_train_loader"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_train_loader">[docs]</a>    <span class="k">def</span> <span class="nf">get_train_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the train data loader.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            DataLoader: The data loader for the train dataset.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_loader</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_test_loader"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_test_loader">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the test data loader</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            DataLoader: The data loader for the test dataset.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_loader</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_optimizer"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optimizer</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the optimizer.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Optimizer: The optimizer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_scheduler"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_scheduler">[docs]</a>    <span class="k">def</span> <span class="nf">get_scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LRScheduler</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the scheduler.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            LRScheduler: The scheduler.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_loss_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_loss_fn">[docs]</a>    <span class="k">def</span> <span class="nf">get_loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the loss function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Callable[[torch.Tensor, torch.Tensor], torch.Tensor]: The loss function to use.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_fn</span></div>
-
-<div class="viewcode-block" id="BaseSolver.set_loss_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_loss_fn">[docs]</a>    <span class="k">def</span> <span class="nf">set_loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Setter for the loss function.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            func (Callable[[torch.Tensor, torch.Tensor], torch.Tensor]): The new loss function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_loss_fn</span> <span class="o">=</span> <span class="n">func</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_acc_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_acc_fn">[docs]</a>    <span class="k">def</span> <span class="nf">get_acc_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the accuracy function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Callable: The accuracy function to use.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_fn</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_device"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_device">[docs]</a>    <span class="k">def</span> <span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the device string.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            str: The device string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span></div>
-
-<div class="viewcode-block" id="BaseSolver.should_use_tqdm"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.should_use_tqdm">[docs]</a>    <span class="k">def</span> <span class="nf">should_use_tqdm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for whether tqdm should be used or not.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: Whether tqdm should be used or not.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_tqdm</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_progbar"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_progbar">[docs]</a>    <span class="k">def</span> <span class="nf">get_progbar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Kbar</span><span class="p">,</span> <span class="n">tqdm</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter for the progress bar</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Union[Kbar, tqdm]: The progress bar.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_progbar</span></div>
-
-<div class="viewcode-block" id="BaseSolver.set_progbar"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_progbar">[docs]</a>    <span class="k">def</span> <span class="nf">set_progbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Kbar</span><span class="p">,</span> <span class="n">tqdm</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Setter for the progress bar.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            value (Union[Kbar, tqdm]): The new progress bar.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_progbar</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="c1"># creating the parent directory</span>
+        <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseSolver.get_history"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_history">[docs]</a>    <span class="k">def</span> <span class="nf">get_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;History&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -685,27 +393,14 @@
 <span class="sd">            History: The history object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span></div>
 
-<div class="viewcode-block" id="BaseSolver.set_log_dir"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.set_log_dir">[docs]</a>    <span class="k">def</span> <span class="nf">set_log_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSolver.cleanup"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Setter for the log directory.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            path (str): The path.</span>
+<span class="sd">        Performs any cleanup.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span> <span class="o">=</span> <span class="n">path</span></div>
-
-<div class="viewcode-block" id="BaseSolver.get_start_epoch"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_start_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">get_start_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Gets the epoch to start training from.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            int</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseSolver.log_results"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.log_results">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">log_results</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
@@ -729,9 +424,9 @@
             <span class="c1"># storing the returned data into history and</span>
             <span class="c1"># summary writer.</span>
             <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">writer_add_scalar</span><span class="p">(</span>
-                    <span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="o">.</span><span class="n">get_current_epoch</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span>
+                    <span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="o">.</span><span class="n">get_current_epoch</span><span class="p">()</span>
                 <span class="p">)</span>
 
             <span class="c1"># returing the result of the function</span>
@@ -760,25 +455,23 @@
             <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
             <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="c1"># creating the progress bar</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">():</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">set_progbar</span><span class="p">(</span>
-                        <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_loader</span> <span class="k">if</span> <span class="n">train</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_loader</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span> <span class="k">if</span> <span class="n">train</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">set_progbar</span><span class="p">(</span>
-                        <span class="n">Kbar</span><span class="p">(</span>
-                            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_loader</span><span class="p">)</span> <span class="k">if</span> <span class="n">train</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_loader</span><span class="p">)</span>
-                        <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span> <span class="o">=</span> <span class="n">Kbar</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">)</span> <span class="k">if</span> <span class="n">train</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span><span class="p">)</span>
                     <span class="p">)</span>
 
                 <span class="c1"># executing function</span>
                 <span class="n">res</span><span class="p">:</span> <span class="n">StepResult</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
                 <span class="c1"># closing progress bars</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">():</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">get_progbar</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">get_progbar</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
                 <span class="c1"># returing the result of the function</span>
                 <span class="k">return</span> <span class="n">res</span>
@@ -807,67 +500,16 @@
             <span class="n">res</span><span class="p">:</span> <span class="n">StepResult</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1"># updating progress bar</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">:</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot; - &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">])</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_progbar</span><span class="p">()</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
                     <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Batch_id: </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">batch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_progbar</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_progbar</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
             <span class="c1"># returning the result of the function</span>
-            <span class="k">return</span> <span class="n">res</span>
-
-        <span class="k">return</span> <span class="n">wrapper</span></div>
-
-<div class="viewcode-block" id="BaseSolver.epoch"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.epoch">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">epoch</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Decorator that manages epoch count, so that it can be checkpointed.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            func (Callable): The function to decorate.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Callable: The decorated function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="c1"># calling the function</span>
-            <span class="n">res</span><span class="p">:</span> <span class="n">StepResult</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-            <span class="c1"># incrementing epoch count</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpointable_epoch</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
-
-            <span class="c1"># returning function result</span>
-            <span class="k">return</span> <span class="n">res</span>
-
-        <span class="k">return</span> <span class="n">wrapper</span></div>
-
-<div class="viewcode-block" id="BaseSolver.checkpoint"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.checkpoint">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a checkpoint after ``func`` is called.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            func (Callable): The function to decorate</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Callable: The decorated function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="c1"># calling function</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-            <span class="c1"># checkpointing</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
-            <span class="c1"># returning result of the function</span>
             <span class="k">return</span> <span class="n">res</span>
 
         <span class="k">return</span> <span class="n">wrapper</span></div>
@@ -875,8 +517,8 @@
 <div class="viewcode-block" id="BaseSolver.train_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train_step">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A convenience decorator that is a combination of :func:`checkpoint` decorator,</span>
-<span class="sd">        :func:`epoch` decorator, :func:`log_results` decorator and :func:`prog_bar` decorator.</span>
+<span class="sd">        A convenience decorator that is a combination of \</span>
+<span class="sd">            :func:`log_results` decorator and :func:`prog_bar` decorator.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            func (Callable): The function to decorate.</span>
@@ -886,8 +528,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">checkpoint</span>
-        <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">epoch</span>
         <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">log_results</span>
         <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">prog_bar</span><span class="p">()</span>
         <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -902,7 +542,8 @@
 <span class="sd">        Results of a train step (train epoch)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (List[Tuple[str, Any]]): The results.</span>
+<span class="sd">            data (List[Tuple[str, Any]]): The results. Typically a list of \</span>
+<span class="sd">                label-accuracy/loss pairs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
@@ -920,7 +561,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            batch_idx (int): The batch index.</span>
-<span class="sd">            data (List[Tuple[str, Any]]): The results of training on the batch.</span>
+<span class="sd">            data (List[Tuple[str, Any]]): The results of training on the batch. Typically \</span>
+<span class="sd">                a list of label-accuracy/loss pairs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_idx</span> <span class="o">=</span> <span class="n">batch_idx</span>
@@ -933,24 +575,78 @@
 
 
 <span class="k">class</span> <span class="nc">_CheckpointableEpoch</span><span class="p">(</span><span class="n">Checkpoint</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">checkpoint</span><span class="p">:</span> <span class="n">Checkpoint</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        An epoch value that is checkpointable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epochs (int): The total number of epochs.</span>
+<span class="sd">            checkpoint (Checkpoint): The checkpoint object whose :meth:`save` is called\</span>
+<span class="sd">                after every epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">checkpoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_restored</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_restored</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">def</span> <span class="nf">get_current_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span>
 
-    <span class="k">def</span> <span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">def</span> <span class="nf">set_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># save checkpoint if training was not just started</span>
+        <span class="c1"># or the checkpoint was not just restored</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_restored</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        
+        <span class="c1"># if the checkpoint was just restored, clear the </span>
+        <span class="c1"># flag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_restored</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">just_restored</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span>
+        
+        <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span>
+
+    <span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">&lt;=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">&lt;</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">&gt;=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">&gt;</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">==</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">!=</span> <span class="n">value</span>
 </pre></div>
 
              </article>

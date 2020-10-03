@@ -232,8 +232,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.datasets.mnist.mnist.build">
-<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.build" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.datasets.mnist.mnist.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -304,8 +304,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.datasets.cifar10.cifar10.build">
-<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.build" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.datasets.cifar10.cifar10.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -359,9 +359,14 @@
 <p>The base class which all datasets that want to use the builder API must implement.</p>
 <span class="target" id="module-athena.datasets.base_dataset"></span><dl class="py class">
 <dt id="athena.datasets.base_dataset.BaseDataset">
-<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.base_dataset.</code><code class="sig-name descname">BaseDataset</code><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.base_dataset.</code><code class="sig-name descname">BaseDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.builder.Buildable</span></code></p>
 <p>The base class for datasets. Enables the use of a builder style API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface. Defaults to                 <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
 <dl class="simple">
 <dt>Default values of various parameters (if not set using the builder API):</dt><dd><ul class="simple">
 <li><p><strong>root</strong> <em>(str)</em>: <code class="docutils literal notranslate"><span class="pre">&quot;./data&quot;</span></code>.</p></li>
@@ -673,8 +678,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.datasets.base_dataset.BaseDataset.build">
-<em class="property">abstract </em><code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.build" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.datasets.base_dataset.BaseDataset.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dataset and returns the dataloader.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>

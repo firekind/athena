@@ -127,6 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
@@ -208,6 +209,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">Experiments</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">plot_grid</span>
 
 
 <div class="viewcode-block" id="plot_experiments"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.experiment.plot_experiments">[docs]</a><span class="k">def</span> <span class="nf">plot_experiments</span><span class="p">(</span>
@@ -240,52 +242,12 @@
     <span class="n">metric_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
     <span class="n">num_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)</span>
 
-    <span class="c1"># checking if number of metrics to plot is &gt; 0</span>
-    <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No metrics to plot.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># calculating the number of rows and column in the plot</span>
-    <span class="n">nrows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">))</span>
-    <span class="n">ncols</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_metrics</span> <span class="o">/</span> <span class="n">nrows</span><span class="p">)</span>
-
-    <span class="c1"># creating the empty plot</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-
-    <span class="c1"># if there is only one metric to plot</span>
-    <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ncols</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
-
-    <span class="c1"># if there is only one row of metrics to plot</span>
-    <span class="k">elif</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># for every plot,</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">)):</span>
-            <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-    <span class="c1"># if there is more than one row of metrics to plot</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
-            <span class="n">metric_idx</span> <span class="o">=</span> <span class="mi">0</span>
-
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">):</span>
-
-                <span class="c1"># coverting i and j values into a single value that can be used</span>
-                <span class="c1"># to index a 1 dimensional array</span>
-                <span class="n">metric_idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">ncols</span> <span class="o">+</span> <span class="n">j</span>
-
-                <span class="c1"># if the converted index is greater than the number of metrics to plot,</span>
-                <span class="c1"># that means there are no more metrics to plot, so break</span>
-                <span class="k">if</span> <span class="n">metric_idx</span> <span class="o">&gt;=</span> <span class="n">num_metrics</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-                <span class="c1"># plot the metric for all the experiments</span>
-                <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">metric_idx</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
-
-            <span class="k">if</span> <span class="n">metric_idx</span> <span class="o">==</span> <span class="n">num_metrics</span><span class="p">:</span>
-                <span class="k">break</span>
-
-    <span class="c1"># saving the plot if path is provided</span>
-    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span></div>
+    <span class="n">plot_grid</span><span class="p">(</span>
+        <span class="n">num_metrics</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">),</span>
+        <span class="n">figsize</span><span class="p">,</span>
+        <span class="n">save_path</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_plot_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">],</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>

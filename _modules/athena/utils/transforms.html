@@ -127,6 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
@@ -201,7 +202,9 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <h1>Source code for athena.utils.transforms</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
@@ -218,7 +221,7 @@
 <span class="sd">        ValueError: If the type of the input is not ``torch.Tensor`` or a ``np.ndarray``</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray: A ``np.ndarray`` with shape ``(C, H, W)``.</span>
+<span class="sd">        np.ndarray: A ``np.ndarray`` with shape ``(H, W, C)``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
@@ -237,7 +240,8 @@
 
 <div class="viewcode-block" id="ToTensor"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.transforms.ToTensor">[docs]</a><span class="k">def</span> <span class="nf">ToTensor</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function that converts a numpy array of shape ``(C, H, W)`` or ``(H, W)`` to a ``torch.Tensor``.</span>
+<span class="sd">    Function that converts a numpy array of shape ``(H, W, C)`` or ``(H, W)`` to a ``torch.Tensor`` </span>
+<span class="sd">    of shape ``(C, H, W)``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        x (np.ndarray): The input to convert.</span>
@@ -261,6 +265,26 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ByteTensor</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="UnNormalize"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.transforms.UnNormalize">[docs]</a><span class="k">class</span> <span class="nc">UnNormalize</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">std</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the reverse of a normalization operation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mean (List): The mean.</span>
+<span class="sd">            std (List): The std.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">std</span>
+    
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tensor</span></div>
 </pre></div>
 
              </article>

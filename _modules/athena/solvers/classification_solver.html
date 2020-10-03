@@ -127,6 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
@@ -201,15 +202,15 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <h1>Source code for athena.solvers.classification_solver</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
-<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">OneCycleLR</span><span class="p">,</span> <span class="n">Optimizer</span>
+<span class="kn">from</span> <span class="nn">athena.builder</span> <span class="kn">import</span> <span class="n">Buildable</span>
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">OneCycleLR</span><span class="p">,</span> <span class="n">Optimizer</span><span class="p">,</span> <span class="n">ReduceLROnPlateau</span>
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">_LRScheduler</span> <span class="k">as</span> <span class="n">LRScheduler</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.base_solver</span> <span class="kn">import</span> <span class="n">BaseSolver</span><span class="p">,</span> <span class="n">BatchResult</span><span class="p">,</span> <span class="n">StepResult</span>
 
@@ -218,18 +219,49 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
-        <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">scheduler</span><span class="p">:</span> <span class="n">LRScheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">use_tqdm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">max_to_keep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A solver for classification problems.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            model (nn.Module): The model to act on.</span>
-<span class="sd">            log_dir (str, optional): The directory to store the logs. Defaults to None.</span>
+<span class="sd">            model (nn.Module): The model to train.</span>
+<span class="sd">            log_dir (str): The directory to store the logs.</span>
+<span class="sd">            epochs (int): The number of epochs to train for.</span>
+<span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
+<span class="sd">            test_loader (DataLoader): The ``DataLoader`` for the test data.</span>
+<span class="sd">            optimizer (Optimizer): The optimizer to use.</span>
+<span class="sd">            scheduler (LRScheduler, optional): The scheduler to use. Defaults to None.</span>
+<span class="sd">            loss_fn (Callable, optional): The loss function to use. If ``None``, the :meth:`default_loss_fn` \</span>
+<span class="sd">                will be used. Defaults to None.</span>
+<span class="sd">            device (str, optional): A valid pytorch device string. Defaults to &quot;cpu&quot;.</span>
+<span class="sd">            use_tqdm (bool, optional): Whether to use tqdm progress bar. Defaults to False.</span>
+<span class="sd">            max_to_keep (Union[int, str], optional): The max number of checkpoints to keep. Defaults to &quot;all&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">)</span>
-
+        <span class="nb">super</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">train_loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span>
+            <span class="n">test_loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
+            <span class="n">loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+            <span class="n">acc_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">use_tqdm</span><span class="o">=</span><span class="n">use_tqdm</span><span class="p">,</span>
+            <span class="n">max_to_keep</span><span class="o">=</span><span class="n">max_to_keep</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="ClassificationSolver.train"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -241,26 +273,33 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># training</span>
-        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_start_epoch</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Epoch: </span><span class="si">%d</span><span class="s2"> / </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">()),</span>
-                <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">(),</span>
+                <span class="s2">&quot;Epoch: </span><span class="si">%d</span><span class="s2"> / </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">),</span>
+                <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># performing train step</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">()</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">()</span>
 
-            <span class="c1"># stepping scheduler</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">(),</span> <span class="n">OneCycleLR</span>
-            <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="c1"># getting loss from train step</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="c1"># performing test step</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_step</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_step</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer_close</span><span class="p">()</span></div>
+                <span class="c1"># getting loss from test step</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># stepping scheduler</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">ReduceLROnPlateau</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">OneCycleLR</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.train_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train_step">[docs]</a>    <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">train_step</span>
     <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepResult</span><span class="p">:</span>
@@ -272,16 +311,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># setting model in train mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># defining variables</span>
         <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">processed</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">train_loss</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span>
-                <span class="n">batch</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()),</span>
-                <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()),</span>
+                <span class="n">batch</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
                 <span class="n">batch_idx</span><span class="o">=</span><span class="n">batch_idx</span><span class="p">,</span>
                 <span class="n">running_train_loss</span><span class="o">=</span><span class="n">train_loss</span><span class="p">,</span>
                 <span class="n">running_correct</span><span class="o">=</span><span class="n">correct</span><span class="p">,</span>
@@ -293,10 +332,10 @@
 
         <span class="k">return</span> <span class="n">StepResult</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="p">[</span>
-                <span class="p">(</span><span class="s2">&quot;train loss&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">train_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()))),</span>
+                <span class="p">(</span><span class="s2">&quot;train loss&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">train_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">))),</span>
                 <span class="p">(</span>
                     <span class="s2">&quot;train accuracy&quot;</span><span class="p">,</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="p">)),</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)),</span>
                 <span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
@@ -327,18 +366,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># zeroing out accumulated gradients</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">()</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
         <span class="c1"># forward prop</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># calculating loss</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_loss_fn</span><span class="p">()(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
         <span class="n">running_train_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
 
         <span class="c1"># backpropagation</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
         <span class="c1"># calculating accuracy</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -346,8 +385,8 @@
         <span class="n">running_processed</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">acc</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">running_correct</span> <span class="o">/</span> <span class="n">running_processed</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">(),</span> <span class="n">OneCycleLR</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">OneCycleLR</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">BatchResult</span><span class="p">(</span>
             <span class="n">batch_idx</span><span class="o">=</span><span class="n">batch_idx</span><span class="p">,</span>
@@ -358,48 +397,48 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.test_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.test_step">[docs]</a>    <span class="nd">@BaseSolver</span><span class="o">.</span><span class="n">log_results</span>
-    <span class="k">def</span> <span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepResult</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a single test step.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple[torch.Tensor, torch.Tensor]: A tuple consisting of the average test loss and average test accuracy.</span>
+<span class="sd">            StepResult: The results of the step.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># setting model to evaluation mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
         <span class="c1"># defining variables</span>
         <span class="n">test_loss</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span><span class="p">:</span>
                 <span class="c1"># casting data to device</span>
-                <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">())</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
                 <span class="c1"># forward prop</span>
-                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
                 <span class="c1"># calculating loss</span>
-                <span class="n">test_loss</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_loss_fn</span><span class="p">()(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                <span class="n">test_loss</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
                 <span class="c1"># calculating number of correctly predicted classes</span>
                 <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">correct</span> <span class="o">+=</span> <span class="n">pred</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">pred</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
         <span class="c1"># averaging loss</span>
-        <span class="n">test_loss</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">())</span>
-        <span class="n">test_acc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">test_loss</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span><span class="p">)</span>
+        <span class="n">test_acc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
 
         <span class="c1"># printing result</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;Test set: Average loss: </span><span class="si">{:.4f}</span><span class="s2">, Accuracy: </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> (</span><span class="si">{:.2f}</span><span class="s2">%)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">test_loss</span><span class="p">,</span>
                 <span class="n">correct</span><span class="p">,</span>
-                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span>
                 <span class="n">test_acc</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">(),</span>
+            <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">StepResult</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;test loss&quot;</span><span class="p">,</span> <span class="n">test_loss</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;test accuracy&quot;</span><span class="p">,</span> <span class="n">test_acc</span><span class="p">)])</span></div>
@@ -414,24 +453,20 @@
 
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[93mWarning:</span><span class="se">\033</span><span class="s2">[0m Loss function not specified. Using nll loss.&quot;</span><span class="p">,</span>
-            <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">should_use_tqdm</span><span class="p">(),</span>
+            <span class="n">flush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_tqdm</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">nll_loss</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.track"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.track">[docs]</a>    <span class="k">def</span> <span class="nf">track</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        List of objects to checkpoint.</span>
+<span class="sd">        List of objects to checkpoint, apart from the model, scheduler, optimizer and epoch.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span>
-        <span class="p">]</span></div>
+
+        <span class="k">return</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.get_misclassified"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.get_misclassified">[docs]</a>    <span class="k">def</span> <span class="nf">get_misclassified</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span>
@@ -444,7 +479,8 @@
 <span class="sd">            device (str): A valid pytorch device string.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: A tuple consisting of the image information, predicted, and actual class of the misclassified images.</span>
+<span class="sd">            Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: A tuple consisting of the \</span>
+<span class="sd">                image information, predicted, and actual class of the misclassified images.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># defining variables</span>
@@ -453,7 +489,7 @@
         <span class="n">misclassified_target</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># put the model to evaluation mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
@@ -461,7 +497,7 @@
                 <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
                 <span class="c1"># forward prop</span>
-                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
                 <span class="c1"># get the predicted class</span>
                 <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -482,7 +518,107 @@
         <span class="n">misclassified_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">misclassified_pred</span><span class="p">)</span>
         <span class="n">misclassified_target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">misclassified_target</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">misclassified</span><span class="p">,</span> <span class="n">misclassified_pred</span><span class="p">,</span> <span class="n">misclassified_target</span></div></div>
+        <span class="k">return</span> <span class="n">misclassified</span><span class="p">,</span> <span class="n">misclassified_pred</span><span class="p">,</span> <span class="n">misclassified_target</span></div>
+
+<div class="viewcode-block" id="ClassificationSolver.builder"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.builder">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an object of the builder interface. Needs to be called if one wants</span>
+<span class="sd">        to use the builder pattern to define the solver.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parent (Buildable, optional): The parent builder interface. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ClassificationSolverBuilder: The builder interface for ``ClassificationSolver``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ClassificationSolverBuilder</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ClassificationSolverBuilder"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolverBuilder">[docs]</a><span class="k">class</span> <span class="nc">ClassificationSolverBuilder</span><span class="p">(</span><span class="n">Buildable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A Builder interface for the :class:`ClassificationSolver`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parent (Buildable, optional): The parent builder interface. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ClassificationSolverBuilder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">parent</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">[</span>
+                <span class="s2">&quot;model&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_dir&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;epochs&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;train_loader&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;test_loader&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scheduler&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;loss_fn&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;device&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;use_tqdm&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;max_checkpoints_to_keep&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ClassificationSolverBuilder.create"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolverBuilder.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClassificationSolver</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and returns an object of :class:`ClassificationSolver`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ClassificationSolver</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># asserting values</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set a model to use.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the optimizer class to use.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the number of epochs to train for.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the dataloader to train on.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_log_dir</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the directory to store the logs.&quot;</span>
+
+        <span class="c1"># getting the model that was defined using this interface or any other</span>
+        <span class="c1"># parent interface.</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
+
+        <span class="c1"># getting the log directory that was defined using this interface or any</span>
+        <span class="c1"># other parent interface.</span>
+        <span class="n">log_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span>
+
+        <span class="c1"># constructing the optimizer.</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">()(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer_args</span><span class="p">(),</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer_kwargs</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># constructing the scheduler.</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler</span><span class="p">()(</span>
+                <span class="n">optimizer</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler_args</span><span class="p">(),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler_kwargs</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># constructing the classifier.</span>
+        <span class="k">return</span> <span class="n">ClassificationSolver</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">()),</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">(),</span>
+            <span class="n">train_loader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_train_loader</span><span class="p">(),</span>
+            <span class="n">test_loader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_test_loader</span><span class="p">(),</span>
+            <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
+            <span class="n">loss_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_loss_fn</span><span class="p">(),</span>
+            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">(),</span>
+            <span class="n">use_tqdm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_use_tqdm</span><span class="p">(),</span>
+            <span class="n">max_to_keep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_max_checkpoints_to_keep</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
              </article>

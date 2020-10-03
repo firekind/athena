@@ -128,6 +128,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.solvers.html">athena.solvers package</a></li>
@@ -211,7 +212,7 @@
 is used to rapidly experiment during the assignments of the program. Although this package was made during the program, it can be used in other situations as well.</p>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>The core of this package is the <a class="reference internal" href="apis/athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.experiment.Experiment</span></code></a> class, which is used to quickly set up an experiment with
+<p>The core of this package is the <a class="reference internal" href="apis/athena.experiment.html#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.experiment.Experiment</span></code></a> class, which is used to quickly set up an experiment with
 various parameters that are to be used for the experiment.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># importing</span>
 <span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
@@ -242,7 +243,8 @@ various parameters that are to be used for the experiment.</p>
 
 <span class="c1"># creating the experiment</span>
 <span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">Experiment</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
+   <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
    <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
    <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
       <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
@@ -259,14 +261,15 @@ various parameters that are to be used for the experiment.</p>
 <span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>To run multiple experiments one after the other, the <a class="reference internal" href="apis/athena.utils.html#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.experiment.Experiments</span></code></a> class is used.</p>
+<p>To run multiple experiments one after the other, the <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.experiment.Experiments</span></code> class is used.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiments</span>
 <span class="o">...</span>
 
 <span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">Experiments</span><span class="p">(</span><span class="s2">&quot;MNIST experiments)</span>
-   <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span> <span class="c1"># optional. if not given, tensorboard will not be used and checkpoints will not be created</span>
+   <span class="n">Experiments</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;MNIST experiments)</span>
+   <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
       <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
@@ -290,7 +293,7 @@ various parameters that are to be used for the experiment.</p>
          <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
          <span class="o">.</span><span class="n">build</span><span class="p">()</span>
       <span class="o">.</span><span class="n">build</span><span class="p">()</span>
-   <span class="o">.</span><span class="n">done</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 
 <span class="n">exps</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -303,7 +306,8 @@ various parameters that are to be used for the experiment.</p>
    <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">nll_loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_true</span><span class="p">)</span>
 
 <span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">Experiment</span><span class="p">(</span><span class="s2">&quot;ResNet with custom loss function&quot;</span><span class="p">)</span>
+   <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;ResNet with custom loss function&quot;</span><span class="p">)</span>
    <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">ResNet32</span><span class="p">())</span>
    <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
       <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>

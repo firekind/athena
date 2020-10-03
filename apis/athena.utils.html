@@ -284,285 +284,6 @@
 </dd></dl>
 
 </div>
-<div class="section" id="module-athena.utils.experiment">
-<span id="experiment-module"></span><h2><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module<a class="headerlink" href="#module-athena.utils.experiment" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="athena.utils.experiment.Experiment">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.experiment.</code><code class="sig-name descname">Experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">log_dir_parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Bundles information regarding an experiment. An experiment is performed on a model, with
-a <code class="docutils literal notranslate"><span class="pre">Solver</span></code> and the arguments that have to be used to train the model.</p>
-<dl class="simple">
-<dt>Default values of various parameters that can be set using the builder API:</dt><dd><ul class="simple">
-<li><p><strong>model</strong> <em>(nn.Module)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-<li><p><strong>solver</strong> <em>(BaseSolver)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-<li><p><strong>log_directory</strong> <em>(str)</em>: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p></li>
-<li><p><strong>log_dir_parent</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the directory where the logs will be stored will be the name of the experiment.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs the experiment. More specifically, calls the <code class="docutils literal notranslate"><span class="pre">BaseSolver.train</span></code> method and saves the
-<code class="docutils literal notranslate"><span class="pre">History</span></code>.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.model">
-<code class="sig-name descname">model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the model to use. Used in the builder api.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>nn.Module</em>) – The model to use.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object of this class.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.solver">
-<code class="sig-name descname">solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">solver</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.solver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the solver to use. Used in the builder api.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>solver</strong> (<em>Type</em><em>[</em><a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a><em>]</em>) – The solver class (not object)</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>AssertionError</strong> – When the model for the experiment is not defined.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>object of this class.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.log_directory">
-<code class="sig-name descname">log_directory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.log_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.log_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the parent of directory where all the logs (tensorboard, checkpoints, etc.) will be stored.             The name of the directory that contains the logs will be the name of the experiment. Used in             the builder api.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the parent of the log directory</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object of this class.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.build">
-<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.build" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prepares the experiment, so that it can be run.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The object of this class, if an <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> object was                 not used to create this experiment, else the <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> object used to create this                 experiment.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Union[<a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a>, <a class="reference internal" href="#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments">Experiments</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiment.get_solver">
-<code class="sig-name descname">get_solver</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiment.get_solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiment.get_solver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Getter that returns the solver object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The solver object.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver">BaseSolver</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="athena.utils.experiment.Experiments">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.experiment.</code><code class="sig-name descname">Experiments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">log_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Defines a list of experiments that has to be run one after the other.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the list of experiments.</p></li>
-<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the directory where the logs will be stored will be the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiments.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiments.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiments.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an experiment to the chain of experiments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> object that was added to the chain.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment">Experiment</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiments.log_directory">
-<code class="sig-name descname">log_directory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiments.log_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiments.log_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the log directory to use.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the log directory</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object of this class</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments">Experiments</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiments.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiments.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiments.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs all the experiments.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.experiment.Experiments.done">
-<code class="sig-name descname">done</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/experiment.html#Experiments.done"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.experiment.Experiments.done" title="Permalink to this definition">¶</a></dt>
-<dd><p>Signifies the end of the chain of experiments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Object of this class.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments">Experiments</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-athena.utils.history">
-<span id="history-module"></span><h2><code class="docutils literal notranslate"><span class="pre">history</span></code> module<a class="headerlink" href="#module-athena.utils.history" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="athena.utils.history.History">
-<em class="property">class </em><code class="sig-prename descclassname">athena.utils.history.</code><code class="sig-name descname">History</code><a class="reference internal" href="../_modules/athena/utils/history.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#athena.utils.checkpoint.Checkpointable" title="athena.utils.checkpoint.Checkpointable"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.utils.checkpoint.Checkpointable</span></code></a></p>
-<p>Contains the information of the losses and accuracies that are recorded during training.</p>
-<dl class="py method">
-<dt id="athena.utils.history.History.add_metric">
-<code class="sig-name descname">add_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.add_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.add_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an item to the history.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the data to be added, eg. loss</p></li>
-<li><p><strong>value</strong> (<em>torch.Tensor</em>) – The value to be added.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.history.History.get_metric_names">
-<code class="sig-name descname">get_metric_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.get_metric_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.get_metric_names" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a list of names of the metrics being recorded.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The list of metric names.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[str]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.history.History.get_metric">
-<code class="sig-name descname">get_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.get_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.get_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the value of the given metric.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – The name of the metric.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The value of the metric.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[torch.Tensor]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.history.History.has_metric">
-<code class="sig-name descname">has_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.has_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.has_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether the given metric is being (or has been) recorded or not.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – The name of the metric</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>True, if it is being (or has been) recorded, False otherwise.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.history.History.state_dict">
-<code class="sig-name descname">state_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.state_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a state dict to checkpoint.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="athena.utils.history.History.load_state_dict">
-<code class="sig-name descname">load_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/history.html#History.load_state_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.history.History.load_state_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads the state from the checkpoint.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em>) – The checkpoint data</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="module-athena.utils.transforms">
 <span id="transforms-module"></span><h2><code class="docutils literal notranslate"><span class="pre">transforms</span></code> module<a class="headerlink" href="#module-athena.utils.transforms" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -578,7 +299,7 @@ or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span
 <dd class="field-even"><p><strong>ValueError</strong> – If the type of the input is not <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> or a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code></p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.</p>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W,</span> <span class="pre">C)</span></code>.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>np.ndarray</p>
@@ -589,7 +310,8 @@ or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span
 <dl class="py function">
 <dt id="athena.utils.transforms.ToTensor">
 <code class="sig-prename descclassname">athena.utils.transforms.</code><code class="sig-name descname">ToTensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/transforms.html#ToTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.transforms.ToTensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function that converts a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code> or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W)</span></code> to a <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>.</p>
+<dd><p>Function that converts a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W,</span> <span class="pre">C)</span></code> or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W)</span></code> to a <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>
+of shape <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – The input to convert.</p>
@@ -602,6 +324,21 @@ or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.utils.transforms.UnNormalize">
+<em class="property">class </em><code class="sig-prename descclassname">athena.utils.transforms.</code><code class="sig-name descname">UnNormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mean</span></em>, <em class="sig-param"><span class="n">std</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/utils/transforms.html#UnNormalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.utils.transforms.UnNormalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Performs the reverse of a normalization operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<em>List</em>) – The mean.</p></li>
+<li><p><strong>std</strong> (<em>List</em>) – The std.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -648,8 +385,6 @@ or <code class="docutils literal notranslate"><span class="pre">(H,</span> <span
               <ul>
 <li><a class="reference internal" href="#">athena.utils package</a><ul>
 <li><a class="reference internal" href="#module-athena.utils.checkpoint"><code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> module</a></li>
-<li><a class="reference internal" href="#module-athena.utils.experiment"><code class="docutils literal notranslate"><span class="pre">experiment</span></code> module</a></li>
-<li><a class="reference internal" href="#module-athena.utils.history"><code class="docutils literal notranslate"><span class="pre">history</span></code> module</a></li>
 <li><a class="reference internal" href="#module-athena.utils.transforms"><code class="docutils literal notranslate"><span class="pre">transforms</span></code> module</a></li>
 </ul>
 </li>

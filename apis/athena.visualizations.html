@@ -128,6 +128,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="athena.html">athena package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
@@ -220,7 +221,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>experiments</strong> (<em>Union</em><em>[</em><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiments" title="athena.utils.experiment.Experiments"><em>Experiments</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a><em>]</em><em>]</em>) – The list of <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> to plot</p></li>
+<li><p><strong>experiments</strong> (<em>Union</em><em>[</em><a class="reference internal" href="athena.experiment.html#athena.experiment.Experiments" title="athena.experiment.Experiments"><em>Experiments</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="athena.experiment.html#athena.experiment.Experiment" title="athena.experiment.Experiment"><em>Experiment</em></a><em>]</em><em>]</em>) – The list of <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> to plot</p></li>
 <li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
 <li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (18, 13).</p></li>
 </ul>
@@ -237,19 +238,21 @@
 <p>This module contains functions that helps with visualizing misclassified images</p>
 <span class="target" id="module-athena.visualizations.misclassified"></span><dl class="py function">
 <dt id="athena.visualizations.misclassified.plot_misclassified">
-<code class="sig-prename descclassname">athena.visualizations.misclassified.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'gray_r'</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/misclassified.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.misclassified.plot_misclassified" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">athena.visualizations.misclassified.</code><code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'gray_r'</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/misclassified.html#plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.misclassified.plot_misclassified" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the misclassified images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>number</strong> (<em>int</em>) – The number of misclassified images to plot.</p></li>
-<li><p><strong>experiment</strong> (<a class="reference internal" href="athena.utils.html#athena.utils.experiment.Experiment" title="athena.utils.experiment.Experiment"><em>Experiment</em></a>) – The experiment that should be used to get the misclassified images</p></li>
+<li><p><strong>experiment</strong> (<a class="reference internal" href="athena.experiment.html#athena.experiment.Experiment" title="athena.experiment.Experiment"><em>Experiment</em></a>) – The experiment that should be used to get the misclassified images</p></li>
 <li><p><strong>data_loader</strong> (<em>DataLoader</em>) – The <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the input data</p></li>
 <li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
 <li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot. Defaults to None.</p></li>
 <li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the plot. Defaults to (10, 15).</p></li>
 <li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>optional</em>) – The cmap to use while plotting. Defaults to ‘gray_r’</p></li>
 <li><p><strong>class_labels</strong> (<em>Tuple</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The class labels to use. Defaults to None.</p></li>
+<li><p><strong>mean</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The mean of the dataset. If given, image will be unnormalized using             this before overlaying. Defaults to None.</p></li>
+<li><p><strong>std</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The std of the dataset. If given, image will be unnormalized using             this before overlaying. Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -348,11 +351,12 @@ to an actual heatmap.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mask</strong> (<em>torch.Tensor</em>) – The mask. Should have shape as <code class="docutils literal notranslate"><span class="pre">(H,</span> <span class="pre">W)</span></code></p></li>
 <li><p><strong>image</strong> (<em>torch.Tensor</em>) – The image to apply the mask on. Should have shape as <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code></p></li>
-<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of transparency to apply to the heatmap mask. Defaults to 1.0.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The heatmap and the resultant image.</p>
+<dd class="field-even"><p>The heatmap and the resultant image. Shape of
+both images is <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>Tuple[torch.Tensor, torch.Tensor]</p>
@@ -362,22 +366,73 @@ to an actual heatmap.</p>
 
 <dl class="py function">
 <dt id="athena.visualizations.gradcam.apply_gradcam">
-<code class="sig-prename descclassname">athena.visualizations.gradcam.</code><code class="sig-name descname">apply_gradcam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">target_layer</span></em>, <em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">class_idx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">retain_graph</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">use_gradcampp</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/gradcam.html#apply_gradcam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.gradcam.apply_gradcam" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">athena.visualizations.gradcam.</code><code class="sig-name descname">apply_gradcam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">target_layer</span></em>, <em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">class_idx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">retain_graph</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">use_gradcampp</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/gradcam.html#apply_gradcam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.gradcam.apply_gradcam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the gradcam (or gradcam plus plus) algorithm using a model and target layer on an image, and
-displays the result on a matplotlib figure.</p>
+returns the result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>nn.Module</em>) – The model to use.</p></li>
 <li><p><strong>target_layer</strong> (<em>nn.Module</em>) – The layer the gradcam algorithm should be applied on.</p></li>
-<li><p><strong>image</strong> (<em>torch.Tensor</em>) – The image to use.</p></li>
+<li><p><strong>image</strong> (<em>torch.Tensor</em>) – The image to use. SHape: <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code></p></li>
 <li><p><strong>transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The transform to apply on the image before sending it            to the model. Defaults to None.</p></li>
 <li><p><strong>class_idx</strong> (<em>int</em><em>, </em><em>optional</em>) – The index of the class to using in the algorithm. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,            uses the class with the highest activation. Defaults to None.</p></li>
 <li><p><strong>retain_graph</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to retain the computational graph or not. Look at             the pytorch documentations for info about this parameter. Defaults to False.</p></li>
-<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the resultant overlaid image. Defaults to None.</p></li>
-<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The figure size of the plot.. Defaults to (10, 15).</p></li>
 <li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to “cpu”.</p></li>
 <li><p><strong>use_gradcampp</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use the gradcam plus plus algorithm or the             gradcam algorithm. Defaults to True.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The overlaid image and the generated heatmap.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[torch.Tensor, torch.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="athena.visualizations.gradcam.plot_gradcam">
+<code class="sig-prename descclassname">athena.visualizations.gradcam.</code><code class="sig-name descname">plot_gradcam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">target_layer</span></em>, <em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">class_idx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">retain_graph</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em>, <em class="sig-param"><span class="n">use_gradcampp</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/gradcam.html#plot_gradcam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.gradcam.plot_gradcam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies gradcam and plots it on a matplotlib figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – The model to use.</p></li>
+<li><p><strong>target_layer</strong> (<em>nn.Module</em>) – The layer the gradcam algorithm should be applied on.</p></li>
+<li><p><strong>image</strong> (<em>torch.Tensor</em>) – The image to use. SHape: <code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">H,</span> <span class="pre">W)</span></code></p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The transform to apply on the image before sending it            to the model. Defaults to None.</p></li>
+<li><p><strong>class_idx</strong> (<em>int</em><em>, </em><em>optional</em>) – The index of the class to using in the algorithm. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,            uses the class with the highest activation. Defaults to None.</p></li>
+<li><p><strong>retain_graph</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to retain the computational graph or not. Look at             the pytorch documentations for info about this parameter. Defaults to False.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – A valid pytorch device string. Defaults to “cpu”.</p></li>
+<li><p><strong>use_gradcampp</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use the gradcam plus plus algorithm or the             gradcam algorithm. Defaults to True.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the matplotlib figure. Defaults to <code class="docutils literal notranslate"><span class="pre">(10,</span> <span class="pre">15)</span></code>.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the matplotlib figure. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="athena.visualizations.gradcam.gradcam_misclassified">
+<code class="sig-prename descclassname">athena.visualizations.gradcam.</code><code class="sig-name descname">gradcam_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">experiment</span></em>, <em class="sig-param"><span class="n">target_layer</span></em>, <em class="sig-param"><span class="n">dataloader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/visualizations/gradcam.html#gradcam_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.visualizations.gradcam.gradcam_misclassified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots gradcam to the misclassified images of the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>) – The number of misclassified images on which gradcam should be applied.</p></li>
+<li><p><strong>experiment</strong> (<a class="reference internal" href="athena.experiment.html#athena.experiment.Experiment" title="athena.experiment.Experiment"><em>Experiment</em></a>) – The experiment to use.</p></li>
+<li><p><strong>target_layer</strong> (<em>nn.Module</em>) – The target layer for gradcam.</p></li>
+<li><p><strong>dataloader</strong> (<em>DataLoader</em>) – The dataloader to use.</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – A valid pytorch device string.</p></li>
+<li><p><strong>class_labels</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The class labels. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Size of the plot. Defaults to (10, 15).</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the plot. Defaults to None.</p></li>
+<li><p><strong>mean</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The mean of the dataset. If given, image will be unnormalized using             this before overlaying. Defaults to None.</p></li>
+<li><p><strong>std</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The std of the dataset. If given, image will be unnormalized using             this before overlaying. Defaults to None.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</p></li>
 </ul>
 </dd>
 </dl>

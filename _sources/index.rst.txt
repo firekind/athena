@@ -9,6 +9,7 @@ Welcome to Athena's documentation!
    
    apis/athena
    apis/athena.datasets
+   apis/athena.experiment
    apis/athena.layers
    apis/athena.models
    apis/athena.solvers
@@ -22,7 +23,7 @@ is used to rapidly experiment during the assignments of the program. Although th
 Usage
 -----
 
-The core of this package is the :class:`athena.utils.experiment.Experiment` class, which is used to quickly set up an experiment with 
+The core of this package is the :class:`athena.experiment.Experiment` class, which is used to quickly set up an experiment with 
 various parameters that are to be used for the experiment.
 
 .. code-block:: python
@@ -56,7 +57,8 @@ various parameters that are to be used for the experiment.
 
    # creating the experiment
    exp = (
-      Experiment("Ghost batch norm with 2 splits")
+      Experiment.builder()
+      .name("Ghost batch norm with 2 splits")
       .model(MnistNet(use_ghost_batch_norm=True))
       .solver(ClassificationSolver)
          .optimizer(optim.SGD, lr=0.01, momentum=0.9)
@@ -81,8 +83,9 @@ To run multiple experiments one after the other, the :class:`athena.utils.experi
    ...
 
    exps = (
-      Experiments("MNIST experiments)
-      .log_directory("./logs") # optional. if not given, tensorboard will not be used and checkpoints will not be created
+      Experiments.builder()
+      .name("MNIST experiments)
+      .log_directory("./logs")
       .add("Ghost batch norm with 2 splits")
          .model(MnistNet(use_ghost_batch_norm=True))
          .solver(ClassificationSolver)
@@ -106,7 +109,7 @@ To run multiple experiments one after the other, the :class:`athena.utils.experi
             .device(device)
             .build()
          .build()
-      .done()
+      .build()
    )
 
    exps.run()
@@ -121,7 +124,8 @@ You can specify a custom loss function to use as well, for example:
       return F.nll_loss(y_pred, y_true)
 
    exp = (
-      Experiment("ResNet with custom loss function")
+      Experiment.builder()
+      .name("ResNet with custom loss function")
       .model(ResNet32())
       .solver(ClassificationSolver)
          .optimizer(optim.SGD, lr=0.01, momentum=0.9)
