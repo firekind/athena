@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from athena.builder import Buildable
-from torch.optim.lr_scheduler import OneCycleLR, Optimizer
+from torch.optim.lr_scheduler import OneCycleLR, Optimizer, ReduceLROnPlateau
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 from torch.utils.data import DataLoader
 
@@ -76,17 +76,25 @@ class ClassificationSolver(BaseSolver):
             )
 
             # performing train step
-            self.train_step()
+            res = self.train_step()
 
-            # stepping scheduler
-            if self.scheduler is not None and not isinstance(
-                self.scheduler, OneCycleLR
-            ):
-                self.scheduler.step()
+            # getting loss from train step
+            loss = res.data[0][1]
 
             # performing test step
             if self.test_loader is not None:
-                self.test_step()
+                res = self.test_step()
+
+                # getting loss from test step
+                loss = res.data[0][1]
+
+            # stepping scheduler
+            if self.scheduler is not None:
+                if isinstance(self.scheduler, ReduceLROnPlateau):
+                    self.scheduler.step(loss)
+                    print(f"lr: {self.optimizer.param_groups[0]['lr']}")
+                elif not isinstance(self.scheduler, OneCycleLR):
+                    self.scheduler.step()
 
         self.cleanup()
 

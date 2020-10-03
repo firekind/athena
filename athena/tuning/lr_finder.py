@@ -1,6 +1,5 @@
 """
 LR Finder. Taken from https://github.com/davidtvs/pytorch-lr-finder
-and added ReduceLROnPlateau as a step mode.
 """
 
 import copy
@@ -9,7 +8,6 @@ import torch
 import numpy as np
 from tqdm.autonotebook import tqdm
 from torch.optim.lr_scheduler import _LRScheduler
-from torch.optim.lr_scheduler import ReduceLROnPlateau as _ReduceLROnPlateau
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
@@ -181,9 +179,9 @@ class LRFinder(object):
     def range_test(
         self,
         train_loader,
-        scheduler_args=None,
         val_loader=None,
         start_lr=None,
+        end_lr=10,
         num_iter=100,
         step_mode="exp",
         smooth_f=0.05,
@@ -201,7 +199,6 @@ class LRFinder(object):
                 returns different outputs e.g. dicts, then you should inherit
                 from `TrainDataLoaderIter` class and redefine `inputs_labels_from_batch`
                 method so that it outputs (inputs, labels).
-            scheduler_args (Dict): Arguments for the scheduler chosen using ``step_mode``.
             val_loader (`torch.utils.data.DataLoader`
                 or child of `ValDataLoaderIter`, optional): if `None` the range test
                 will only use the training loss. When given a data loader, the model is
@@ -214,6 +211,7 @@ class LRFinder(object):
                 it outputs (inputs, labels). Default: None.
             start_lr (float, optional): the starting learning rate for the range test.
                 Default: None (uses the learning rate from the optimizer).
+            end_lr (float, optional): the maximum learning rate to test. Default: 10.
             num_iter (int, optional): the number of iterations over which the test
                 occurs. Default: 100.
             step_mode (str, optional): one of the available learning rate policies,
@@ -270,23 +268,13 @@ class LRFinder(object):
         if start_lr:
             self._set_learning_rate(start_lr)
 
-        # setting default scheduler args
-        if scheduler_args is None:
-            scheduler_args = {}
-
         # Initialize the proper learning rate policy
         if step_mode.lower() == "exp":
-            lr_schedule = ExponentialLR(
-                self.optimizer, num_iter=num_iter, **scheduler_args
-            )
+            lr_schedule = ExponentialLR(self.optimizer, end_lr, num_iter)
         elif step_mode.lower() == "linear":
-            lr_schedule = LinearLR(self.optimizer, num_iter=num_iter, **scheduler_args)
-        elif step_mode.lower() == "plateau":
-            lr_schedule = ReduceLROnPlateau(self.optimizer, **scheduler_args)
+            lr_schedule = LinearLR(self.optimizer, end_lr, num_iter)
         else:
-            raise ValueError(
-                "expected one of (exp, linear, plateau), got {}".format(step_mode)
-            )
+            raise ValueError("expected one of (exp, linear), got {}".format(step_mode))
 
         if smooth_f < 0 or smooth_f >= 1:
             raise ValueError("smooth_f is outside the range [0, 1[")
@@ -329,10 +317,7 @@ class LRFinder(object):
 
             # Update the learning rate
             self.history["lr"].append(lr_schedule.get_lr()[0])
-            if isinstance(lr_schedule, ReduceLROnPlateau):
-                lr_schedule.step(loss)
-            else:
-                lr_schedule.step()
+            lr_schedule.step()
 
             # Track the best loss and smooth it if smooth_f is specified
             if iteration == 0:
@@ -604,37 +589,6 @@ class ExponentialLR(_LRScheduler):
             r = self.last_epoch / (self.num_iter - 1)
 
         return [base_lr * (self.end_lr / base_lr) ** r for base_lr in self.base_lrs]
-
-
-class ReduceLROnPlateau(_ReduceLROnPlateau):
-    def __init__(
-        self,
-        optimizer,
-        mode="min",
-        factor=0.1,
-        patience=10,
-        verbose=False,
-        threshold=1e-4,
-        threshold_mode="rel",
-        cooldown=0,
-        min_lr=0,
-        eps=1e-8,
-    ):
-        super(ReduceLROnPlateau, self).__init__(
-            optimizer,
-            mode,
-            factor,
-            patience,
-            verbose,
-            threshold,
-            threshold_mode,
-            cooldown,
-            min_lr,
-            eps,
-        )
-
-    def get_lr(self):
-        return [group["lr"] for group in self.optimizer.param_groups]
 
 
 class StateCacher(object):
