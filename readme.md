@@ -53,7 +53,8 @@ test_loader = (
 
 # creating the experiment
 exp = (
-    Experiment("Ghost batch norm with 2 splits")
+    Experiment.builder()
+    .name("Ghost batch norm with 2 splits")
     .model(MnistNet(use_ghost_batch_norm=True))
     .solver(ClassificationSolver)
         .optimizer(optim.SGD, lr=0.01, momentum=0.9)

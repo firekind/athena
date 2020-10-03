@@ -10,6 +10,7 @@ The various subpackages within ``athena``
    :maxdepth: 4
 
    athena.datasets
+   athena.experiment
    athena.layers
    athena.models
    athena.solvers

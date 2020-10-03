@@ -65,6 +65,13 @@ def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
 
 class UnNormalize:
     def __init__(self, mean: List, std: List):
+        """
+        Performs the reverse of a normalization operation.
+
+        Args:
+            mean (List): The mean.
+            std (List): The std.
+        """
         self.mean = mean
         self.std = std
     

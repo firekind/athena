@@ -140,8 +140,11 @@ class ExperimentBuilder(Buildable):
         """
         Sets the name of the experiment
 
+        Args:
+            name (str): The name of the experiment.
+
         Returns:
-            str: The name of the experiment.
+            ExperimentBuilder: Object of this class.
         """
 
         self._name = name
@@ -151,8 +154,11 @@ class ExperimentBuilder(Buildable):
         """
         Sets the model to use.
 
-        Returns:
+        Args:
             nn.Module: The model.
+
+        Returns:
+            ExperimentBuilder: Object of this class.
         """
 
         self._model = model
