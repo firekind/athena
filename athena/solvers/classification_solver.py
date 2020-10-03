@@ -92,7 +92,6 @@ class ClassificationSolver(BaseSolver):
             if self.scheduler is not None:
                 if isinstance(self.scheduler, ReduceLROnPlateau):
                     self.scheduler.step(loss)
-                    print(f"lr: {self.optimizer.param_groups[0]['lr']}")
                 elif not isinstance(self.scheduler, OneCycleLR):
                     self.scheduler.step()
 
