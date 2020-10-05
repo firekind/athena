@@ -1,5 +1,6 @@
 """
 LR Finder. Taken from https://github.com/davidtvs/pytorch-lr-finder
+and added ability to plot acc vs lr
 """
 
 import copy
@@ -141,6 +142,7 @@ class LRFinder(object):
         model,
         optimizer,
         criterion,
+        acc_fn=None,
         device=None,
         memory_cache=True,
         cache_dir=None,
@@ -151,6 +153,7 @@ class LRFinder(object):
 
         self.model = model
         self.criterion = criterion
+        self.acc_fn = acc_fn
         self.history = {"lr": [], "loss": []}
         self.best_loss = None
         self.memory_cache = memory_cache
@@ -255,7 +258,7 @@ class LRFinder(object):
         """
 
         # Reset test results
-        self.history = {"lr": [], "loss": []}
+        self.history = {"lr": [], "loss": [], "acc": []}
         self.best_loss = None
 
         # Move the model to the proper device
@@ -305,13 +308,13 @@ class LRFinder(object):
 
         for iteration in tqdm(range(num_iter)):
             # Train on batch and retrieve loss
-            loss = self._train_batch(
+            loss, acc = self._train_batch(
                 train_iter,
                 accumulation_steps,
                 non_blocking_transfer=non_blocking_transfer,
             )
             if val_loader:
-                loss = self._validate(
+                loss, acc = self._validate(
                     val_iter, non_blocking_transfer=non_blocking_transfer
                 )
 
@@ -330,6 +333,9 @@ class LRFinder(object):
 
             # Check if the loss has diverged; if it has, stop the test
             self.history["loss"].append(loss)
+
+            if acc is not None:
+                self.history["acc"].append(acc)
             if loss > diverge_th * self.best_loss:
                 print("Stopping early, the loss has diverged")
                 break
@@ -356,6 +362,7 @@ class LRFinder(object):
     def _train_batch(self, train_iter, accumulation_steps, non_blocking_transfer=True):
         self.model.train()
         total_loss = None  # for late initialization
+        total_acc = None  # for late initialization
 
         self.optimizer.zero_grad()
         for i in range(accumulation_steps):
@@ -389,9 +396,19 @@ class LRFinder(object):
             else:
                 total_loss += loss
 
+            if self.acc_fn is not None:
+                acc = self.acc_fn(outputs, labels)
+
+                # accuracy should be averaged in each step
+                acc /= accumulation_steps
+                if total_acc is None:
+                    total_acc = acc
+                else:
+                    total_acc += acc
+
         self.optimizer.step()
 
-        return total_loss.item()
+        return total_loss.item(), total_acc.item() if total_acc is not None else None
 
     def _move_to_device(self, inputs, labels, non_blocking=True):
         def move(obj, device, non_blocking=True):
@@ -413,6 +430,7 @@ class LRFinder(object):
     def _validate(self, val_iter, non_blocking_transfer=True):
         # Set model to evaluation mode and disable gradient computation
         running_loss = 0
+        running_acc = 0
         self.model.eval()
         with torch.no_grad():
             for inputs, labels in val_iter:
@@ -426,7 +444,16 @@ class LRFinder(object):
                 loss = self.criterion(outputs, labels)
                 running_loss += loss.item() * len(labels)
 
-        return running_loss / len(val_iter.dataset)
+                if self.acc_fn is not None:
+                    acc = self.acc_fn(outputs, labels)
+                    running_acc += acc
+
+        return (
+            running_loss / len(val_iter.dataset),
+            running_acc / len(val_iter.data_loader)
+            if self.acc_fn is not None
+            else None,
+        )
 
     def plot(
         self,
@@ -436,6 +463,7 @@ class LRFinder(object):
         show_lr=None,
         ax=None,
         suggest_lr=True,
+        mode="loss"
     ):
         """Plots the learning rate range test.
         Arguments:
@@ -453,7 +481,10 @@ class LRFinder(object):
                 shown . Default: None.
             suggest_lr (bool, optional): suggest a learning rate by
                 - 'steepest': the point with steepest gradient (minimal gradient)
-                you can use that point as a first guess for an LR. Default: True.
+                you can use that point as a first guess for an LR. Will only be calculated
+                when plot mode is "loss". Default: True.
+            mode (str, optional): If "loss", plots loss vs learning rate curve. if
+                "acc", plots accuracy vs learning rate curve. Default: "loss"
         Returns:
             The matplotlib.axes.Axes object that contains the plot,
             and the suggested learning rate (if set suggest_lr=True).
@@ -465,28 +496,36 @@ class LRFinder(object):
             raise ValueError("skip_end cannot be negative")
         if show_lr is not None and not isinstance(show_lr, float):
             raise ValueError("show_lr must be float")
+        if mode == "acc" and len(self.history["acc"]) == 0:
+            raise ValueError("cannot plot accuracy vs lr when acc_fn was not defined.")
 
         # Get the data to plot from the history dictionary. Also, handle skip_end=0
         # properly so the behaviour is the expected
         lrs = self.history["lr"]
         losses = self.history["loss"]
+        accs = self.history["acc"]
         if skip_end == 0:
             lrs = lrs[skip_start:]
             losses = losses[skip_start:]
+            accs = accs[skip_start:]
         else:
             lrs = lrs[skip_start:-skip_end]
             losses = losses[skip_start:-skip_end]
+            accs = accs[skip_start:-skip_end]
 
         # Create the figure and axes object if axes was not already given
         fig = None
         if ax is None:
             fig, ax = plt.subplots()
 
-        # Plot loss as a function of the learning rate
-        ax.plot(lrs, losses)
+        # Plot loss/accuracy as a function of the learning rate
+        if mode == "loss":
+            ax.plot(lrs, losses)
+        else:
+            ax.plot(lrs, accs)
 
         # Plot the suggested LR
-        if suggest_lr:
+        if suggest_lr and mode != "acc":
             # 'steepest': the point with steepest gradient (minimal gradient)
             print("LR suggestion: steepest gradient")
             min_grad_idx = None
@@ -512,7 +551,7 @@ class LRFinder(object):
         if log_lr:
             ax.set_xscale("log")
         ax.set_xlabel("Learning rate")
-        ax.set_ylabel("Loss")
+        ax.set_ylabel("Loss" if mode == "loss" else "Accuracy")
 
         if show_lr is not None:
             ax.axvline(x=show_lr, color="red")
@@ -521,8 +560,11 @@ class LRFinder(object):
         if fig is not None:
             plt.show()
 
-        if suggest_lr and min_grad_idx:
-            return ax, lrs[min_grad_idx]
+        if mode != "acc":
+            if suggest_lr and min_grad_idx:
+                return ax, lrs[min_grad_idx]
+            else:
+                return ax
         else:
             return ax
 
