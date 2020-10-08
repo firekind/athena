@@ -1,18 +1,13 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Union
+from typing import Callable, Iterable, Union
 
-from torch.utils.data import Sampler, DataLoader
+from torch.utils.data import DataLoader, Sampler
 
-from athena.builder import Buildable
 
-class BaseDataset(Buildable):
-    def __init__(self, parent: Buildable = None):
+class BaseDataset:
+    def __init__(self):
         """
         The base class for datasets. Enables the use of a builder style API.
-        
-        Args:
-            parent (Buildable, optional): The parent builder interface. Defaults to \
-                ``None``.
 
         Default values of various parameters (if not set using the builder API):
             * **root** *(str)*: ``"./data"``.
@@ -47,7 +42,6 @@ class BaseDataset(Buildable):
 
             * **use_default_transforms** *(bool)*: ``False``
         """
-        super().__init__(parent)
 
         self._root = "./data"
         self._train = True
@@ -322,4 +316,13 @@ class BaseDataset(Buildable):
 
         Returns:
             Callable: The transform.
+        """
+
+    @abstractmethod
+    def build(self) -> DataLoader:
+        """
+        Builds the dataset.
+
+        Returns:
+            DataLoader: The dataloader of the dataset.
         """

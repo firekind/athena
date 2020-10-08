@@ -7,10 +7,22 @@ from matplotlib.axes import Axes
 
 def plot_grid(
     number: int,
-    plot_fn: Callable[[int], Axes],
+    plot_fn: Callable[[int, Axes]],
     figsize: Tuple[int, int] = (10, 15),
     save_path: str = None,
 ):
+    """
+    Plots images in a grid.
+
+    Args:
+        number (int): The number of images to plot.
+        plot_fn (Callable[[int, Axes]]): The function to be called for each plot in the grid.\
+            The 1D index of the plot and the `matplotlib.axes.Axes` will be passed as arguments.\
+            Typically this function actually plots the graph / image using ``plt.plot``, \
+            ``plt.imshow``, etc.
+        figsize (Tuple[int, int], optional): The size of the figure. Defaults to (10, 15).
+        save_path (str, optional): The path to save the figure. Defaults to None.
+    """
     # calculating the number of rows and columns in the plot
     nrows = math.floor(math.sqrt(number))
     ncols = math.ceil(number / nrows)

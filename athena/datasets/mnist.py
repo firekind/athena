@@ -21,7 +21,7 @@ class mnist(BaseDataset):
         """
         super(mnist, self).__init__()
 
-    def create(self) -> DataLoader:
+    def build(self) -> DataLoader:
         """
         Builds the dataset and returns a pytorch ``DataLoader``.
 

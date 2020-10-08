@@ -1,19 +1,20 @@
 from typing import Callable, Tuple
 
 import albumentations as A
+import cv2
 import numpy as np
 import torch
+from athena.utils.transforms import ToNumpy, ToTensor
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from .base_dataset import BaseDataset
-from athena.utils.transforms import ToNumpy, ToTensor
 
 
 class cifar10(BaseDataset):
 
-    mean = (0.4914, 0.4822, 0.4465) #: mean of the dataset.
-    std = (0.2023, 0.1994, 0.2010) #: std of the dataset.
+    mean = (0.4914, 0.4822, 0.4465)  #: mean of the dataset.
+    std = (0.2023, 0.1994, 0.2010)  #: std of the dataset.
 
     def __init__(self):
         """
@@ -21,7 +22,7 @@ class cifar10(BaseDataset):
         """
         super(cifar10, self).__init__()
 
-    def create(self) -> DataLoader:
+    def build(self) -> DataLoader:
         """
         Builds the dataset and returns a pytorch ``DataLoader``.
 
@@ -55,7 +56,10 @@ class cifar10(BaseDataset):
         Default cifar10 training transforms. Performs
 
         * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)
-        
+        * Random crop of 32x32 (after padding it by 4 on each side)
+        * Random horizontal flip
+        * 8x8 Cutout
+
         Returns:
             Callable: The transform, an ``albumentations.Compose`` object.
         """
@@ -63,9 +67,15 @@ class cifar10(BaseDataset):
             [
                 A.Lambda(ToNumpy),
                 A.Normalize(
-                    mean=cifar10.mean, std=cifar10.std, max_pixel_value=1.0
-                ),  # Normalizing
-                A.Lambda(ToTensor)
+                    mean=datasets.cifar10.mean,
+                    std=datasets.cifar10.std,
+                    max_pixel_value=1.0,
+                ),
+                A.PadIfNeeded(40, 40, border_mode=cv2.BORDER_CONSTANT, value=0),
+                A.RandomCrop(32, 32),
+                A.HorizontalFlip(),
+                A.Cutout(num_holes=1),
+                A.Lambda(ToTensor),
             ]
         )
 
@@ -74,7 +84,7 @@ class cifar10(BaseDataset):
         Default cifar10 test transforms. Performs
 
         * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)
-        
+
         Returns:
             Callable: The transform, an ``albumentations.Compose`` object.
         """
@@ -84,7 +94,7 @@ class cifar10(BaseDataset):
                 A.Normalize(
                     mean=cifar10.mean, std=cifar10.std, max_pixel_value=1.0
                 ),  # Normalizing
-                A.Lambda(ToTensor)
+                A.Lambda(ToTensor),
             ]
         )
 
@@ -107,20 +117,25 @@ class _cifar10_dataset(datasets.CIFAR10):
         self.input_shape = (3, 32, 32)
 
     def __getitem__(self, index) -> Tuple[np.ndarray, np.ndarray]:
-        img, target = self.data[index], int(self.targets[index]) # img shape: (H, W, C)
+        img, target = self.data[index], int(self.targets[index])  # img shape: (H, W, C)
 
         # converting img from a uint8 np array (with range 0-255) to float32 np array (with range 0-1)
         # and channels last.
         img = img.astype(np.float32) / 255
 
         if self.transform is not None:
-            if isinstance(self.transform, (A.BasicTransform, A.core.composition.BaseCompose)):
+            if isinstance(
+                self.transform, (A.BasicTransform, A.core.composition.BaseCompose)
+            ):
                 img = self.transform(image=img)["image"]
             else:
                 img = self.transform(img)
 
         if self.target_transform is not None:
-            if isinstance(self.target_transform, (A.BasicTransform, A.core.composition.BaseCompose)):
+            if isinstance(
+                self.target_transform,
+                (A.BasicTransform, A.core.composition.BaseCompose),
+            ):
                 target = self.target_transform(image=target)["image"]
             else:
                 target = self.target_transform(target)
