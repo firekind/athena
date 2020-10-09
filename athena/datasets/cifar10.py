@@ -67,8 +67,8 @@ class cifar10(BaseDataset):
             [
                 A.Lambda(ToNumpy),
                 A.Normalize(
-                    mean=datasets.cifar10.mean,
-                    std=datasets.cifar10.std,
+                    mean=cifar10.mean,
+                    std=cifar10.std,
                     max_pixel_value=1.0,
                 ),
                 A.PadIfNeeded(40, 40, border_mode=cv2.BORDER_CONSTANT, value=0),
