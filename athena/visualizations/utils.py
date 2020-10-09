@@ -7,7 +7,7 @@ from matplotlib.axes import Axes
 
 def plot_grid(
     number: int,
-    plot_fn: Callable[[int, Axes]],
+    plot_fn: Callable[[int, Axes], None],
     figsize: Tuple[int, int] = (10, 15),
     save_path: str = None,
 ):
@@ -16,7 +16,7 @@ def plot_grid(
 
     Args:
         number (int): The number of images to plot.
-        plot_fn (Callable[[int, Axes]]): The function to be called for each plot in the grid.\
+        plot_fn (Callable[[int, Axes], None]): The function to be called for each plot in the grid.\
             The 1D index of the plot and the `matplotlib.axes.Axes` will be passed as arguments.\
             Typically this function actually plots the graph / image using ``plt.plot``, \
             ``plt.imshow``, etc.
