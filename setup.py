@@ -12,6 +12,7 @@ setuptools.setup(
         "tensorboard~=2.2.0",
         "albumentations~=0.4.6",
         "opencv-python~=4.4.0.42",
-        "pytorch-lightning~=0.9.0"
+        "pytorch-lightning~=0.9.0",
+        "ipympl~=0.5.8"
     ]
 )
