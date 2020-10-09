@@ -1,19 +1,21 @@
 import os
 import shutil
-from pathlib import Path
 from inspect import signature
-from typing import Any, Dict, Tuple, Union
+from pathlib import Path
+from typing import Any, Callable, Dict, Tuple, Union
 
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from athena.solvers.base_solver import BaseSolver
+from athena.tuning import LRFinder
 from athena.utils import ProgbarCallback
 from athena.visualizations import (
-    plot_misclassified,
     gradcam_misclassified,
+    plot_misclassified,
     plot_scalars,
 )
+from matplotlib.axes import Axes
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
@@ -37,7 +39,6 @@ class Experiment:
 
         Args:
             name (str): The name of the experiment.
-            model (nn.Module): The model that the experiment is acting on.
             solver (BaseSolver): The solver the experiment is using.
             epochs (int): The number of epochs to train for.
             train_loader (DataLoader): The train ``DataLoader``.
@@ -55,6 +56,7 @@ class Experiment:
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.log_dir = log_dir
+        self.lr_finder = None
 
         if (
             os.path.exists(log_dir)
@@ -66,7 +68,7 @@ class Experiment:
                 " training from scratch or specify a checkpoint to resume from."
             )
 
-        if force_restart:
+        if force_restart and os.path.exists(log_dir):
             shutil.rmtree(log_dir)
 
         if "gpus" not in trainer_args and torch.cuda.is_available():
@@ -98,6 +100,103 @@ class Experiment:
             self.solver,
             train_dataloader=self.train_loader,
             val_dataloaders=self.val_loader,
+        )
+
+    def lr_range_test(
+        self,
+        criterion: Callable,
+        validate: bool = True,
+        start_lr: float = None,
+        end_lr: float = 1,
+        num_iter: int = 100,
+        step_mode: str = "exp",
+        smooth_f: float = 0.05,
+        diverge_th: float = 5,
+        accumulation_steps: int = 1,
+        non_blocking_transfer: bool = True,
+    ):
+        """
+        Performs the LR range test.
+
+        Args:
+            criterion (Callable): The loss function.
+            validate (bool, optional): If True, uses the validation dataset specified to validate every \
+                step of the range test. Defaults to True.
+            start_lr (float, optional): The starting learning rate of the range test. If ``None``, uses the lr from \
+                the optimizer. Defaults to None.
+            end_lr (float, optional): The final lr. Defaults to 1.
+            num_iter (int, optional): The number of iterations that the test should happen for. Defaults to 100.
+            step_mode (str, optional): The step mode. Can be one of "exp" or "linear". Defaults to "exp".
+            smooth_f (float, optional): the loss smoothing factor within the [0, 1[ interval. Disabled if set to \
+                0, otherwise the loss is smoothed using exponential smoothing. Default: 0.05.
+            diverge_th (int, optional): the test is stopped when the loss surpasses the threshold: \
+                diverge_th * best_loss. Default: 5.
+            accumulation_steps (int, optional): steps for gradient accumulation. If it is 1, gradients are not \
+                accumulated. Default: 1.
+            non_blocking_transfer (bool, optional): when non_blocking_transfer is set, tries to convert/move \
+                data to the device asynchronously if possible, e.g., moving CPU Tensors with pinned memory \
+                to CUDA devices. Default: True.
+        """
+
+        # creating fresh copy of optimizer (without an lr scheduler)
+        optimizer = self.solver.optimizer.__class__(
+            self.model.parameters(), **self.solver.optimizer.__dict__["defaults"]
+        )
+
+        self.lr_finder = LRFinder(
+            self.model,
+            optimizer,
+            criterion,
+            device="cuda" if torch.cuda.is_available() else "cpu",
+        )
+
+        self.lr_finder.range_test(
+            self.train_loader,
+            self.val_loader if validate else None,
+            start_lr=start_lr,
+            end_lr=end_lr,
+            num_iter=num_iter,
+            step_mode=step_mode,
+            smooth_f=smooth_f,
+            diverge_th=diverge_th,
+            accumulation_steps=accumulation_steps,
+            non_blocking_transfer=non_blocking_transfer,
+        )
+        self.lr_finder.plot()
+        self.lr_finder.reset()
+
+    def plot_lr_finder(
+        self,
+        skip_start: int = 10,
+        skip_end: int = 5,
+        log_lr: bool = True,
+        show_lr: float = None,
+        ax: Axes = None,
+        suggest_lr: bool = True,
+    ) -> Union[Axes, Tuple[Axes, float]]:
+        """
+        Plots the results of the lr range test.
+
+        Args:
+            skip_start (int, optional): How many readings to skip from the beginning. Defaults to 10.
+            skip_end (int, optional): How many reading to skip from the end. Defaults to 5.
+            log_lr (bool, optional): Whether the x-axis should be in log scale or not. Defaults to True.
+            show_lr (float, optional): Draws a vertical line at this number. Defaults to None.
+            ax (Axes, optional): A matplotlib axes. If specified, figure will be plotted using this. Defaults to None.
+            suggest_lr (bool, optional): Whether to suggest an lr or not. Defaults to True.
+
+        Raises:
+            ValueError: When an lr range test hasn't been performed.
+
+        Returns:
+            Union[Axes, Tuple[Axes, float]]: The matplotlib ``Axes`` and the suggested lr, if any and if specified.
+        """
+
+        if self.lr_finder is None:
+            raise ValueError("Run a LR range test first.")
+
+        return self.lr_finder.plot(
+            skip_start, skip_end, log_lr, show_lr, ax, suggest_lr
         )
 
     def plot_misclassified(
@@ -187,7 +286,7 @@ class Experiment:
             figsize (Tuple[int, int], optional): The size of the figure. Defaults to (15, 10).
             save_path (str, optional): The path to save tht plot to. Defaults to None.
         """
-        
+
         plot_scalars(self.log_dir, figsize=figsize, save_path=save_path)
 
     def get_solver(self) -> "BaseSolver":
