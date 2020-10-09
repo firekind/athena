@@ -5,6 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 from matplotlib import axes
 import numpy as np
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,6 +13,7 @@ from torch.utils.data import DataLoader
 
 from athena.utils.transforms import UnNormalize
 from .utils import plot_grid
+from athena.utils import get_misclassified
 
 
 class GradCam:
@@ -248,7 +250,7 @@ class GradCamPP(GradCam):
 
 
 def overlay_gradcam_mask(
-    mask: torch.Tensor, image: torch.Tensor, alpha: float = 1.0
+    mask: torch.Tensor, image: torch.Tensor, opacity: float = 1.0
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Overlays the heatmap mask on the image, and also converts the heatmap mask
@@ -257,7 +259,7 @@ def overlay_gradcam_mask(
     Args:
         mask (torch.Tensor): The mask. Should have shape as ``(H, W)``
         image (torch.Tensor): The image to apply the mask on. Should have shape as ``(C, H, W)``
-        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+        opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
 
     Returns:
         Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of 
@@ -273,7 +275,7 @@ def overlay_gradcam_mask(
     heatmap = torch.from_numpy(heatmap).permute(2, 0, 1).float().div(255)
 
     # converting bgr to rgb (cuz of opencv) and applying transparency
-    heatmap = heatmap[[2, 1, 0], :, :] * alpha
+    heatmap = heatmap[[2, 1, 0], :, :] * opacity
 
     # overlaying the heatmap with input image
     result = heatmap + image.cpu()
@@ -285,7 +287,7 @@ def overlay_gradcam_mask(
 
 
 def apply_gradcam(
-    model: nn.Module,
+    module: pl.LightningModule,
     target_layer: nn.Module,
     image: torch.Tensor,
     transform: Callable = None,
@@ -300,7 +302,7 @@ def apply_gradcam(
     returns the result.
 
     Args:
-        model (nn.Module): The model to use.
+        module (pl.LightningModule): The model to use.
         target_layer (nn.Module): The layer the gradcam algorithm should be applied on.
         image (torch.Tensor): The image to use. SHape: ``(C, H, W)``
         transform (Callable, optional): The transform to apply on the image before sending it\
@@ -323,9 +325,9 @@ def apply_gradcam(
 
     # creating the gradcam object
     if use_gradcampp:
-        cam = GradCamPP(model.to(device), target_layer.to(device))
+        cam = GradCamPP(module.to(device), target_layer.to(device))
     else:
-        cam = GradCam(model.to(device), target_layer.to(device))
+        cam = GradCam(module.to(device), target_layer.to(device))
 
     # transforming image
     transformed_image = transform(image) if transform is not None else image
@@ -341,7 +343,7 @@ def apply_gradcam(
 
 
 def plot_gradcam(
-    model: nn.Module,
+    module: pl.LightningModule,
     target_layer: nn.Module,
     image: torch.Tensor,
     transform: Callable = None,
@@ -357,7 +359,7 @@ def plot_gradcam(
     Applies gradcam and plots it on a matplotlib figure.
 
     Args:
-        model (nn.Module): The model to use.
+        module (pl.LightningModule): The model to use.
         target_layer (nn.Module): The layer the gradcam algorithm should be applied on.
         image (torch.Tensor): The image to use. SHape: ``(C, H, W)``
         transform (Callable, optional): The transform to apply on the image before sending it\
@@ -375,7 +377,7 @@ def plot_gradcam(
     """
     # generating overlaid image
     _, overlaid = apply_gradcam(
-        model,
+        module,
         target_layer,
         image,
         transform,
@@ -417,7 +419,7 @@ def gradcam_misclassified(
     save_path: str = None,
     mean: Tuple = None,
     std: Tuple = None,
-    alpha: float = 1.0
+    opacity: float = 1.0
 ):
     """
     Plots gradcam to the misclassified images of the experiment.
@@ -435,12 +437,12 @@ def gradcam_misclassified(
             this before overlaying. Defaults to None.
         std (Tuple, optional): The std of the dataset. If given, image will be unnormalized using \
             this before overlaying. Defaults to None.
-        alpha (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+        opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
     """
 
     # getting data of the misclassified images
-    image_data, predicted, actual = experiment.get_solver().get_misclassified(
-        dataloader, device
+    image_data, predicted, actual = get_misclassified(
+        experiment.get_solver(), dataloader, device
     )
 
     # generating the array to store the misclassified images
@@ -469,7 +471,7 @@ def gradcam_misclassified(
         overlays[idx] = overlay_gradcam_mask(
             heatmap_mask,
             image if unnormalize is None else unnormalize(image),
-            alpha
+            opacity
         )[1]
 
     # plot results

@@ -1,12 +1,19 @@
 import os
+import shutil
+from pathlib import Path
 from inspect import signature
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from athena.solvers.base_solver import BaseSolver
 from athena.utils import ProgbarCallback
+from athena.visualizations import (
+    plot_misclassified,
+    gradcam_misclassified,
+    plot_scalars,
+)
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
@@ -21,6 +28,8 @@ class Experiment:
         val_loader: DataLoader,
         log_dir: str,
         trainer_args: Dict[str, Any],
+        resume_from_checkpoint: str = None,
+        force_restart: bool = False,
     ):
         """
         Bundles information regarding an experiment. An experiment is performed on a model, with
@@ -35,6 +44,9 @@ class Experiment:
             val_loader (DataLoader): The validation ``DataLoader``.
             log_dir (str): The log directory.
             trainer_args (Dict[str, Any]): Additional arguments to be given to ``pl.Trainer``.
+            resume_from_checkpoint (str, optional): The path to the checkpoint to resume training from.
+            force_restart (bool, optional): If True, deletes old checkpoints and restarts training from beginning. \
+                Defaults to False.
         """
 
         self.name = name
@@ -44,6 +56,19 @@ class Experiment:
         self.val_loader = val_loader
         self.log_dir = log_dir
 
+        if (
+            os.path.exists(log_dir)
+            and len(os.listdir(log_dir)) != 0
+            and not force_restart
+        ):
+            raise FileExistsError(
+                f"The directory '{log_dir}' is not empty. Use the force_restart property to start"
+                " training from scratch or specify a checkpoint to resume from."
+            )
+
+        if force_restart:
+            shutil.rmtree(log_dir)
+
         if "gpus" not in trainer_args and torch.cuda.is_available():
             trainer_args["gpus"] = 1
 
@@ -52,9 +77,14 @@ class Experiment:
         else:
             trainer_args["callbacks"] = [ProgbarCallback()]
 
-        tensorboard_logger = TensorBoardLogger(log_dir, name="")
+        tensorboard_logger = TensorBoardLogger(
+            Path(log_dir).parent, name="", version=name
+        )
         self.trainer = pl.Trainer(
-            max_epochs=epochs, logger=tensorboard_logger, **trainer_args
+            max_epochs=epochs,
+            logger=tensorboard_logger,
+            resume_from_checkpoint=resume_from_checkpoint,
+            **trainer_args,
         )
 
     def run(self):
@@ -69,6 +99,96 @@ class Experiment:
             train_dataloader=self.train_loader,
             val_dataloaders=self.val_loader,
         )
+
+    def plot_misclassified(
+        self,
+        number: int = 25,
+        save_path: str = None,
+        figsize: Tuple[int, int] = (10, 15),
+        class_labels: Tuple = None,
+        mean: Tuple = None,
+        std: Tuple = None,
+    ):
+        """
+        Plots the images misclassified by the model of this experiment. Will work only
+        for classification type solvers.
+
+        Args:
+            number (int, optional): The number of misclassified images to plot. Defaults to 25.
+            save_path (str, optional): The path to save the plot to. Defaults to None.
+            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (10, 15).
+            class_labels (Tuple, optional): The class labels, if any. Defaults to None.
+            mean (Tuple, optional): The mean of the dataset, used to un-normalize the data \
+                before plotting. Defaults to None.
+            std (Tuple, optional): The std of the dataset, used to un-normalize the data \
+                before plotting. Defaults to None.
+        """
+        plot_misclassified(
+            number,
+            self,
+            self.val_loader,
+            device="cuda" if torch.cuda.is_available() else "cpu",
+            save_path=save_path,
+            figsize=figsize,
+            class_labels=class_labels,
+            mean=mean,
+            std=std,
+        )
+
+    def gradcam_misclassified(
+        self,
+        target_layer: nn.Module,
+        number: int = 25,
+        class_labels: Tuple = None,
+        figsize: Tuple[int, int] = (10, 15),
+        save_path: str = None,
+        mean: Tuple = None,
+        std: Tuple = None,
+        opacity: float = 1.0,
+    ):
+        """
+        Plots gradcam using the misclassified images of the experiment.
+
+        Args:
+            target_layer (nn.Module): The target layer for gradcam.
+            number (int): The number of misclassified images on which gradcam should be applied.
+            class_labels (Tuple, optional): The class labels. Defaults to None.
+            figsize (Tuple[int, int], optional): Size of the plot. Defaults to (10, 15).
+            save_path (str, optional): Path to save the plot. Defaults to None.
+            mean (Tuple, optional): The mean of the dataset. If given, image will be unnormalized using \
+                this before overlaying. Defaults to None.
+            std (Tuple, optional): The std of the dataset. If given, image will be unnormalized using \
+                this before overlaying. Defaults to None.
+            opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
+        """
+        gradcam_misclassified(
+            number=number,
+            experiment=self,
+            target_layer=target_layer,
+            dataloader=self.val_loader,
+            device="cuda" if torch.cuda.is_available() else "cpu",
+            save_path=save_path,
+            figsize=figsize,
+            class_labels=class_labels,
+            mean=mean,
+            std=std,
+            opacity=opacity,
+        )
+
+    def plot_scalars(
+        self,
+        figsize: Tuple[int, int] = (15, 10),
+        save_path: str = None,
+    ):
+        """
+        Plots the tenorboard scalars as a matplotlib figure.
+
+        Args:
+            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (15, 10).
+            save_path (str, optional): The path to save tht plot to. Defaults to None.
+        """
+        
+        plot_scalars(self.log_dir, figsize=figsize, save_path=save_path)
 
     def get_solver(self) -> "BaseSolver":
         """
@@ -146,13 +266,13 @@ class ExperimentBuilder:
         optimizer = self._solver["optimizer"]["cls"](
             model.parameters(),
             *self._solver["optimizer"]["args"],
-            **self._solver["optimizer"]["kwargs"]
+            **self._solver["optimizer"]["kwargs"],
         )
         scheduler = (
             self._solver["scheduler"]["cls"](
                 optimizer,
                 *self._solver["scheduler"]["args"],
-                **self._solver["scheduler"]["kwargs"]
+                **self._solver["scheduler"]["kwargs"],
             )
             if self._solver.get("scheduler") is not None
             else None
@@ -162,7 +282,7 @@ class ExperimentBuilder:
             model=model,
             optimizer=optimizer,
             scheduler=scheduler,
-            **self._solver["other_args"]
+            **self._solver["other_args"],
         )
 
         exp = Experiment(
@@ -172,9 +292,10 @@ class ExperimentBuilder:
             train_loader=self._data["train"],
             val_loader=self._data["val"],
             trainer_args=self._props.get("trainer_args", {}),
-            log_dir=self._props.get(
-                "log_dir", os.path.join(self.parent.get_log_dir(), self._props["name"])
-            ),
+            log_dir=self._props.get("log_dir")
+            or os.path.join(self.parent.get_log_dir(), self._props["name"]),
+            resume_from_checkpoint=self._props.get("resume_from_checkpoint"),
+            force_restart=self._props.get("force_restart", False),
         )
 
         # if there is a parent `ExperimentsBuilder`, sending the created ``Experiment``
@@ -211,7 +332,11 @@ class ExperimentBuilder:
             ExperimentBuilder: Object of this class.
         """
 
-        self._props["log_dir"] = path
+        assert (
+            self._props.get("name") is not None
+        ), "Set the name of the experiment first."
+
+        self._props["log_dir"] = os.path.join(path, self._props["name"])
         return self
 
     def trainer_args(self, args: Dict[str, Any]) -> "ExperimentBuilder":
@@ -283,6 +408,28 @@ class ExperimentBuilder:
         """
 
         self._props["epochs"] = epochs
+        return self
+
+    def resume_from_checkpoint(self, path: str) -> "ExperimentBuilder":
+        """
+        Sets the checkpoint to resume from.
+
+        Args:
+            path (str): The path to resume from.
+
+        Returns:
+            ExperimentBuilder: Object of this class.
+        """
+
+        self._props["resume_from_checkpoint"] = path
+        return self
+
+    def force_restart(self, value: bool = True) -> "ExperimentBuilder":
+        """
+        Deletes old log directory and starts training from scratch.
+        """
+
+        self._props["force_restart"] = value
         return self
 
     def props(self) -> "ExperimentBuilder":

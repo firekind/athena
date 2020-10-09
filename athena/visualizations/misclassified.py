@@ -6,16 +6,17 @@ from matplotlib import axes
 import torch
 from torch.utils.data import DataLoader
 
-from athena import ClassificationSolver, Experiment
+from athena.solvers import ClassificationSolver
 from athena.utils.transforms import UnNormalize
 from .utils import plot_grid
+from athena.utils import get_misclassified
 
 
 def plot_misclassified(
     number: int,
-    experiment: Experiment,
+    experiment: "Experiment",
     data_loader: DataLoader,
-    device: str,
+    device: str = None,
     save_path: str = None,
     figsize: Tuple[int, int] = (10, 15),
     cmap: str = "gray_r",
@@ -30,7 +31,8 @@ def plot_misclassified(
         number (int): The number of misclassified images to plot.
         experiment (Experiment): The experiment that should be used to get the misclassified images
         data_loader (DataLoader): The ``DataLoader`` of the input data
-        device (str): A valid pytorch device string.
+        device (str, optional): A valid pytorch device string. Defaults to None. If None, will use \
+            the ``experiment``'s device.
         save_path (str, optional): The path to save the plot. Defaults to None.
         figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).
         cmap (str, optional): The cmap to use while plotting. Defaults to 'gray_r'
@@ -56,8 +58,8 @@ def plot_misclassified(
         unorm = None
 
     # getting the misclassified images by forward proping the model
-    image_data, predicted, actual = experiment.get_solver().get_misclassified(
-        data_loader, device
+    image_data, predicted, actual = get_misclassified(
+        experiment.get_solver(), data_loader, device
     )
 
     if image_data.ndim == 3:

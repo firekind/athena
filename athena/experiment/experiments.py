@@ -1,17 +1,20 @@
 import os
-from typing import Dict, Optional
+from typing import Optional, Tuple
 
 from .experiment import Experiment, ExperimentBuilder
 
+from collections import OrderedDict
+from athena.visualizations import plot_scalars
+
 
 class Experiments:
-    def __init__(self, name: str, experiments: Dict, log_dir: str = None):
+    def __init__(self, name: str, experiments: OrderedDict, log_dir: str = None):
         """
         Defines experiments that has to be run one after the other.
 
         Args:
             name (str): The name of the list of experiments.
-            experiments (Dict): The name-experiment key value pairs.
+            experiments (OrderedDict): The name-experiment key value pairs.
             log_dir (str, optional): The parent of the directory where the logs should be stored. \
                 the logs will be stored in the directory ``os.path.join(log_dir, name)``.
         """
@@ -28,8 +31,27 @@ class Experiments:
         for _, exp in self.experiments.items():
             exp.run()
 
+    def plot_scalars(
+        self,
+        figsize: Tuple[int, int] = (15, 10),
+        save_path: str = None,
+    ):
+        """
+        Plots the tenorboard scalars as a matplotlib figure.
+
+        Args:
+            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (15, 10).
+            save_path (str, optional): The path to save tht plot to. Defaults to None.
+        """
+        plot_scalars(self.log_dir, figsize, save_path)
+
     def __getitem__(self, name):
-        return self.experiments[name]
+        if type(name) == "str":
+            return self.experiments[name]
+        else:
+            idx = name
+            name = list(self.experiments.keys())[idx]
+            return self.experiments[name]
 
     def __iter__(self):
         for name, obj in self.experiments.items():
@@ -53,7 +75,7 @@ class ExperimentsBuilder:
         A Builder interface for the :class:`Experiments`.
         """
 
-        self.experiments = {}
+        self.experiments = OrderedDict()
         self.props = {}
 
     def add(self, name) -> ExperimentBuilder:
