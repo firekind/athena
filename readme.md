@@ -1,6 +1,6 @@
 # Project Athena
 
-Project Athena is a python package which helps in experimenting with various iterations of a deep learning model. The core of this package is the `Experiment` object, which contains the information about an experiment, and also the information obtained while training.
+Project Athena is a simple wrapper aroung pytorch lightning that helps in quickly defining experiments around a deep learning model.
 
 ## Installation
 
@@ -28,12 +28,11 @@ to make the virtual environment and install an editable version of athena. Then 
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
-from athena import datasets, Experiments, ClassificationSolver
+from athena import datasets, Experiment, ClassificationSolver
 from athena.models import MnistNet
 
 # defining batch size and device
 batch_size = 128 if torch.cuda.is_available() else 64
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # creating the datasets 
 train_loader = (
@@ -54,16 +53,17 @@ test_loader = (
 # creating the experiment
 exp = (
     Experiment.builder()
-    .name("Ghost batch norm with 2 splits")
-    .model(MnistNet(use_ghost_batch_norm=True))
+    .props()
+        .name("MNIST with ghost batch norm with 2 splits")
+        .log_directory("./logs")
+    .data()
+        .train_loader(train_loader)
+        .val_loader(test_loader)
     .solver(ClassificationSolver)
+        .epochs(10)
+        .model(MnistNet(use_ghost_batch_norm=True))
         .optimizer(optim.SGD, lr=0.01, momentum=0.9)
         .scheduler(StepLR, step_size=8, gamma=0.1)
-        .epochs(epochs)
-        .train_loader(train_loader)
-        .test_loader(test_loader)
-        .device(device)
-        .build()
     .build()
 )
 
