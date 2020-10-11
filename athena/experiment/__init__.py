@@ -5,6 +5,8 @@ from inspect import signature
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -115,7 +117,7 @@ class Experiment:
         diverge_th: float = 5,
         accumulation_steps: int = 1,
         non_blocking_transfer: bool = True,
-    ):
+    ) -> Tuple[float, float]:
         """
         Performs the LR range test.
 
@@ -137,6 +139,10 @@ class Experiment:
             non_blocking_transfer (bool, optional): when non_blocking_transfer is set, tries to convert/move \
                 data to the device asynchronously if possible, e.g., moving CPU Tensors with pinned memory \
                 to CUDA devices. Default: True.
+
+        Returns:
+            Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \
+                rate when the loss was the least.
         """
 
         # creating fresh copy of optimizer (without an lr scheduler)
@@ -166,15 +172,31 @@ class Experiment:
         self.lr_finder.plot()
         self.lr_finder.reset()
 
+        steepest_lr = None
+        lr_with_least_loss = self.lr_finder.history["lr"][
+            self.lr_finder.history["loss"].index(self.lr_finder.best_loss)
+        ]
+
+        # finding lr with steepest gradient (minimal gradient)
+        try:
+            min_grad_idx = np.gradient(
+                np.array(self.lr_finder.history["loss"][10:-5])
+            ).argmin()
+            steepest_lr = self.lr_finder.history["lr"][min_grad_idx]
+        except ValueError:
+            print("Failed to compute the gradients, there might not be enough points.")
+
+        return steepest_lr, lr_with_least_loss
+
     def plot_lr_finder(
         self,
         skip_start: int = 10,
         skip_end: int = 5,
         log_lr: bool = True,
         show_lr: float = None,
-        ax: Axes = None,
         suggest_lr: bool = True,
-    ) -> Union[Axes, Tuple[Axes, float]]:
+        save_path: str = None,
+    ) -> Tuple[float, float]:
         """
         Plots the results of the lr range test.
 
@@ -183,22 +205,34 @@ class Experiment:
             skip_end (int, optional): How many reading to skip from the end. Defaults to 5.
             log_lr (bool, optional): Whether the x-axis should be in log scale or not. Defaults to True.
             show_lr (float, optional): Draws a vertical line at this number. Defaults to None.
-            ax (Axes, optional): A matplotlib axes. If specified, figure will be plotted using this. Defaults to None.
             suggest_lr (bool, optional): Whether to suggest an lr or not. Defaults to True.
+            save_path (str, optional): Path to save the plot. Defaults to None.
 
         Raises:
             ValueError: When an lr range test hasn't been performed.
 
         Returns:
-            Union[Axes, Tuple[Axes, float]]: The matplotlib ``Axes`` and the suggested lr, if any and if specified.
+            Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \
+                rate when the loss was the least.
         """
 
         if self.lr_finder is None:
             raise ValueError("Run a LR range test first.")
 
-        return self.lr_finder.plot(
-            skip_start, skip_end, log_lr, show_lr, ax, suggest_lr
-        )
+        fig, ax = plt.subplots()
+        res = self.lr_finder.plot(skip_start, skip_end, log_lr, show_lr, ax, suggest_lr)
+
+        if save_path is not None:
+            fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
+
+        steepest_lr = None
+        lr_with_least_loss = self.lr_finder.history["lr"][
+            self.lr_finder.history["loss"].index(self.lr_finder.best_loss)
+        ]
+        if type(res) == tuple:
+            steepest_lr = res[-1]
+
+        return steepest_lr, lr_with_least_loss
 
     def plot_misclassified(
         self,
