@@ -24,6 +24,10 @@ except ImportError:
 
 
 class DataLoaderIter(object):
+    """
+    Base class for :class:`TrainDataLoaderIter` and :class:`ValDataLoaderIter`.
+    """
+
     def __init__(self, data_loader):
         self.data_loader = data_loader
         self._iterator = iter(data_loader)
@@ -33,6 +37,19 @@ class DataLoaderIter(object):
         return self.data_loader.dataset
 
     def inputs_labels_from_batch(self, batch_data):
+        """
+        This method should be overriden when the batch is not a tuple or list.
+
+        Args:
+            batch_data (Any): The data from the batch.
+
+        Raises:
+            ValueError: When the type of the data is not a tuple or a list.
+
+        Returns:
+            Tuple: The inputs and labels.
+        """
+
         if not isinstance(batch_data, list) and not isinstance(batch_data, tuple):
             raise ValueError(
                 "Your batch type is not supported: {}. Please inherit from "
@@ -53,6 +70,9 @@ class DataLoaderIter(object):
 
 
 class TrainDataLoaderIter(DataLoaderIter):
+    """
+    Iterates through the dataset in a cyclic manner.
+    """
     def __init__(self, data_loader, auto_reset=True):
         super().__init__(data_loader)
         self.auto_reset = auto_reset
@@ -73,10 +93,12 @@ class TrainDataLoaderIter(DataLoaderIter):
 
 class ValDataLoaderIter(DataLoaderIter):
     """This iterator will reset itself **only** when it is acquired by
-    the syntax of normal `iterator`. That is, this iterator just works
-    like a `torch.data.DataLoader`. If you want to restart it, you
+    the syntax of normal ``iterator``. That is, this iterator just works
+    like a ``torch.data.DataLoader``. If you want to restart it, you
     should use it like:
-        ```
+    
+    .. code-block:: python
+
         loader_iter = ValDataLoaderIter(data_loader)
         for batch in loader_iter:
             ...
@@ -86,7 +108,7 @@ class ValDataLoaderIter(DataLoaderIter):
             ...
         # 2. passing it into `iter()` manually
         loader_iter = iter(loader_iter)  # __iter__ is called by `iter()`
-        ```
+    
     """
 
     def __init__(self, data_loader):
@@ -111,7 +133,8 @@ class LRFinder(object):
     between two boundaries in a linear or exponential manner. It provides valuable
     information on how well the network can be trained over a range of learning rates
     and what is the optimal learning rate.
-    Arguments:
+
+    Args:
         model (torch.nn.Module): wrapped model.
         optimizer (torch.optim.Optimizer): wrapped optimizer where the defined learning
             is assumed to be the lower boundary of the range test.
@@ -119,21 +142,27 @@ class LRFinder(object):
         device (str or torch.device, optional): a string ("cpu" or "cuda") with an
             optional ordinal for the device type (e.g. "cuda:X", where is the ordinal).
             Alternatively, can be an object representing the device on which the
-            computation will take place. Default: None, uses the same device as `model`.
+            computation will take place. Default: None, uses the same device as ``model``.
         memory_cache (boolean, optional): if this flag is set to True, `state_dict` of
             model and optimizer will be cached in memory. Otherwise, they will be saved
-            to files under the `cache_dir`.
+            to files under the ``cache_dir``.
         cache_dir (string, optional): path for storing temporary files. If no path is
             specified, system-wide temporary directory is used. Notice that this
-            parameter will be ignored if `memory_cache` is True.
+            parameter will be ignored if ``memory_cache`` is True.
     Example:
         >>> lr_finder = LRFinder(net, optimizer, criterion, device="cuda")
         >>> lr_finder.range_test(dataloader, end_lr=100, num_iter=100)
         >>> lr_finder.plot() # to inspect the loss-learning rate graph
         >>> lr_finder.reset() # to reset the model and optimizer to their initial state
+    
     Reference:
-    Cyclical Learning Rates for Training Neural Networks: https://arxiv.org/abs/1506.01186
-    fastai/lr_find: https://github.com/fastai/fastai
+
+    * `Cyclical Learning Rates for Training Neural Networks`_
+
+    * `fastai/lr_find`_
+
+    .. _Cyclical Learning Rates for Training Neural Networks: https://arxiv.org/abs/1506.01186
+    .. _fastai/lr_find: https://github.com/fastai/fastai
     """
 
     def __init__(
@@ -189,25 +218,27 @@ class LRFinder(object):
         accumulation_steps=1,
         non_blocking_transfer=True,
     ):
-        """Performs the learning rate range test.
-        Arguments:
-            train_loader (`torch.utils.data.DataLoader`
-                or child of `TrainDataLoaderIter`, optional):
+        """
+        Performs the learning rate range test.
+
+        Args:
+            train_loader (``torch.utils.data.DataLoader`` \
+                *or child of* ``TrainDataLoaderIter``, *optional*):
                 the training set data loader.
                 If your dataset (data loader) returns a tuple (inputs, labels,*) then
                 Pytorch data loader object can be provided. However, if a dataset
                 returns different outputs e.g. dicts, then you should inherit
-                from `TrainDataLoaderIter` class and redefine `inputs_labels_from_batch`
+                from ``TrainDataLoaderIter`` class and redefine ``inputs_labels_from_batch``
                 method so that it outputs (inputs, labels).
-            val_loader (`torch.utils.data.DataLoader`
-                or child of `ValDataLoaderIter`, optional): if `None` the range test
+            val_loader (``torch.utils.data.DataLoader`` \
+                *or child of* ``ValDataLoaderIter``, *optional*): if ``None`` the range test
                 will only use the training loss. When given a data loader, the model is
                 evaluated after each iteration on that dataset and the evaluation loss
                 is used. Note that in this mode the test takes significantly longer but
                 generally produces more precise results.
-                Similarly to `train_loader`, if your dataset outputs are not standard
-                you should inherit from `ValDataLoaderIter` class and
-                redefine method `inputs_labels_from_batch` so that
+                Similarly to ``train_loader``, if your dataset outputs are not standard
+                you should inherit from ``ValDataLoaderIter`` class and
+                redefine method ``inputs_labels_from_batch`` so that
                 it outputs (inputs, labels). Default: None.
             start_lr (float, optional): the starting learning rate for the range test.
                 Default: None (uses the learning rate from the optimizer).
@@ -226,21 +257,29 @@ class LRFinder(object):
             non_blocking_transfer (bool, optional): when non_blocking_transfer is set,
                 tries to convert/move data to the device asynchronously if possible,
                 e.g., moving CPU Tensors with pinned memory to CUDA devices. Default: True.
+
         Example (fastai approach):
+
             >>> lr_finder = LRFinder(net, optimizer, criterion, device="cuda")
             >>> lr_finder.range_test(dataloader, end_lr=100, num_iter=100)
+
         Example (Leslie Smith's approach):
+
             >>> lr_finder = LRFinder(net, optimizer, criterion, device="cuda")
             >>> lr_finder.range_test(trainloader, val_loader=val_loader, end_lr=1, num_iter=100, step_mode="linear")
+            
         Gradient accumulation is supported; example:
+
             >>> train_data = ...    # prepared dataset
             >>> desired_bs, real_bs = 32, 4         # batch size
             >>> accumulation_steps = desired_bs // real_bs     # required steps for accumulation
             >>> dataloader = torch.utils.data.DataLoader(train_data, batch_size=real_bs, shuffle=True)
             >>> acc_lr_finder = LRFinder(net, optimizer, criterion, device="cuda")
             >>> acc_lr_finder.range_test(dataloader, end_lr=10, num_iter=100, accumulation_steps=accumulation_steps)
-        If your DataLoader returns e.g. dict, or other non standard output, intehit from TrainDataLoaderIter,
-        redefine method `inputs_labels_from_batch` so that it outputs (inputs, lables) data:
+
+        If your DataLoader returns e.g. dict, or other non standard output, inherit from TrainDataLoaderIter,
+        redefine method ``inputs_labels_from_batch`` so that it outputs (inputs, lables) data:
+
             >>> import torch_lr_finder
             >>> class TrainIter(torch_lr_finder.TrainDataLoaderIter):
             >>>     def inputs_labels_from_batch(self, batch_data):
@@ -248,10 +287,14 @@ class LRFinder(object):
             >>> train_data_iter = TrainIter(train_dl)
             >>> finder = torch_lr_finder.LRFinder(model, optimizer, partial(model._train_loss, need_one_hot=False))
             >>> finder.range_test(train_data_iter, end_lr=10, num_iter=300, diverge_th=10)
+
         Reference:
-        [Training Neural Nets on Larger Batches: Practical Tips for 1-GPU, Multi-GPU & Distributed setups](
-        https://medium.com/huggingface/ec88c3e51255)
-        [thomwolf/gradient_accumulation](https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3)
+        
+        * `Training Neural Nets on Larger Batches: Practical Tips for 1-GPU, Multi-GPU & Distributed setups`_        
+        * `thomwolf/gradient_accumulation`_
+
+        .. _Training Neural Nets on Larger Batches\: Practical Tips for 1-GPU, Multi-GPU & Distributed setups: https://medium.com/huggingface/ec88c3e51255
+        .. _thomwolf/gradient_accumulation: https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3
         """
 
         # Reset test results
@@ -438,7 +481,8 @@ class LRFinder(object):
         suggest_lr=True,
     ):
         """Plots the learning rate range test.
-        Arguments:
+
+        Args:
             skip_start (int, optional): number of batches to trim from the start.
                 Default: 10.
             skip_end (int, optional): number of batches to trim from the start.
@@ -530,7 +574,8 @@ class LRFinder(object):
 class LinearLR(_LRScheduler):
     """Linearly increases the learning rate between two boundaries over a number of
     iterations.
-    Arguments:
+
+    Args:
         optimizer (torch.optim.Optimizer): wrapped optimizer.
         end_lr (float): the final learning rate.
         num_iter (int): the number of iterations over which the test occurs.
@@ -546,7 +591,11 @@ class LinearLR(_LRScheduler):
 
         super(LinearLR, self).__init__(optimizer, last_epoch)
 
-    def get_lr(self):
+    def get_lr(self) -> float:
+        """
+        Calculates and returns the lr for the current step.
+        """
+
         # In earlier Pytorch versions last_epoch starts at -1, while in recent versions
         # it starts at 0. We need to adjust the math a bit to handle this. See
         # discussion at: https://github.com/davidtvs/pytorch-lr-finder/pull/42
@@ -562,7 +611,8 @@ class LinearLR(_LRScheduler):
 class ExponentialLR(_LRScheduler):
     """Exponentially increases the learning rate between two boundaries over a number of
     iterations.
-    Arguments:
+    
+    Args:
         optimizer (torch.optim.Optimizer): wrapped optimizer.
         end_lr (float): the final learning rate.
         num_iter (int): the number of iterations over which the test occurs.
@@ -578,7 +628,11 @@ class ExponentialLR(_LRScheduler):
 
         super(ExponentialLR, self).__init__(optimizer, last_epoch)
 
-    def get_lr(self):
+    def get_lr(self) -> float:
+        """
+        Calculates and returns the lr for the current step.
+        """
+
         # In earlier Pytorch versions last_epoch starts at -1, while in recent versions
         # it starts at 0. We need to adjust the math a bit to handle this. See
         # discussion at: https://github.com/davidtvs/pytorch-lr-finder/pull/42

@@ -13,6 +13,7 @@ Welcome to Athena's documentation!
    apis/athena.layers
    apis/athena.models
    apis/athena.solvers
+   apis/athena.tuning
    apis/athena.utils
    apis/athena.visualizations
 
