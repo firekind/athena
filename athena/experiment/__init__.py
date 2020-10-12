@@ -281,6 +281,10 @@ class Experiment:
         """
         if self.solver.scheduler is not None:
             raise ValueError("Scheduler is already defined.")
+        
+        # although it seems to not make a difference, sometimes setting optimizer's
+        # ``lr = max_lr`` helps
+        self._set_optimizer_lr(max_lr)
 
         self.solver.scheduler = torch.optim.lr_scheduler.OneCycleLR(
             self.solver.optimizer,
@@ -417,6 +421,17 @@ class Experiment:
             ExperimentBuilder: The builder interface for ``Experiment``.
         """
         return ExperimentBuilder()
+
+    def _set_optimizer_lr(self, lr: float):
+        """
+        Sets the lr for the optimizer.
+
+        Args:
+            lr (float): The new lr.
+        """
+
+        for param_group in self.solver.optimizer.param_groups:
+            param_group['lr'] = lr
 
 
 class ExperimentBuilder:
