@@ -70,5 +70,3 @@ exp = (
 # running experiment
 exp.run()
 ```
-
-for more info, take a look at the [documentation](https://firekind.github.io/athena).
