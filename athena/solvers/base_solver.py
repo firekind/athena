@@ -3,7 +3,7 @@ from typing import Dict
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import Optimizer, _LRScheduler
+from torch.optim.lr_scheduler import Optimizer, _LRScheduler, OneCycleLR
 
 
 class BaseSolver(pl.LightningModule):
@@ -37,7 +37,11 @@ class BaseSolver(pl.LightningModule):
         if self.scheduler is None:
             return self.optimizer
 
-        return [self.optimizer], [self.scheduler]
+        scheduler = self.scheduler
+        if isinstance(scheduler, OneCycleLR):
+            scheduler = {"scheduler": scheduler, "interval": "step"}
+
+        return [self.optimizer], [scheduler]
 
     def get_lr_log_dict(self) -> Dict[str, float]:
         """
