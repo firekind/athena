@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="athena",
-    version="1.0.0",
+    version="0.0.1-beta",
     author="Shyamant Achar",
     packages=setuptools.find_packages(),
     python_requires='>=3.6.8',
