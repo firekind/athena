@@ -3,7 +3,7 @@ import shutil
 from collections import OrderedDict
 from inspect import signature
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -108,7 +108,7 @@ class Experiment:
     def lr_range_test(
         self,
         criterion: Callable,
-        validate: bool = True,
+        validate: bool = False,
         start_lr: float = None,
         end_lr: float = 1,
         num_iter: int = 100,
@@ -124,7 +124,7 @@ class Experiment:
         Args:
             criterion (Callable): The loss function.
             validate (bool, optional): If True, uses the validation dataset specified to validate every \
-                step of the range test. Defaults to True.
+                step of the range test. Defaults to False.
             start_lr (float, optional): The starting learning rate of the range test. If ``None``, uses the lr from \
                 the optimizer. Defaults to None.
             end_lr (float, optional): The final lr. Defaults to 1.
@@ -147,14 +147,16 @@ class Experiment:
 
         # creating fresh copy of optimizer (without an lr scheduler)
         optimizer = self.solver.optimizer.__class__(
-            self.model.parameters(), **self.solver.optimizer.__dict__["defaults"]
+            self.get_model().parameters(), **self.solver.optimizer.__dict__["defaults"]
         )
 
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
         self.lr_finder = LRFinder(
-            self.model,
+            self.get_model().to(device),
             optimizer,
             criterion,
-            device="cuda" if torch.cuda.is_available() else "cpu",
+            device=device,
         )
 
         self.lr_finder.range_test(
@@ -169,7 +171,7 @@ class Experiment:
             accumulation_steps=accumulation_steps,
             non_blocking_transfer=non_blocking_transfer,
         )
-        self.lr_finder.plot()
+        res = self.lr_finder.plot()
         self.lr_finder.reset()
 
         steepest_lr = None
@@ -177,14 +179,8 @@ class Experiment:
             self.lr_finder.history["loss"].index(self.lr_finder.best_loss)
         ]
 
-        # finding lr with steepest gradient (minimal gradient)
-        try:
-            min_grad_idx = np.gradient(
-                np.array(self.lr_finder.history["loss"][10:-5])
-            ).argmin()
-            steepest_lr = self.lr_finder.history["lr"][min_grad_idx]
-        except ValueError:
-            print("Failed to compute the gradients, there might not be enough points.")
+        if type(res) == tuple:
+            steepest_lr = res[-1]
 
         return steepest_lr, lr_with_least_loss
 
@@ -233,6 +229,75 @@ class Experiment:
             steepest_lr = res[-1]
 
         return steepest_lr, lr_with_least_loss
+
+    def fit_one_cycle(
+        self,
+        max_lr: float,
+        max_at_epoch: int,
+        anneal_strategy: str = "cos",
+        cycle_momentum: bool = True,
+        base_momentum: Union[float, List] = 0.85,
+        max_momentum: Union[float, List] = 0.95,
+        div_factor: float = 8,
+        final_div_factor: float = 1e4,
+        last_epoch: int = -1,
+        verbose: bool = False,
+    ):
+        """
+        Trains the network using the One Cycle Policy. This policy was initially described in 
+        the paper `Super-Convergence: Very Fast Training of Neural Networks Using Large Learning Rates`_.
+
+        Args:
+            max_lr (float): Upper learning rate boundaries in the cycle for each parameter group.
+            max_at_epoch (int): Epoch at which the lr should be ``max_lr``.
+            anneal_strategy (str, optional): {‘cos’, ‘linear’} Specifies the annealing strategy: “cos” \
+                for cosine annealing, “linear” for linear annealing. Defaults to "cos".
+            cycle_momentum (bool, optional): If True, momentum is cycled inversely to learning rate \
+                between ``base_momentum`` and ``max_momentum``. Defaults to ``True``.
+            base_momentum (Union[float, List], optional): Lower momentum boundaries in the cycle for \
+                each parameter group. Note that momentum is cycled inversely to learning rate; at the \
+                peak of a cycle, momentum is ``base_momentum`` and learning rate is ``max_lr``. \
+                Defaults to 0.85.
+            max_momentum (Union[float, List], optional): Upper momentum boundaries in the cycle for \
+                each parameter group. Functionally, it defines the cycle amplitude \
+                (``max_momentum`` - ``base_momentum``). Note that momentum is cycled inversely to \
+                learning rate; at the start of a cycle, momentum is ``max_momentum`` and learning \
+                rate is ``base_lr``. Defaults to 0.95.
+            div_factor (float, optional): Determines the initial learning rate via \
+                ``initial_lr`` = ``max_lr``/``div_factor``. Defaults to 8.
+            final_div_factor (float, optional): Determines the minimum learning rate via \
+                ``min_lr`` = ``initial_lr``/``final_div_factor``. Defaults to 1e4.
+            last_epoch (int, optional): The index of the last batch. This parameter is used when resuming \
+                a training job. Since ``step()`` should be invoked after each batch instead of after each \
+                epoch, this number represents the total number of *batches* computed, not the total number \
+                of epochs computed. When ``last_epoch`` = -1, the schedule is started from the beginning. \
+                Defaults to -1.
+            verbose (bool, optional): If ``True``, prints a message to stdout for each update. Defaults to ``False``.
+
+        Raises:
+            ValueError: When a scheduler is already set for the solver.
+
+        .. _Super-Convergence\: Very Fast Training of Neural Networks Using Large Learning Rates: https://arxiv.org/abs/1708.07120
+        """
+        if self.solver.scheduler is not None:
+            raise ValueError("Scheduler is already defined.")
+
+        self.solver.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            self.solver.optimizer,
+            max_lr,
+            epochs=self.epochs,
+            steps_per_epoch=len(self.train_loader),
+            pct_start=max_at_epoch / self.epochs,
+            anneal_strategy=anneal_strategy,
+            cycle_momentum=cycle_momentum,
+            base_momentum=base_momentum,
+            max_momentum=max_momentum,
+            div_factor=div_factor,
+            final_div_factor=final_div_factor,
+            last_epoch=last_epoch,
+        )
+
+        self.run()
 
     def plot_misclassified(
         self,

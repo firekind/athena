@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -36,3 +38,22 @@ class BaseSolver(pl.LightningModule):
             return self.optimizer
 
         return [self.optimizer], [self.scheduler]
+
+    def get_lr_log_dict(self) -> Dict[str, float]:
+        """
+        Gets the learning rates from the optimizer.
+
+        Returns:
+            Dict[str, float]: A dict with containing the learning rates of each param \
+                group.
+        """
+
+        data = {}
+
+        if len(self.optimizer.param_groups) == 1:
+            data["lr"] = self.optimizer.param_groups[0]["lr"]
+        else:
+            for idx, param_group in enumerate(self.optimizer.param_groups):
+                data[f"param_group_{idx}_lr"] = param_group["lr"]
+            
+        return data

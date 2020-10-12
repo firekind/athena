@@ -44,6 +44,7 @@ class ClassificationSolver(BaseSolver):
             "loss": loss,
             "acc": avg_running_acc,
             "progress_bar": {"train accuracy": avg_running_acc},
+            "log": self.get_lr_log_dict()
         }
 
     def training_epoch_end(self, outputs):
