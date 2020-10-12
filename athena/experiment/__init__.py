@@ -108,6 +108,7 @@ class Experiment:
     def lr_range_test(
         self,
         criterion: Callable,
+        acc_fn: Callable = None,
         validate: bool = False,
         start_lr: float = None,
         end_lr: float = 1,
@@ -117,12 +118,15 @@ class Experiment:
         diverge_th: float = 5,
         accumulation_steps: int = 1,
         non_blocking_transfer: bool = True,
+        figsize: Tuple[int, int] = (8, 6),
+        save_path: str = None,
     ) -> Tuple[float, float]:
         """
         Performs the LR range test.
 
         Args:
             criterion (Callable): The loss function.
+            acc_fn (Callable): The accuracy function. Defaults to ``None``.
             validate (bool, optional): If True, uses the validation dataset specified to validate every \
                 step of the range test. Defaults to False.
             start_lr (float, optional): The starting learning rate of the range test. If ``None``, uses the lr from \
@@ -139,6 +143,8 @@ class Experiment:
             non_blocking_transfer (bool, optional): when non_blocking_transfer is set, tries to convert/move \
                 data to the device asynchronously if possible, e.g., moving CPU Tensors with pinned memory \
                 to CUDA devices. Default: True.
+            figsize (Tuple[int, int], optional): Size of the plot. Defaults to ``(8, 6)``.
+            save_path (str, optional): Path to save the figure. Defaults to ``None``.
 
         Returns:
             Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \
@@ -156,6 +162,7 @@ class Experiment:
             self.get_model().to(device),
             optimizer,
             criterion,
+            acc_fn=acc_fn,
             device=device,
         )
 
@@ -171,7 +178,9 @@ class Experiment:
             accumulation_steps=accumulation_steps,
             non_blocking_transfer=non_blocking_transfer,
         )
-        res = self.lr_finder.plot()
+
+        fig, ax = plt.subplots(figsize=figsize)
+        res = self.lr_finder.plot(ax=ax)
         self.lr_finder.reset()
 
         steepest_lr = None
@@ -182,6 +191,9 @@ class Experiment:
         if type(res) == tuple:
             steepest_lr = res[-1]
 
+        if save_path is not None:
+            fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
+
         return steepest_lr, lr_with_least_loss
 
     def plot_lr_finder(
@@ -191,7 +203,9 @@ class Experiment:
         log_lr: bool = True,
         show_lr: float = None,
         suggest_lr: bool = True,
+        figsize: Tuple[int, int] = (8, 6),
         save_path: str = None,
+        plot_mode: str = "loss",
     ) -> Tuple[float, float]:
         """
         Plots the results of the lr range test.
@@ -199,10 +213,13 @@ class Experiment:
         Args:
             skip_start (int, optional): How many readings to skip from the beginning. Defaults to 10.
             skip_end (int, optional): How many reading to skip from the end. Defaults to 5.
-            log_lr (bool, optional): Whether the x-axis should be in log scale or not. Defaults to True.
-            show_lr (float, optional): Draws a vertical line at this number. Defaults to None.
-            suggest_lr (bool, optional): Whether to suggest an lr or not. Defaults to True.
-            save_path (str, optional): Path to save the plot. Defaults to None.
+            log_lr (bool, optional): Whether the x-axis should be in log scale or not. Defaults to ``True``.
+            show_lr (float, optional): Draws a vertical line at this number. Defaults to ``None``.
+            suggest_lr (bool, optional): Whether to suggest an lr or not. Defaults to ``True``.
+            figsize (Tuple[int, int]): The size of the plot. Defaults to ``(8, 6)``.
+            save_path (str, optional): Path to save the plot. Defaults to ``None``.
+            plot_mode (str, optional): {'loss', 'acc'} Whether to plot loss vs lr or accuracy vs lr. \
+                Defaults to 'loss'.
 
         Raises:
             ValueError: When an lr range test hasn't been performed.
@@ -215,8 +232,10 @@ class Experiment:
         if self.lr_finder is None:
             raise ValueError("Run a LR range test first.")
 
-        fig, ax = plt.subplots()
-        res = self.lr_finder.plot(skip_start, skip_end, log_lr, show_lr, ax, suggest_lr)
+        fig, ax = plt.subplots(figsize=figsize)
+        res = self.lr_finder.plot(
+            skip_start, skip_end, log_lr, show_lr, ax, suggest_lr, plot_mode
+        )
 
         if save_path is not None:
             fig.savefig(save_path, bbox_inches="tight", pad_inches=0.25)
@@ -281,7 +300,7 @@ class Experiment:
         """
         if self.solver.scheduler is not None:
             raise ValueError("Scheduler is already defined.")
-        
+
         # although it seems to not make a difference, sometimes setting optimizer's
         # ``lr = max_lr`` helps
         self._set_optimizer_lr(max_lr)
@@ -431,7 +450,7 @@ class Experiment:
         """
 
         for param_group in self.solver.optimizer.param_groups:
-            param_group['lr'] = lr
+            param_group["lr"] = lr
 
 
 class ExperimentBuilder:

@@ -5,14 +5,15 @@ and added ability to plot acc vs lr
 
 import copy
 import os
-import torch
-import numpy as np
-from tqdm.autonotebook import tqdm
-from torch.optim.lr_scheduler import _LRScheduler
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
 
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from athena.utils.progbar import Kbar
 from packaging import version
+from torch.optim.lr_scheduler import _LRScheduler
+from torch.utils.data import DataLoader
+from tqdm.autonotebook import tqdm
 
 PYTORCH_VERSION = version.parse(torch.__version__)
 
@@ -74,6 +75,7 @@ class TrainDataLoaderIter(DataLoaderIter):
     """
     Iterates through the dataset in a cyclic manner.
     """
+
     def __init__(self, data_loader, auto_reset=True):
         super().__init__(data_loader)
         self.auto_reset = auto_reset
@@ -97,7 +99,7 @@ class ValDataLoaderIter(DataLoaderIter):
     the syntax of normal ``iterator``. That is, this iterator just works
     like a ``torch.data.DataLoader``. If you want to restart it, you
     should use it like:
-    
+
     .. code-block:: python
 
         loader_iter = ValDataLoaderIter(data_loader)
@@ -109,7 +111,7 @@ class ValDataLoaderIter(DataLoaderIter):
             ...
         # 2. passing it into `iter()` manually
         loader_iter = iter(loader_iter)  # __iter__ is called by `iter()`
-    
+
     """
 
     def __init__(self, data_loader):
@@ -140,6 +142,7 @@ class LRFinder(object):
         optimizer (torch.optim.Optimizer): wrapped optimizer where the defined learning
             is assumed to be the lower boundary of the range test.
         criterion (torch.nn.Module): wrapped loss function.
+        acc_fn (Callable, optional): The function to calculate accuracy.
         device (str or torch.device, optional): a string ("cpu" or "cuda") with an
             optional ordinal for the device type (e.g. "cuda:X", where is the ordinal).
             Alternatively, can be an object representing the device on which the
@@ -155,7 +158,7 @@ class LRFinder(object):
         >>> lr_finder.range_test(dataloader, end_lr=100, num_iter=100)
         >>> lr_finder.plot() # to inspect the loss-learning rate graph
         >>> lr_finder.reset() # to reset the model and optimizer to their initial state
-    
+
     Reference:
 
     * `Cyclical Learning Rates for Training Neural Networks`_
@@ -183,8 +186,9 @@ class LRFinder(object):
         self.model = model
         self.criterion = criterion
         self.acc_fn = acc_fn
-        self.history = {"lr": [], "loss": []}
+        self.history = {"lr": [], "loss": [], "acc": []}
         self.best_loss = None
+        self.best_acc = None
         self.memory_cache = memory_cache
         self.cache_dir = cache_dir
 
@@ -349,7 +353,9 @@ class LRFinder(object):
                     "or child of `ValDataLoaderIter`.".format(type(val_loader))
                 )
 
-        for iteration in tqdm(range(num_iter)):
+        pbar = Kbar(num_iter)
+        print("Running LR Finder:", flush=True)
+        for iteration in range(num_iter):
             # Train on batch and retrieve loss
             loss, acc = self._train_batch(
                 train_iter,
@@ -368,11 +374,16 @@ class LRFinder(object):
             # Track the best loss and smooth it if smooth_f is specified
             if iteration == 0:
                 self.best_loss = loss
+                self.best_acc = acc
             else:
                 if smooth_f > 0:
                     loss = smooth_f * loss + (1 - smooth_f) * self.history["loss"][-1]
+                    if acc is not None:
+                        acc = smooth_f * acc + (1 - smooth_f) * self.history["acc"][-1]
                 if loss < self.best_loss:
                     self.best_loss = loss
+                if acc is not None and acc > self.best_acc:
+                    self.best_acc = acc
 
             # Check if the loss has diverged; if it has, stop the test
             self.history["loss"].append(loss)
@@ -383,7 +394,7 @@ class LRFinder(object):
                 print("Stopping early, the loss has diverged")
                 break
 
-        print("Learning rate search finished. See the graph with {finder_name}.plot()")
+            pbar.add(1)
 
     def _set_learning_rate(self, new_lrs):
         if not isinstance(new_lrs, list):
@@ -506,7 +517,7 @@ class LRFinder(object):
         show_lr=None,
         ax=None,
         suggest_lr=True,
-        mode="loss"
+        mode="loss",
     ):
         """Plots the learning rate range test.
 
@@ -528,7 +539,7 @@ class LRFinder(object):
                 you can use that point as a first guess for an LR. Will only be calculated
                 when plot mode is "loss". Default: True.
             mode (str, optional): If "loss", plots loss vs learning rate curve. if
-                "acc", plots accuracy vs learning rate curve. Default: "loss"
+                "acc", plots accuracy vs learning rate curve. Default: "loss".
         Returns:
             The matplotlib.axes.Axes object that contains the plot,
             and the suggested learning rate (if set suggest_lr=True).
@@ -569,9 +580,8 @@ class LRFinder(object):
             ax.plot(lrs, accs)
 
         # Plot the suggested LR
-        if suggest_lr and mode != "acc":
+        if suggest_lr:
             # 'steepest': the point with steepest gradient (minimal gradient)
-            print("LR suggestion: steepest gradient")
             min_grad_idx = None
             try:
                 min_grad_idx = (np.gradient(np.array(losses))).argmin()
@@ -580,15 +590,16 @@ class LRFinder(object):
                     "Failed to compute the gradients, there might not be enough points."
                 )
             if min_grad_idx is not None:
-                print("Suggested LR: {:.2E}".format(lrs[min_grad_idx]))
                 ax.scatter(
                     lrs[min_grad_idx],
-                    losses[min_grad_idx],
+                    losses[min_grad_idx] if mode == "loss" else accs[min_grad_idx],
                     s=75,
                     marker="o",
                     color="red",
                     zorder=3,
-                    label="steepest gradient",
+                    label="Suggestion:\nsteepest gradient (w.r.t loss): {:.2E}".format(
+                        lrs[min_grad_idx]
+                    ),
                 )
                 ax.legend()
 
@@ -604,11 +615,8 @@ class LRFinder(object):
         if fig is not None:
             plt.show()
 
-        if mode != "acc":
-            if suggest_lr and min_grad_idx:
-                return ax, lrs[min_grad_idx]
-            else:
-                return ax
+        if suggest_lr and min_grad_idx:
+            return ax, lrs[min_grad_idx]
         else:
             return ax
 
@@ -653,7 +661,7 @@ class LinearLR(_LRScheduler):
 class ExponentialLR(_LRScheduler):
     """Exponentially increases the learning rate between two boundaries over a number of
     iterations.
-    
+
     Args:
         optimizer (torch.optim.Optimizer): wrapped optimizer.
         end_lr (float): the final learning rate.
