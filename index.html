@@ -132,6 +132,7 @@
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -218,12 +219,11 @@ various parameters that are to be used for the experiment.</p>
 <span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">StepLR</span>
 
-<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">Experiments</span><span class="p">,</span> <span class="n">ClassificationSolver</span>
+<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ClassificationSolver</span>
 <span class="kn">from</span> <span class="nn">athena.models</span> <span class="kn">import</span> <span class="n">MnistNet</span>
 
 <span class="c1"># defining batch size and device</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">128</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">64</span>
-<span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
 
 <span class="c1"># creating the datasets</span>
 <span class="n">train_loader</span> <span class="o">=</span> <span class="p">(</span>
@@ -244,16 +244,17 @@ various parameters that are to be used for the experiment.</p>
 <span class="c1"># creating the experiment</span>
 <span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
    <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-   <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+   <span class="o">.</span><span class="n">props</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;MNIST with ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">data</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">val_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
    <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
       <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">build</span><span class="p">()</span>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 
@@ -271,27 +272,24 @@ various parameters that are to be used for the experiment.</p>
    <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;MNIST experiments)</span>
    <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+      <span class="o">.</span><span class="n">data</span><span class="p">()</span>
+         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">val_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
          <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
          <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">build</span><span class="p">()</span>
       <span class="o">.</span><span class="n">build</span><span class="p">()</span>
-
    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;Ghost batch norm with 4 splits&quot;</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+      <span class="o">.</span><span class="n">data</span><span class="p">()</span>
+         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">val_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
       <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_splits</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
          <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
          <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-         <span class="o">.</span><span class="n">build</span><span class="p">()</span>
       <span class="o">.</span><span class="n">build</span><span class="p">()</span>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
@@ -307,17 +305,18 @@ various parameters that are to be used for the experiment.</p>
 
 <span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
    <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-   <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;ResNet with custom loss function&quot;</span><span class="p">)</span>
-   <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">ResNet32</span><span class="p">())</span>
+   <span class="o">.</span><span class="n">props</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;ResNet with custom loss function&quot;</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">data</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">val_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
    <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
       <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
       <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">test_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">custom_loss_fn</span><span class="p">)</span> <span class="c1"># specifying loss function to use</span>
-      <span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-      <span class="o">.</span><span class="n">build</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">custom_loss_fn</span><span class="p">)</span>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 

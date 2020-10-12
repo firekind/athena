@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -210,16 +211,17 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 
-<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">ClassificationSolver</span><span class="p">,</span> <span class="n">Experiment</span>
+<span class="kn">from</span> <span class="nn">athena.solvers</span> <span class="kn">import</span> <span class="n">ClassificationSolver</span>
 <span class="kn">from</span> <span class="nn">athena.utils.transforms</span> <span class="kn">import</span> <span class="n">UnNormalize</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">plot_grid</span>
+<span class="kn">from</span> <span class="nn">athena.utils</span> <span class="kn">import</span> <span class="n">get_misclassified</span>
 
 
 <div class="viewcode-block" id="plot_misclassified"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.misclassified.plot_misclassified">[docs]</a><span class="k">def</span> <span class="nf">plot_misclassified</span><span class="p">(</span>
     <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">experiment</span><span class="p">:</span> <span class="n">Experiment</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="p">:</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">,</span>
     <span class="n">data_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
-    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
     <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gray_r&quot;</span><span class="p">,</span>
@@ -234,7 +236,8 @@
 <span class="sd">        number (int): The number of misclassified images to plot.</span>
 <span class="sd">        experiment (Experiment): The experiment that should be used to get the misclassified images</span>
 <span class="sd">        data_loader (DataLoader): The ``DataLoader`` of the input data</span>
-<span class="sd">        device (str): A valid pytorch device string.</span>
+<span class="sd">        device (str, optional): A valid pytorch device string. Defaults to None. If None, will use \</span>
+<span class="sd">            the ``experiment``&#39;s device.</span>
 <span class="sd">        save_path (str, optional): The path to save the plot. Defaults to None.</span>
 <span class="sd">        figsize (Tuple[int, int], optional): The size of the plot. Defaults to (10, 15).</span>
 <span class="sd">        cmap (str, optional): The cmap to use while plotting. Defaults to &#39;gray_r&#39;</span>
@@ -260,8 +263,8 @@
         <span class="n">unorm</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># getting the misclassified images by forward proping the model</span>
-    <span class="n">image_data</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_misclassified</span><span class="p">(</span>
-        <span class="n">data_loader</span><span class="p">,</span> <span class="n">device</span>
+    <span class="n">image_data</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span> <span class="o">=</span> <span class="n">get_misclassified</span><span class="p">(</span>
+        <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">(),</span> <span class="n">data_loader</span><span class="p">,</span> <span class="n">device</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">image_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>

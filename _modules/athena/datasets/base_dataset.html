@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -203,20 +204,15 @@
               
   <h1>Source code for athena.datasets.base_dataset</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Sampler</span><span class="p">,</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Sampler</span>
 
-<span class="kn">from</span> <span class="nn">athena.builder</span> <span class="kn">import</span> <span class="n">Buildable</span>
 
-<div class="viewcode-block" id="BaseDataset"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset">[docs]</a><span class="k">class</span> <span class="nc">BaseDataset</span><span class="p">(</span><span class="n">Buildable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseDataset"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset">[docs]</a><span class="k">class</span> <span class="nc">BaseDataset</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The base class for datasets. Enables the use of a builder style API.</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            parent (Buildable, optional): The parent builder interface. Defaults to \</span>
-<span class="sd">                ``None``.</span>
 
 <span class="sd">        Default values of various parameters (if not set using the builder API):</span>
 <span class="sd">            * **root** *(str)*: ``&quot;./data&quot;``.</span>
@@ -251,7 +247,6 @@
 
 <span class="sd">            * **use_default_transforms** *(bool)*: ``False``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_train</span> <span class="o">=</span> <span class="kc">True</span>
@@ -526,6 +521,15 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Callable: The transform.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="BaseDataset.build"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.build">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the dataset.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataLoader: The dataloader of the dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div></div>
 </pre></div>
 

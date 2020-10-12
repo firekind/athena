@@ -29,7 +29,7 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="athena.layers package" href="athena.layers.html" />
+    <link rel="next" title="athena.experiment package" href="athena.experiment.html" />
     <link rel="prev" title="athena package" href="athena.html" /> 
 
   
@@ -129,9 +129,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="athena.html">athena package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.experiment.html">athena.experiment package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -232,8 +234,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.datasets.mnist.mnist.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.create" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.datasets.mnist.mnist.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/mnist.html#mnist.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.mnist.mnist.build" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -304,8 +306,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.datasets.cifar10.cifar10.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.create" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.datasets.cifar10.cifar10.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/cifar10.html#cifar10.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.cifar10.cifar10.build" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dataset and returns a pytorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -323,6 +325,9 @@
 <dd><p>Default cifar10 training transforms. Performs</p>
 <ul class="simple">
 <li><p>Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)</p></li>
+<li><p>Random crop of 32x32 (after padding it by 4 on each side)</p></li>
+<li><p>Random horizontal flip</p></li>
+<li><p>8x8 Cutout</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -359,14 +364,9 @@
 <p>The base class which all datasets that want to use the builder API must implement.</p>
 <span class="target" id="module-athena.datasets.base_dataset"></span><dl class="py class">
 <dt id="athena.datasets.base_dataset.BaseDataset">
-<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.base_dataset.</code><code class="sig-name descname">BaseDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.builder.Buildable</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.base_dataset.</code><code class="sig-name descname">BaseDataset</code><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The base class for datasets. Enables the use of a builder style API.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface. Defaults to                 <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-</dd>
-</dl>
 <dl class="simple">
 <dt>Default values of various parameters (if not set using the builder API):</dt><dd><ul class="simple">
 <li><p><strong>root</strong> <em>(str)</em>: <code class="docutils literal notranslate"><span class="pre">&quot;./data&quot;</span></code>.</p></li>
@@ -716,6 +716,20 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="athena.datasets.base_dataset.BaseDataset.build">
+<em class="property">abstract </em><code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/base_dataset.html#BaseDataset.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.base_dataset.BaseDataset.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The dataloader of the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -729,7 +743,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="athena.layers.html" class="btn btn-neutral float-right" title="athena.layers package" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="athena.experiment.html" class="btn btn-neutral float-right" title="athena.experiment package" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
         <a href="athena.html" class="btn btn-neutral" title="athena package" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>

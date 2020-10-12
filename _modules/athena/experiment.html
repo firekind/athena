@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -203,46 +204,425 @@
               
   <h1>Source code for athena.experiment</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">from</span> <span class="nn">athena.builder</span> <span class="kn">import</span> <span class="n">Buildable</span>
 <span class="kn">from</span> <span class="nn">athena.solvers.base_solver</span> <span class="kn">import</span> <span class="n">BaseSolver</span>
+<span class="kn">from</span> <span class="nn">athena.tuning</span> <span class="kn">import</span> <span class="n">LRFinder</span>
+<span class="kn">from</span> <span class="nn">athena.utils</span> <span class="kn">import</span> <span class="n">ProgbarCallback</span>
+<span class="kn">from</span> <span class="nn">athena.visualizations</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">gradcam_misclassified</span><span class="p">,</span>
+    <span class="n">plot_misclassified</span><span class="p">,</span>
+    <span class="n">plot_scalars</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span> <span class="nn">pytorch_lightning.loggers</span> <span class="kn">import</span> <span class="n">TensorBoardLogger</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 
 
 <div class="viewcode-block" id="Experiment"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment">[docs]</a><span class="k">class</span> <span class="nc">Experiment</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">solver</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">solver</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">val_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">trainer_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">resume_from_checkpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">force_restart</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bundles information regarding an experiment. An experiment is performed on a model, with</span>
-<span class="sd">        a ``Solver``.</span>
+<span class="sd">        a ``Solver`` (subclass of :class:`BaseSolver`.).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the experiment.</span>
-<span class="sd">            model (nn.Module): The model that the experiment is acting on.</span>
 <span class="sd">            solver (BaseSolver): The solver the experiment is using.</span>
+<span class="sd">            epochs (int): The number of epochs to train for.</span>
+<span class="sd">            train_loader (DataLoader): The train ``DataLoader``.</span>
+<span class="sd">            val_loader (DataLoader): The validation ``DataLoader``.</span>
+<span class="sd">            log_dir (str): The log directory.</span>
+<span class="sd">            trainer_args (Dict[str, Any]): Additional arguments to be given to ``pl.Trainer``.</span>
+<span class="sd">            resume_from_checkpoint (str, optional): The path to the checkpoint to resume training from.</span>
+<span class="sd">            force_restart (bool, optional): If True, deletes old checkpoints and restarts training from beginning. \</span>
+<span class="sd">                Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span> <span class="o">=</span> <span class="n">train_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span> <span class="o">=</span> <span class="n">val_loader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">log_dir</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_restart</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The directory &#39;</span><span class="si">{</span><span class="n">log_dir</span><span class="si">}</span><span class="s2">&#39; is not empty. Use the force_restart property to start&quot;</span>
+                <span class="s2">&quot; training from scratch or specify a checkpoint to resume from.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">force_restart</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">log_dir</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;gpus&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">trainer_args</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">trainer_args</span><span class="p">[</span><span class="s2">&quot;gpus&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="s2">&quot;callbacks&quot;</span> <span class="ow">in</span> <span class="n">trainer_args</span><span class="p">:</span>
+            <span class="n">trainer_args</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ProgbarCallback</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trainer_args</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ProgbarCallback</span><span class="p">()]</span>
+
+        <span class="n">tensorboard_logger</span> <span class="o">=</span> <span class="n">TensorBoardLogger</span><span class="p">(</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">name</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+            <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="n">tensorboard_logger</span><span class="p">,</span>
+            <span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="n">resume_from_checkpoint</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">trainer_args</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="Experiment.run"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Runs the experiment. More specifically, calls the ``BaseSolver.train`` method and saves the</span>
-<span class="sd">        ``History``.</span>
+<span class="sd">        Runs the experiment. More specifically, calls the ``pl.Trainer.fit`` method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m</span><span class="se">\033</span><span class="s2">[92m=&gt; Running experiment: </span><span class="si">%s</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">train</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+            <span class="n">train_dataloader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">,</span>
+            <span class="n">val_dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Experiment.get_solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.get_solver">[docs]</a>    <span class="k">def</span> <span class="nf">get_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseSolver</span><span class="p">:</span>
+<div class="viewcode-block" id="Experiment.lr_range_test"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.lr_range_test">[docs]</a>    <span class="k">def</span> <span class="nf">lr_range_test</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">start_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">num_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">step_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+        <span class="n">smooth_f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">diverge_th</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">accumulation_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">non_blocking_transfer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the LR range test.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            criterion (Callable): The loss function.</span>
+<span class="sd">            acc_fn (Callable): The accuracy function. Defaults to ``None``.</span>
+<span class="sd">            validate (bool, optional): If True, uses the validation dataset specified to validate every \</span>
+<span class="sd">                step of the range test. Defaults to False.</span>
+<span class="sd">            start_lr (float, optional): The starting learning rate of the range test. If ``None``, uses the lr from \</span>
+<span class="sd">                the optimizer. Defaults to None.</span>
+<span class="sd">            end_lr (float, optional): The final lr. Defaults to 1.</span>
+<span class="sd">            num_iter (int, optional): The number of iterations that the test should happen for. Defaults to 100.</span>
+<span class="sd">            step_mode (str, optional): The step mode. Can be one of &quot;exp&quot; or &quot;linear&quot;. Defaults to &quot;exp&quot;.</span>
+<span class="sd">            smooth_f (float, optional): the loss smoothing factor within the [0, 1[ interval. Disabled if set to \</span>
+<span class="sd">                0, otherwise the loss is smoothed using exponential smoothing. Default: 0.05.</span>
+<span class="sd">            diverge_th (int, optional): the test is stopped when the loss surpasses the threshold: \</span>
+<span class="sd">                diverge_th * best_loss. Default: 5.</span>
+<span class="sd">            accumulation_steps (int, optional): steps for gradient accumulation. If it is 1, gradients are not \</span>
+<span class="sd">                accumulated. Default: 1.</span>
+<span class="sd">            non_blocking_transfer (bool, optional): when non_blocking_transfer is set, tries to convert/move \</span>
+<span class="sd">                data to the device asynchronously if possible, e.g., moving CPU Tensors with pinned memory \</span>
+<span class="sd">                to CUDA devices. Default: True.</span>
+<span class="sd">            figsize (Tuple[int, int], optional): Size of the plot. Defaults to ``(8, 6)``.</span>
+<span class="sd">            save_path (str, optional): Path to save the figure. Defaults to ``None``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \</span>
+<span class="sd">                rate when the loss was the least.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># creating fresh copy of optimizer (without an lr scheduler)</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">criterion</span><span class="p">,</span>
+            <span class="n">acc_fn</span><span class="o">=</span><span class="n">acc_fn</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span> <span class="k">if</span> <span class="n">validate</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_lr</span><span class="o">=</span><span class="n">start_lr</span><span class="p">,</span>
+            <span class="n">end_lr</span><span class="o">=</span><span class="n">end_lr</span><span class="p">,</span>
+            <span class="n">num_iter</span><span class="o">=</span><span class="n">num_iter</span><span class="p">,</span>
+            <span class="n">step_mode</span><span class="o">=</span><span class="n">step_mode</span><span class="p">,</span>
+            <span class="n">smooth_f</span><span class="o">=</span><span class="n">smooth_f</span><span class="p">,</span>
+            <span class="n">diverge_th</span><span class="o">=</span><span class="n">diverge_th</span><span class="p">,</span>
+            <span class="n">accumulation_steps</span><span class="o">=</span><span class="n">accumulation_steps</span><span class="p">,</span>
+            <span class="n">non_blocking_transfer</span><span class="o">=</span><span class="n">non_blocking_transfer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="n">steepest_lr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">lr_with_least_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">][</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">best_loss</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="n">steepest_lr</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">steepest_lr</span><span class="p">,</span> <span class="n">lr_with_least_loss</span></div>
+
+<div class="viewcode-block" id="Experiment.plot_lr_finder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.plot_lr_finder">[docs]</a>    <span class="k">def</span> <span class="nf">plot_lr_finder</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">skip_start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">skip_end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">log_lr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">suggest_lr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;loss&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the results of the lr range test.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            skip_start (int, optional): How many readings to skip from the beginning. Defaults to 10.</span>
+<span class="sd">            skip_end (int, optional): How many reading to skip from the end. Defaults to 5.</span>
+<span class="sd">            log_lr (bool, optional): Whether the x-axis should be in log scale or not. Defaults to ``True``.</span>
+<span class="sd">            show_lr (float, optional): Draws a vertical line at this number. Defaults to ``None``.</span>
+<span class="sd">            suggest_lr (bool, optional): Whether to suggest an lr or not. Defaults to ``True``.</span>
+<span class="sd">            figsize (Tuple[int, int]): The size of the plot. Defaults to ``(8, 6)``.</span>
+<span class="sd">            save_path (str, optional): Path to save the plot. Defaults to ``None``.</span>
+<span class="sd">            plot_mode (str, optional): {&#39;loss&#39;, &#39;acc&#39;} Whether to plot loss vs lr or accuracy vs lr. \</span>
+<span class="sd">                Defaults to &#39;loss&#39;.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: When an lr range test hasn&#39;t been performed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \</span>
+<span class="sd">                rate when the loss was the least.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Run a LR range test first.&quot;</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">skip_start</span><span class="p">,</span> <span class="n">skip_end</span><span class="p">,</span> <span class="n">log_lr</span><span class="p">,</span> <span class="n">show_lr</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">suggest_lr</span><span class="p">,</span> <span class="n">plot_mode</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+        <span class="n">steepest_lr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">lr_with_least_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">][</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span><span class="o">.</span><span class="n">best_loss</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="n">steepest_lr</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">steepest_lr</span><span class="p">,</span> <span class="n">lr_with_least_loss</span></div>
+
+<div class="viewcode-block" id="Experiment.fit_one_cycle"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.fit_one_cycle">[docs]</a>    <span class="k">def</span> <span class="nf">fit_one_cycle</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">max_lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">max_at_epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">anneal_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cos&quot;</span><span class="p">,</span>
+        <span class="n">cycle_momentum</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">base_momentum</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.85</span><span class="p">,</span>
+        <span class="n">max_momentum</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">div_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">final_div_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e4</span><span class="p">,</span>
+        <span class="n">last_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains the network using the One Cycle Policy. This policy was initially described in </span>
+<span class="sd">        the paper `Super-Convergence: Very Fast Training of Neural Networks Using Large Learning Rates`_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_lr (float): Upper learning rate boundaries in the cycle for each parameter group.</span>
+<span class="sd">            max_at_epoch (int): Epoch at which the lr should be ``max_lr``.</span>
+<span class="sd">            anneal_strategy (str, optional): {‘cos’, ‘linear’} Specifies the annealing strategy: “cos” \</span>
+<span class="sd">                for cosine annealing, “linear” for linear annealing. Defaults to &quot;cos&quot;.</span>
+<span class="sd">            cycle_momentum (bool, optional): If True, momentum is cycled inversely to learning rate \</span>
+<span class="sd">                between ``base_momentum`` and ``max_momentum``. Defaults to ``True``.</span>
+<span class="sd">            base_momentum (Union[float, List], optional): Lower momentum boundaries in the cycle for \</span>
+<span class="sd">                each parameter group. Note that momentum is cycled inversely to learning rate; at the \</span>
+<span class="sd">                peak of a cycle, momentum is ``base_momentum`` and learning rate is ``max_lr``. \</span>
+<span class="sd">                Defaults to 0.85.</span>
+<span class="sd">            max_momentum (Union[float, List], optional): Upper momentum boundaries in the cycle for \</span>
+<span class="sd">                each parameter group. Functionally, it defines the cycle amplitude \</span>
+<span class="sd">                (``max_momentum`` - ``base_momentum``). Note that momentum is cycled inversely to \</span>
+<span class="sd">                learning rate; at the start of a cycle, momentum is ``max_momentum`` and learning \</span>
+<span class="sd">                rate is ``base_lr``. Defaults to 0.95.</span>
+<span class="sd">            div_factor (float, optional): Determines the initial learning rate via \</span>
+<span class="sd">                ``initial_lr`` = ``max_lr``/``div_factor``. Defaults to 8.</span>
+<span class="sd">            final_div_factor (float, optional): Determines the minimum learning rate via \</span>
+<span class="sd">                ``min_lr`` = ``initial_lr``/``final_div_factor``. Defaults to 1e4.</span>
+<span class="sd">            last_epoch (int, optional): The index of the last batch. This parameter is used when resuming \</span>
+<span class="sd">                a training job. Since ``step()`` should be invoked after each batch instead of after each \</span>
+<span class="sd">                epoch, this number represents the total number of *batches* computed, not the total number \</span>
+<span class="sd">                of epochs computed. When ``last_epoch`` = -1, the schedule is started from the beginning. \</span>
+<span class="sd">                Defaults to -1.</span>
+<span class="sd">            verbose (bool, optional): If ``True``, prints a message to stdout for each update. Defaults to ``False``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: When a scheduler is already set for the solver.</span>
+
+<span class="sd">        .. _Super-Convergence\: Very Fast Training of Neural Networks Using Large Learning Rates: https://arxiv.org/abs/1708.07120</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scheduler is already defined.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># although it seems to not make a difference, sometimes setting optimizer&#39;s</span>
+        <span class="c1"># ``lr = max_lr`` helps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_optimizer_lr</span><span class="p">(</span><span class="n">max_lr</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">OneCycleLR</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">max_lr</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">steps_per_epoch</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">),</span>
+            <span class="n">pct_start</span><span class="o">=</span><span class="n">max_at_epoch</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">anneal_strategy</span><span class="o">=</span><span class="n">anneal_strategy</span><span class="p">,</span>
+            <span class="n">cycle_momentum</span><span class="o">=</span><span class="n">cycle_momentum</span><span class="p">,</span>
+            <span class="n">base_momentum</span><span class="o">=</span><span class="n">base_momentum</span><span class="p">,</span>
+            <span class="n">max_momentum</span><span class="o">=</span><span class="n">max_momentum</span><span class="p">,</span>
+            <span class="n">div_factor</span><span class="o">=</span><span class="n">div_factor</span><span class="p">,</span>
+            <span class="n">final_div_factor</span><span class="o">=</span><span class="n">final_div_factor</span><span class="p">,</span>
+            <span class="n">last_epoch</span><span class="o">=</span><span class="n">last_epoch</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Experiment.plot_misclassified"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.plot_misclassified">[docs]</a>    <span class="k">def</span> <span class="nf">plot_misclassified</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+        <span class="n">class_labels</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mean</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">std</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the images misclassified by the model of this experiment. Will work only</span>
+<span class="sd">        for classification type solvers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            number (int, optional): The number of misclassified images to plot. Defaults to 25.</span>
+<span class="sd">            save_path (str, optional): The path to save the plot to. Defaults to None.</span>
+<span class="sd">            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (10, 15).</span>
+<span class="sd">            class_labels (Tuple, optional): The class labels, if any. Defaults to None.</span>
+<span class="sd">            mean (Tuple, optional): The mean of the dataset, used to un-normalize the data \</span>
+<span class="sd">                before plotting. Defaults to None.</span>
+<span class="sd">            std (Tuple, optional): The std of the dataset, used to un-normalize the data \</span>
+<span class="sd">                before plotting. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plot_misclassified</span><span class="p">(</span>
+            <span class="n">number</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+            <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">class_labels</span><span class="o">=</span><span class="n">class_labels</span><span class="p">,</span>
+            <span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Experiment.gradcam_misclassified"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.gradcam_misclassified">[docs]</a>    <span class="k">def</span> <span class="nf">gradcam_misclassified</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_layer</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+        <span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="n">class_labels</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mean</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">std</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots gradcam using the misclassified images of the experiment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_layer (nn.Module): The target layer for gradcam.</span>
+<span class="sd">            number (int): The number of misclassified images on which gradcam should be applied.</span>
+<span class="sd">            class_labels (Tuple, optional): The class labels. Defaults to None.</span>
+<span class="sd">            figsize (Tuple[int, int], optional): Size of the plot. Defaults to (10, 15).</span>
+<span class="sd">            save_path (str, optional): Path to save the plot. Defaults to None.</span>
+<span class="sd">            mean (Tuple, optional): The mean of the dataset. If given, image will be unnormalized using \</span>
+<span class="sd">                this before overlaying. Defaults to None.</span>
+<span class="sd">            std (Tuple, optional): The std of the dataset. If given, image will be unnormalized using \</span>
+<span class="sd">                this before overlaying. Defaults to None.</span>
+<span class="sd">            opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gradcam_misclassified</span><span class="p">(</span>
+            <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
+            <span class="n">experiment</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_layer</span><span class="o">=</span><span class="n">target_layer</span><span class="p">,</span>
+            <span class="n">dataloader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+            <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">class_labels</span><span class="o">=</span><span class="n">class_labels</span><span class="p">,</span>
+            <span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Experiment.plot_scalars"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.plot_scalars">[docs]</a>    <span class="k">def</span> <span class="nf">plot_scalars</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the tenorboard scalars as a matplotlib figure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (15, 10).</span>
+<span class="sd">            save_path (str, optional): The path to save tht plot to. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">plot_scalars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Experiment.get_solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.get_solver">[docs]</a>    <span class="k">def</span> <span class="nf">get_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Getter method for the solver.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            BaseSolver: The solver used in this experiment.</span>
+<span class="sd">            &quot;BaseSolver&quot;: The solver used in this experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span></div>
 
@@ -253,147 +633,304 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            nn.Module: The model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">model</span></div>
 
 <div class="viewcode-block" id="Experiment.builder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.builder">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">builder</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an object of the builder interface. Needs to be called if one wants</span>
 <span class="sd">        to use the builder pattern to define the ``Experiment``.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            parent (Buildable, optional): The parent builder interface. Defaults to None.</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            ExperimentBuilder: The builder interface for ``Experiment``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">ExperimentBuilder</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">ExperimentBuilder</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_optimizer_lr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the lr for the optimizer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lr (float): The new lr.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">param_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+            <span class="n">param_group</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lr</span></div>
 
 
-<div class="viewcode-block" id="ExperimentBuilder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder">[docs]</a><span class="k">class</span> <span class="nc">ExperimentBuilder</span><span class="p">(</span><span class="n">Buildable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ExperimentBuilder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder">[docs]</a><span class="k">class</span> <span class="nc">ExperimentBuilder</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="s2">&quot;ExperimentsBuilder&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A Builder interface for the :class:`Experiment`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            parent (Buildable, optional): The parent builder interface.</span>
-<span class="sd">            name (str, optional): The name of the experiment.</span>
+<span class="sd">            name (str, optional): The name of the experiment. Defaults to None.</span>
+<span class="sd">            parent (Buildable, optional): The parent :class:`ExperimentsBuilder`, if any. \</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">:</span> <span class="n">BaseSolver</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-        <span class="c1"># adding the correct log directory to context if present</span>
-        <span class="c1"># in parent</span>
-        <span class="n">parent_log_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">parent_log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_to_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent_log_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ExperimentBuilder.create"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experiment</span><span class="p">:</span>
+<div class="viewcode-block" id="ExperimentBuilder.build"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Experiment</span><span class="p">,</span> <span class="s2">&quot;ExperimentsBuilder&quot;</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates and returns an object of :class:`Experiment`.</span>
+<span class="sd">        Builds The :class:`Experiment` object.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Experiment</span>
+<span class="sd">            Union[Experiment, ExperimentsBuilder]: The built object if there is no parent \</span>
+<span class="sd">                :class:`ExperimentsBuilder` or the parent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># asserting the values</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the name of the experiment.&quot;</span>
+
+        <span class="c1"># assertion checks</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the model to use.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the optimizer to use.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the name of the experiment.&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="p">),</span> <span class="s2">&quot;Set the model for the experiment.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;epochs&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the number of epochs to train for.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the train dataloader.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;val&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the validation dataloader.&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">),</span> <span class="s2">&quot;Set the log directory for the experiment.&quot;</span>
 
-        <span class="c1"># creating the experiment object</span>
-        <span class="k">return</span> <span class="n">Experiment</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
-            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_in_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">),</span>
-            <span class="n">solver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="c1"># building the ``Experiment`` object</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">][</span><span class="s2">&quot;cls&quot;</span><span class="p">](</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">],</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">][</span><span class="s2">&quot;kwargs&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">][</span><span class="s2">&quot;cls&quot;</span><span class="p">](</span>
+                <span class="n">optimizer</span><span class="p">,</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">],</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">][</span><span class="s2">&quot;kwargs&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scheduler&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
 
-<div class="viewcode-block" id="ExperimentBuilder.handle"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">](</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;other_args&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">exp</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">],</span>
+            <span class="n">train_loader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">],</span>
+            <span class="n">val_loader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">],</span>
+            <span class="n">trainer_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trainer_args&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_log_dir</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]),</span>
+            <span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resume_from_checkpoint&quot;</span><span class="p">),</span>
+            <span class="n">force_restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;force_restart&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># if there is a parent `ExperimentsBuilder`, sending the created ``Experiment``</span>
+        <span class="c1"># to be handled by the parent and returning the parent.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+
+        <span class="c1"># else returning the created ``Experiment`` object.</span>
+        <span class="k">return</span> <span class="n">exp</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.name"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handles objects returned by the :func:`create` method of child interfaces.</span>
-<span class="sd">        Used to recieve the :class:`BaseSolver` object from the Solver child interface.</span>
+<span class="sd">        Sets the name of the experiment.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            obj (object): The object returned by the child interface.</span>
+<span class="sd">            name (str): The name of the experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">BaseSolver</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">obj</span></div>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="ExperimentBuilder.log_directory"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.log_directory">[docs]</a>    <span class="k">def</span> <span class="nf">log_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the log directory of the experiment.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            path (str): The path to the directory.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ExperimentBuilder: Object of this class.</span>
+<span class="sd">            path (str): The path to the log directory of the experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the name of the experiment first.&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the name of the experiment first.&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;log_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="ExperimentBuilder.name"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="ExperimentBuilder.trainer_args"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.trainer_args">[docs]</a>    <span class="k">def</span> <span class="nf">trainer_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the name of the experiment</span>
+<span class="sd">        Sets the additional ``pl.Trainer`` args to be used.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name (str): The name of the experiment.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ExperimentBuilder: Object of this class.</span>
+<span class="sd">            args (Dict[str, Any]): The arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;trainer_args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="ExperimentBuilder.model"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="ExperimentBuilder.train_loader"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.train_loader">[docs]</a>    <span class="k">def</span> <span class="nf">train_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the model to use.</span>
+<span class="sd">        Sets the train dataloader to be used.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            nn.Module: The model.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ExperimentBuilder: Object of this class.</span>
+<span class="sd">            loader (DataLoader): The train dataloader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loader</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.val_loader"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.val_loader">[docs]</a>    <span class="k">def</span> <span class="nf">val_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the validation dataloader to be used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loader (DataLoader): The validation dataloader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loader</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.solver">[docs]</a>    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The solver to use.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cls (BaseSolver): The class (not object) of the solver to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_methods</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.epochs"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.epochs">[docs]</a>    <span class="k">def</span> <span class="nf">epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the total number of epochs to train for.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epochs (int): The number of epochs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.resume_from_checkpoint"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.resume_from_checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">resume_from_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the checkpoint to resume from.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to resume from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;resume_from_checkpoint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.force_restart"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.force_restart">[docs]</a>    <span class="k">def</span> <span class="nf">force_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deletes old log directory and starts training from scratch.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (bool): Whether to force restart or not. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_props</span><span class="p">[</span><span class="s2">&quot;force_restart&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ExperimentBuilder.props"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.props">[docs]</a>    <span class="k">def</span> <span class="nf">props</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines the properties section of the builder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="ExperimentBuilder.solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.solver">[docs]</a>    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver_cls</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Buildable</span><span class="p">:</span>
+<div class="viewcode-block" id="ExperimentBuilder.data"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentBuilder.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the builder interface of the given solver class.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            solver_cls (BaseSolver): The solver class</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Buildable: The builder interface.</span>
+<span class="sd">        Defines the data section (train and validation loaders) of the builder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">solver_cls</span><span class="o">.</span><span class="n">builder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the parameters of the ``cls``&#39;s ``__init__`` method as functions that can</span>
+<span class="sd">        be used to set the value of that parameter, to ``self``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: When the solver used does not have &quot;model&quot;, &quot;optimizer&quot; and \</span>
+<span class="sd">                &quot;scheduler&quot; as parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># getting signature of the __init__ function of the class</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+
+        <span class="c1"># checking if &quot;model&quot;, &quot;optimizer&quot;, and &quot;scheduler&quot; are arguments</span>
+        <span class="c1"># in the __init__ function</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="s2">&quot;model&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="ow">and</span> <span class="s2">&quot;optimizer&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="ow">and</span> <span class="s2">&quot;scheduler&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;To use the builder, the solver&#39;s __init__ function should have &#39;model&#39;, &#39;optimizer&#39;, and &#39;scheduler&#39; as parameters (and in the same order).&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># defining intializer methods</span>
+        <span class="k">def</span> <span class="nf">_basic_intializer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">return</span> <span class="bp">self</span>
+
+            <span class="k">return</span> <span class="n">wrapper</span>
+
+        <span class="k">def</span> <span class="nf">_optim_initializer</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cls&quot;</span><span class="p">:</span> <span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">}</span>
+                <span class="k">return</span> <span class="bp">self</span>
+
+            <span class="k">return</span> <span class="n">wrapper</span>
+
+        <span class="c1"># adding the functions to the object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;other_args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;optimizer&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_optim_initializer</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">name</span><span class="p">,</span>
+                    <span class="n">_basic_intializer</span><span class="p">(</span>
+                        <span class="n">name</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;model&quot;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">[</span><span class="s2">&quot;other_args&quot;</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Experiments"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiments">[docs]</a><span class="k">class</span> <span class="nc">Experiments</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiments</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiments</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines a list of experiments that has to be run one after the other.</span>
+<span class="sd">        Defines experiments that has to be run one after the other.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the list of experiments.</span>
-<span class="sd">            experiments (Dict): The name-experiment key value pairs.</span>
+<span class="sd">            experiments (OrderedDict): The name-experiment key value pairs.</span>
 <span class="sd">            log_dir (str, optional): The parent of the directory where the logs should be stored. \</span>
-<span class="sd">                the directory where the logs will be stored will be the ``name`` parameter.</span>
+<span class="sd">                the logs will be stored in the directory ``os.path.join(log_dir, name)``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -408,40 +945,52 @@
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">exp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Experiments.plot_scalars"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiments.plot_scalars">[docs]</a>    <span class="k">def</span> <span class="nf">plot_scalars</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the tenorboard scalars as a matplotlib figure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            figsize (Tuple[int, int], optional): The size of the figure. Defaults to (15, 10).</span>
+<span class="sd">            save_path (str, optional): The path to save tht plot to. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plot_scalars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">yield</span> <span class="n">obj</span>
 
 <div class="viewcode-block" id="Experiments.builder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiments.builder">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">builder</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentsBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an object of the builder interface. Needs to be called if one wants</span>
 <span class="sd">        to use the builder pattern to define the ``Experiments``.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            parent (Buildable, optional): The parent builder interface. Defaults to None.</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            ExperimentsBuilder: The builder interface for ``Experiments``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">ExperimentsBuilder</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">ExperimentsBuilder</span><span class="p">()</span></div></div>
 
 
-<div class="viewcode-block" id="ExperimentsBuilder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder">[docs]</a><span class="k">class</span> <span class="nc">ExperimentsBuilder</span><span class="p">(</span><span class="n">Buildable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Buildable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ExperimentsBuilder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder">[docs]</a><span class="k">class</span> <span class="nc">ExperimentsBuilder</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A Builder interface for the :class:`Experiments`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            parent (Buildable, optional): The parent builder interface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="ExperimentsBuilder.add"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExperimentBuilder</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -454,9 +1003,16 @@
 <span class="sd">            ExperimentBuilder: The builder interface for :class:`Experiment`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">ExperimentBuilder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the name of this group of experiments first.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the log directory for these experiments first.&quot;</span>
 
-<div class="viewcode-block" id="ExperimentsBuilder.create"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experiments</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ExperimentBuilder</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExperimentsBuilder.build"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experiments</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates and returns an object of :class:`Experiments`.</span>
 
@@ -465,23 +1021,38 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># assertion checks</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the name of this group of experiments.&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the log directory.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Set the name of this group of experiments.&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Set the log directory.&quot;</span>
 
         <span class="c1"># creating `Experiments` object.</span>
-        <span class="k">return</span> <span class="n">Experiments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Experiments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;log_dir&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ExperimentsBuilder.handle"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handles objects returned by the :func:`create` method of child interfaces.</span>
-<span class="sd">        Used to recieve the :class:`Experiment` object from the ExperimentBuilder</span>
-<span class="sd">        child interface.</span>
+<span class="sd">        Handles objects built by the ``build`` method of :class:`ExperimentBuilder`.</span>
+<span class="sd">        This function should be explicitly called in the ``build`` method of the :class:`ExperimentBuilder`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            obj (object): The object returned by the child interface.</span>
+<span class="sd">            obj (object): The object built by the ``build`` method of :class:`ExperimentBuilder`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Experiment</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span></div>
+
+<div class="viewcode-block" id="ExperimentsBuilder.name"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the name of the group of experiments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the group.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ExperimentsBuilder: The object of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="ExperimentsBuilder.log_directory"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.log_directory">[docs]</a>    <span class="k">def</span> <span class="nf">log_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentsBuilder&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -494,27 +1065,22 @@
 <span class="sd">            ExperimentsBuilder: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">),</span> <span class="s2">&quot;Set the name of this group of experiments before setting log directory.&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_context</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;log_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="ExperimentsBuilder.model"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ExperimentsBuilder&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="ExperimentsBuilder.get_log_dir"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.get_log_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the model for all the experiments. Can be overriden per experiment.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            model (nn.Module): The model.</span>
+<span class="sd">        Getter for the log directory.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            ExperimentsBuilder: Object of this class</span>
+<span class="sd">            Optional[str]: The path to the log directory as a string, or \</span>
+<span class="sd">                ``None`` if no log directory is set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_context</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
              </article>

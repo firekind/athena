@@ -133,6 +133,7 @@
 <li class="toctree-l1"><a class="reference internal" href="athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -212,26 +213,232 @@
 <div class="toctree-wrapper compound">
 </div>
 <p>Core classes behind the athena package.</p>
+<p>The <a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.experiment.Experiment</span></code></a> class wraps around a <a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.solvers.base_solver.BaseSolver</span></code></a>, and provides methods to run, visualize and tune an experiment.</p>
+<p>The <a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.experiment.ExperimentBuilder</span></code></a> provides a builder style interface to create experiment(s). There are three sections to be called while using the class:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">props()</span></code>: This section defines the properties of the experiment, such as name, log directory, trainer arguments and so on.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data()</span></code>: This section defines the dataloaders that will be used for the experiment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solver(cls)</span></code>: This section defines the solver and the properties of the solver.</p></li>
+</ul>
+<p>After defining all the section, the experiment is compiled using the <code class="docutils literal notranslate"><span class="pre">build()</span></code> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># creating the experiment</span>
+<span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
+   <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">props</span><span class="p">()</span> <span class="c1"># the properties section</span>
+      <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;MNIST with ghost batch norm with 2 splits&quot;</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">data</span><span class="p">()</span> <span class="c1"># the data section</span>
+      <span class="o">.</span><span class="n">train_loader</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">val_loader</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">ClassificationSolver</span><span class="p">)</span> <span class="c1"># the solver section</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">MnistNet</span><span class="p">(</span><span class="n">use_ghost_batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">StepLR</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">build</span><span class="p">()</span> <span class="c1"># compiling the experiment</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.experiment.ExperimentBuilder</span></code></a> makes it easy to use custom created solvers in the builder api. under the <code class="docutils literal notranslate"><span class="pre">solver(cls)</span></code> section, any arguments that are defined in the constructor of the solver can be accessed as functions in the <code class="docutils literal notranslate"><span class="pre">solver(cls)</span></code> section.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># creating a custom solver</span>
+<span class="k">class</span> <span class="nc">MyCustomSolver</span><span class="p">(</span><span class="n">BaseSolver</span><span class="p">):</span>
+   <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">custom_value_1</span><span class="p">,</span> <span class="n">custom_value_2</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">MyCustomSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">)</span>
+
+      <span class="c1"># do stuff with custom_value_1 and custom_value_2</span>
+
+   <span class="c1"># defining remaining methods (except forward and configure_optimizers) just like in pytorch lightning</span>
+
+<span class="o">.</span>
+<span class="o">.</span>
+<span class="o">.</span>
+
+<span class="n">exp</span> <span class="o">=</span> <span class="p">(</span>
+   <span class="n">Experiment</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+   <span class="o">.</span><span class="n">props</span><span class="p">()</span>
+      <span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;Using MyCustomSolver&quot;</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">log_directory</span><span class="p">(</span><span class="s2">&quot;./logs&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">data</span><span class="p">()</span>
+      <span class="c1"># add data loaders</span>
+   <span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">MyCustomSolver</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">epochs</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">custom_value_1</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># custom_value_1 can be given a value like this</span>
+      <span class="o">.</span><span class="n">custom_value_2</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># custom_value_2 can be given a value like this</span>
+   <span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="o">.</span>
+<span class="o">.</span>
+<span class="o">.</span>
+</pre></div>
+</div>
 <span class="target" id="module-athena.experiment"></span><dl class="py class">
 <dt id="athena.experiment.Experiment">
-<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">Experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">solver</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">Experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">solver</span></em>, <em class="sig-param"><span class="n">epochs</span></em>, <em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">val_loader</span></em>, <em class="sig-param"><span class="n">log_dir</span></em>, <em class="sig-param"><span class="n">trainer_args</span></em>, <em class="sig-param"><span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">force_restart</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Bundles information regarding an experiment. An experiment is performed on a model, with
-a <code class="docutils literal notranslate"><span class="pre">Solver</span></code>.</p>
+a <code class="docutils literal notranslate"><span class="pre">Solver</span></code> (subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code>.).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p></li>
-<li><p><strong>model</strong> (<em>nn.Module</em>) – The model that the experiment is acting on.</p></li>
 <li><p><strong>solver</strong> (<a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a>) – The solver the experiment is using.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em>) – The number of epochs to train for.</p></li>
+<li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The train <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></li>
+<li><p><strong>val_loader</strong> (<em>DataLoader</em>) – The validation <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em>) – The log directory.</p></li>
+<li><p><strong>trainer_args</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Additional arguments to be given to <code class="docutils literal notranslate"><span class="pre">pl.Trainer</span></code>.</p></li>
+<li><p><strong>resume_from_checkpoint</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to the checkpoint to resume training from.</p></li>
+<li><p><strong>force_restart</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, deletes old checkpoints and restarts training from beginning.                 Defaults to False.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt id="athena.experiment.Experiment.run">
 <code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs the experiment. More specifically, calls the <code class="docutils literal notranslate"><span class="pre">BaseSolver.train</span></code> method and saves the
-<code class="docutils literal notranslate"><span class="pre">History</span></code>.</p>
+<dd><p>Runs the experiment. More specifically, calls the <code class="docutils literal notranslate"><span class="pre">pl.Trainer.fit</span></code> method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.lr_range_test">
+<code class="sig-name descname">lr_range_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">criterion</span></em>, <em class="sig-param"><span class="n">acc_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_lr</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">num_iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">step_mode</span><span class="o">=</span><span class="default_value">'exp'</span></em>, <em class="sig-param"><span class="n">smooth_f</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">diverge_th</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">accumulation_steps</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">non_blocking_transfer</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">8, 6</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.lr_range_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.lr_range_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the LR range test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>criterion</strong> (<em>Callable</em>) – The loss function.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em>) – The accuracy function. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>validate</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses the validation dataset specified to validate every                 step of the range test. Defaults to False.</p></li>
+<li><p><strong>start_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – The starting learning rate of the range test. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses the lr from                 the optimizer. Defaults to None.</p></li>
+<li><p><strong>end_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – The final lr. Defaults to 1.</p></li>
+<li><p><strong>num_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of iterations that the test should happen for. Defaults to 100.</p></li>
+<li><p><strong>step_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The step mode. Can be one of “exp” or “linear”. Defaults to “exp”.</p></li>
+<li><p><strong>smooth_f</strong> (<em>float</em><em>, </em><em>optional</em>) – the loss smoothing factor within the [0, 1[ interval. Disabled if set to                 0, otherwise the loss is smoothed using exponential smoothing. Default: 0.05.</p></li>
+<li><p><strong>diverge_th</strong> (<em>int</em><em>, </em><em>optional</em>) – the test is stopped when the loss surpasses the threshold:                 diverge_th * best_loss. Default: 5.</p></li>
+<li><p><strong>accumulation_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – steps for gradient accumulation. If it is 1, gradients are not                 accumulated. Default: 1.</p></li>
+<li><p><strong>non_blocking_transfer</strong> (<em>bool</em><em>, </em><em>optional</em>) – when non_blocking_transfer is set, tries to convert/move                 data to the device asynchronously if possible, e.g., moving CPU Tensors with pinned memory                 to CUDA devices. Default: True.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Size of the plot. Defaults to <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">6)</span></code>.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the figure. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The learning rate when the loss gradient was the steepest, and the learning                 rate when the loss was the least.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.plot_lr_finder">
+<code class="sig-name descname">plot_lr_finder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">skip_start</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">skip_end</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">log_lr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">suggest_lr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">8, 6</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_mode</span><span class="o">=</span><span class="default_value">'loss'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.plot_lr_finder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.plot_lr_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the results of the lr range test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skip_start</strong> (<em>int</em><em>, </em><em>optional</em>) – How many readings to skip from the beginning. Defaults to 10.</p></li>
+<li><p><strong>skip_end</strong> (<em>int</em><em>, </em><em>optional</em>) – How many reading to skip from the end. Defaults to 5.</p></li>
+<li><p><strong>log_lr</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the x-axis should be in log scale or not. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>show_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – Draws a vertical line at this number. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>suggest_lr</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to suggest an lr or not. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The size of the plot. Defaults to <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">6)</span></code>.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the plot. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>plot_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – {‘loss’, ‘acc’} Whether to plot loss vs lr or accuracy vs lr.                 Defaults to ‘loss’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When an lr range test hasn’t been performed.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The learning rate when the loss gradient was the steepest, and the learning                 rate when the loss was the least.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.fit_one_cycle">
+<code class="sig-name descname">fit_one_cycle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_lr</span></em>, <em class="sig-param"><span class="n">max_at_epoch</span></em>, <em class="sig-param"><span class="n">anneal_strategy</span><span class="o">=</span><span class="default_value">'cos'</span></em>, <em class="sig-param"><span class="n">cycle_momentum</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">base_momentum</span><span class="o">=</span><span class="default_value">0.85</span></em>, <em class="sig-param"><span class="n">max_momentum</span><span class="o">=</span><span class="default_value">0.95</span></em>, <em class="sig-param"><span class="n">div_factor</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">final_div_factor</span><span class="o">=</span><span class="default_value">10000.0</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.fit_one_cycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.fit_one_cycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains the network using the One Cycle Policy. This policy was initially described in
+the paper <a class="reference external" href="https://arxiv.org/abs/1708.07120">Super-Convergence: Very Fast Training of Neural Networks Using Large Learning Rates</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_lr</strong> (<em>float</em>) – Upper learning rate boundaries in the cycle for each parameter group.</p></li>
+<li><p><strong>max_at_epoch</strong> (<em>int</em>) – Epoch at which the lr should be <code class="docutils literal notranslate"><span class="pre">max_lr</span></code>.</p></li>
+<li><p><strong>anneal_strategy</strong> (<em>str</em><em>, </em><em>optional</em>) – {‘cos’, ‘linear’} Specifies the annealing strategy: “cos”                 for cosine annealing, “linear” for linear annealing. Defaults to “cos”.</p></li>
+<li><p><strong>cycle_momentum</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, momentum is cycled inversely to learning rate                 between <code class="docutils literal notranslate"><span class="pre">base_momentum</span></code> and <code class="docutils literal notranslate"><span class="pre">max_momentum</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>base_momentum</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>List</em><em>]</em><em>, </em><em>optional</em>) – Lower momentum boundaries in the cycle for                 each parameter group. Note that momentum is cycled inversely to learning rate; at the                 peak of a cycle, momentum is <code class="docutils literal notranslate"><span class="pre">base_momentum</span></code> and learning rate is <code class="docutils literal notranslate"><span class="pre">max_lr</span></code>.                 Defaults to 0.85.</p></li>
+<li><p><strong>max_momentum</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>List</em><em>]</em><em>, </em><em>optional</em>) – Upper momentum boundaries in the cycle for                 each parameter group. Functionally, it defines the cycle amplitude                 (<code class="docutils literal notranslate"><span class="pre">max_momentum</span></code> - <code class="docutils literal notranslate"><span class="pre">base_momentum</span></code>). Note that momentum is cycled inversely to                 learning rate; at the start of a cycle, momentum is <code class="docutils literal notranslate"><span class="pre">max_momentum</span></code> and learning                 rate is <code class="docutils literal notranslate"><span class="pre">base_lr</span></code>. Defaults to 0.95.</p></li>
+<li><p><strong>div_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Determines the initial learning rate via                 <code class="docutils literal notranslate"><span class="pre">initial_lr</span></code> = <code class="docutils literal notranslate"><span class="pre">max_lr</span></code>/<code class="docutils literal notranslate"><span class="pre">div_factor</span></code>. Defaults to 8.</p></li>
+<li><p><strong>final_div_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Determines the minimum learning rate via                 <code class="docutils literal notranslate"><span class="pre">min_lr</span></code> = <code class="docutils literal notranslate"><span class="pre">initial_lr</span></code>/<code class="docutils literal notranslate"><span class="pre">final_div_factor</span></code>. Defaults to 1e4.</p></li>
+<li><p><strong>last_epoch</strong> (<em>int</em><em>, </em><em>optional</em>) – The index of the last batch. This parameter is used when resuming                 a training job. Since <code class="docutils literal notranslate"><span class="pre">step()</span></code> should be invoked after each batch instead of after each                 epoch, this number represents the total number of <em>batches</em> computed, not the total number                 of epochs computed. When <code class="docutils literal notranslate"><span class="pre">last_epoch</span></code> = -1, the schedule is started from the beginning.                 Defaults to -1.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, prints a message to stdout for each update. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When a scheduler is already set for the solver.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.plot_misclassified">
+<code class="sig-name descname">plot_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.plot_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.plot_misclassified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the images misclassified by the model of this experiment. Will work only
+for classification type solvers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of misclassified images to plot. Defaults to 25.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save the plot to. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the figure. Defaults to (10, 15).</p></li>
+<li><p><strong>class_labels</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The class labels, if any. Defaults to None.</p></li>
+<li><p><strong>mean</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The mean of the dataset, used to un-normalize the data                 before plotting. Defaults to None.</p></li>
+<li><p><strong>std</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The std of the dataset, used to un-normalize the data                 before plotting. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.gradcam_misclassified">
+<code class="sig-name descname">gradcam_misclassified</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_layer</span></em>, <em class="sig-param"><span class="n">number</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">class_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">10, 15</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opacity</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.gradcam_misclassified"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.gradcam_misclassified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots gradcam using the misclassified images of the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_layer</strong> (<em>nn.Module</em>) – The target layer for gradcam.</p></li>
+<li><p><strong>number</strong> (<em>int</em>) – The number of misclassified images on which gradcam should be applied.</p></li>
+<li><p><strong>class_labels</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The class labels. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Size of the plot. Defaults to (10, 15).</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the plot. Defaults to None.</p></li>
+<li><p><strong>mean</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The mean of the dataset. If given, image will be unnormalized using                 this before overlaying. Defaults to None.</p></li>
+<li><p><strong>std</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – The std of the dataset. If given, image will be unnormalized using                 this before overlaying. Defaults to None.</p></li>
+<li><p><strong>opacity</strong> (<em>float</em><em>, </em><em>optional</em>) – The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.Experiment.plot_scalars">
+<code class="sig-name descname">plot_scalars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">15, 10</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.plot_scalars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.plot_scalars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the tenorboard scalars as a matplotlib figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the figure. Defaults to (15, 10).</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save tht plot to. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -243,7 +450,7 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <dd class="field-odd"><p>The solver used in this experiment.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver">BaseSolver</a></p>
+<dd class="field-even"><p>“BaseSolver”</p>
 </dd>
 </dl>
 </dd></dl>
@@ -264,18 +471,15 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 
 <dl class="py method">
 <dt id="athena.experiment.Experiment.builder">
-<em class="property">static </em><code class="sig-name descname">builder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.builder" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">builder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.builder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an object of the builder interface. Needs to be called if one wants
 to use the builder pattern to define the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface. Defaults to None.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The builder interface for <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The builder interface for <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">ExperimentBuilder</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -284,39 +488,41 @@ to use the builder pattern to define the <code class="docutils literal notransla
 
 <dl class="py class">
 <dt id="athena.experiment.ExperimentBuilder">
-<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">ExperimentBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.builder.Buildable</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">ExperimentBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A Builder interface for the <a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiment</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface.</p></li>
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the experiment.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the experiment. Defaults to None.</p></li>
+<li><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent <a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentsBuilder</span></code></a>, if any.                 Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="athena.experiment.ExperimentBuilder.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates and returns an object of <a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiment</span></code></a>.</p>
+<dt id="athena.experiment.ExperimentBuilder.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds The <a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiment</span></code></a> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Experiment</p>
+<dd class="field-odd"><p>The built object if there is no parent                 <a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentsBuilder</span></code></a> or the parent.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment">athena.experiment.Experiment</a></p>
+<dd class="field-even"><p>Union[<a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment">Experiment</a>, <a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder">ExperimentsBuilder</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.experiment.ExperimentBuilder.handle">
-<code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.handle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handles objects returned by the <a class="reference internal" href="#athena.experiment.ExperimentBuilder.create" title="athena.experiment.ExperimentBuilder.create"><code class="xref py py-func docutils literal notranslate"><span class="pre">create()</span></code></a> method of child interfaces.
-Used to recieve the <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code> object from the Solver child interface.</p>
+<dt id="athena.experiment.ExperimentBuilder.name">
+<code class="sig-name descname">name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the name of the experiment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>object</em>) – The object returned by the child interface.</p>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -327,67 +533,130 @@ Used to recieve the <code class="xref py py-class docutils literal notranslate">
 <dd><p>Sets the log directory of the experiment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the directory.</p>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the log directory of the experiment.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Object of this class.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">ExperimentBuilder</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.experiment.ExperimentBuilder.name">
-<code class="sig-name descname">name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the name of the experiment</p>
+<dt id="athena.experiment.ExperimentBuilder.trainer_args">
+<code class="sig-name descname">trainer_args</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.trainer_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.trainer_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the additional <code class="docutils literal notranslate"><span class="pre">pl.Trainer</span></code> args to be used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p>
+<dd class="field-odd"><p><strong>args</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The arguments.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Object of this class.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">ExperimentBuilder</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.experiment.ExperimentBuilder.model">
-<code class="sig-name descname">model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the model to use.</p>
+<dt id="athena.experiment.ExperimentBuilder.train_loader">
+<code class="sig-name descname">train_loader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.train_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.train_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the train dataloader to be used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nn.Module</strong> – The model.</p></li>
-<li><p><strong>model</strong> (<em>torch.nn.modules.module.Module</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>loader</strong> (<em>DataLoader</em>) – The train dataloader.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Object of this class.</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">ExperimentBuilder</a></p>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.val_loader">
+<code class="sig-name descname">val_loader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.val_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.val_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the validation dataloader to be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>loader</strong> (<em>DataLoader</em>) – The validation dataloader.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="athena.experiment.ExperimentBuilder.solver">
-<code class="sig-name descname">solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">solver_cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.solver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the builder interface of the given solver class.</p>
+<code class="sig-name descname">solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>The solver to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>solver_cls</strong> (<a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a>) – The solver class</p>
+<dd class="field-odd"><p><strong>cls</strong> (<a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a>) – The class (not object) of the solver to use.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The builder interface.</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.epochs">
+<code class="sig-name descname">epochs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epochs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.epochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the total number of epochs to train for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>epochs</strong> (<em>int</em>) – The number of epochs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.resume_from_checkpoint">
+<code class="sig-name descname">resume_from_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.resume_from_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.resume_from_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the checkpoint to resume from.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to resume from.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.force_restart">
+<code class="sig-name descname">force_restart</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.force_restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.force_restart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes old log directory and starts training from scratch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>bool</em>) – Whether to force restart or not. Defaults to True.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.props">
+<code class="sig-name descname">props</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.props"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.props" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the properties section of the builder</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Buildable</p>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentBuilder.data">
+<code class="sig-name descname">data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentBuilder.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentBuilder.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the data section (train and validation loaders) of the builder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder">athena.experiment.ExperimentBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -398,13 +667,13 @@ Used to recieve the <code class="xref py py-class docutils literal notranslate">
 <dt id="athena.experiment.Experiments">
 <em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">Experiments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">experiments</span></em>, <em class="sig-param"><span class="n">log_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Defines a list of experiments that has to be run one after the other.</p>
+<p>Defines experiments that has to be run one after the other.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – The name of the list of experiments.</p></li>
-<li><p><strong>experiments</strong> (<em>Dict</em>) – The name-experiment key value pairs.</p></li>
-<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the directory where the logs will be stored will be the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter.</p></li>
+<li><p><strong>experiments</strong> (<em>OrderedDict</em>) – The name-experiment key value pairs.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The parent of the directory where the logs should be stored.                 the logs will be stored in the directory <code class="docutils literal notranslate"><span class="pre">os.path.join(log_dir,</span> <span class="pre">name)</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -415,19 +684,30 @@ Used to recieve the <code class="xref py py-class docutils literal notranslate">
 </dd></dl>
 
 <dl class="py method">
+<dt id="athena.experiment.Experiments.plot_scalars">
+<code class="sig-name descname">plot_scalars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">15, 10</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiments.plot_scalars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiments.plot_scalars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the tenorboard scalars as a matplotlib figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of the figure. Defaults to (15, 10).</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – The path to save tht plot to. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="athena.experiment.Experiments.builder">
-<em class="property">static </em><code class="sig-name descname">builder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiments.builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiments.builder" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">builder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiments.builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiments.builder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an object of the builder interface. Needs to be called if one wants
 to use the builder pattern to define the <code class="docutils literal notranslate"><span class="pre">Experiments</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface. Defaults to None.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The builder interface for <code class="docutils literal notranslate"><span class="pre">Experiments</span></code>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The builder interface for <code class="docutils literal notranslate"><span class="pre">Experiments</span></code>.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder">ExperimentsBuilder</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder">ExperimentsBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -436,14 +716,9 @@ to use the builder pattern to define the <code class="docutils literal notransla
 
 <dl class="py class">
 <dt id="athena.experiment.ExperimentsBuilder">
-<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">ExperimentsBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">athena.builder.Buildable</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">ExperimentsBuilder</code><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A Builder interface for the <a class="reference internal" href="#athena.experiment.Experiments" title="athena.experiment.Experiments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiments</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parent</strong> (<em>Buildable</em><em>, </em><em>optional</em>) – The parent builder interface.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="athena.experiment.ExperimentsBuilder.add">
 <code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.add" title="Permalink to this definition">¶</a></dt>
@@ -462,8 +737,8 @@ to use the builder pattern to define the <code class="docutils literal notransla
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.experiment.ExperimentsBuilder.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.create" title="Permalink to this definition">¶</a></dt>
+<dt id="athena.experiment.ExperimentsBuilder.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.build" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates and returns an object of <a class="reference internal" href="#athena.experiment.Experiments" title="athena.experiment.Experiments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiments</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -478,12 +753,28 @@ to use the builder pattern to define the <code class="docutils literal notransla
 <dl class="py method">
 <dt id="athena.experiment.ExperimentsBuilder.handle">
 <code class="sig-name descname">handle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.handle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handles objects returned by the <a class="reference internal" href="#athena.experiment.ExperimentsBuilder.create" title="athena.experiment.ExperimentsBuilder.create"><code class="xref py py-func docutils literal notranslate"><span class="pre">create()</span></code></a> method of child interfaces.
-Used to recieve the <a class="reference internal" href="#athena.experiment.Experiment" title="athena.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiment</span></code></a> object from the ExperimentBuilder
-child interface.</p>
+<dd><p>Handles objects built by the <code class="docutils literal notranslate"><span class="pre">build</span></code> method of <a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentBuilder</span></code></a>.
+This function should be explicitly called in the <code class="docutils literal notranslate"><span class="pre">build</span></code> method of the <a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentBuilder</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>object</em>) – The object returned by the child interface.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<em>object</em>) – The object built by the <code class="docutils literal notranslate"><span class="pre">build</span></code> method of <a class="reference internal" href="#athena.experiment.ExperimentBuilder" title="athena.experiment.ExperimentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentBuilder</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.experiment.ExperimentsBuilder.name">
+<code class="sig-name descname">name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the name of the group of experiments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the group.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The object of this class.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder">ExperimentsBuilder</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -506,18 +797,15 @@ child interface.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="athena.experiment.ExperimentsBuilder.model">
-<code class="sig-name descname">model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the model for all the experiments. Can be overriden per experiment.</p>
+<dt id="athena.experiment.ExperimentsBuilder.get_log_dir">
+<code class="sig-name descname">get_log_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#ExperimentsBuilder.get_log_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.ExperimentsBuilder.get_log_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the log directory.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>nn.Module</em>) – The model.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The path to the log directory as a string, or                 <code class="docutils literal notranslate"><span class="pre">None</span></code> if no log directory is set.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Object of this class</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#athena.experiment.ExperimentsBuilder" title="athena.experiment.ExperimentsBuilder">ExperimentsBuilder</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Optional[str]</p>
 </dd>
 </dl>
 </dd></dl>

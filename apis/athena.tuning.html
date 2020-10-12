@@ -1,0 +1,635 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>athena.tuning package &mdash; Athena  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="athena.utils package" href="athena.utils.html" />
+    <link rel="prev" title="athena.solvers package" href="athena.solvers.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a href= "../index.html">
+        <h1 class="header-logo" style="margin: 0px">
+          Athena
+        </h1>
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+
+  </div>
+</div>
+
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.experiment.html">athena.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.layers.html">athena.layers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.models.html">athena.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">athena.tuning package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="athena.visualizations.html">athena.visualizations package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="athena.html">athena package</a> &gt;</li>
+        
+      <li>athena.tuning package</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apis/athena.tuning.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <div class="section" id="athena-tuning-package">
+<h1>athena.tuning package<a class="headerlink" href="#athena-tuning-package" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="lr-finder-module">
+<h2><code class="docutils literal notranslate"><span class="pre">lr_finder</span></code> module<a class="headerlink" href="#lr-finder-module" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.DataLoaderIter">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">DataLoaderIter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#DataLoaderIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.DataLoaderIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for <a class="reference internal" href="#athena.tuning.lr_finder.TrainDataLoaderIter" title="athena.tuning.lr_finder.TrainDataLoaderIter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainDataLoaderIter</span></code></a> and <a class="reference internal" href="#athena.tuning.lr_finder.ValDataLoaderIter" title="athena.tuning.lr_finder.ValDataLoaderIter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValDataLoaderIter</span></code></a>.</p>
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.DataLoaderIter.dataset">
+<em class="property">property </em><code class="sig-name descname">dataset</code><a class="headerlink" href="#athena.tuning.lr_finder.DataLoaderIter.dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.DataLoaderIter.inputs_labels_from_batch">
+<code class="sig-name descname">inputs_labels_from_batch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch_data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#DataLoaderIter.inputs_labels_from_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.DataLoaderIter.inputs_labels_from_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should be overriden when the batch is not a tuple or list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_data</strong> (<em>Any</em>) – The data from the batch.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When the type of the data is not a tuple or a list.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The inputs and labels.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.TrainDataLoaderIter">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">TrainDataLoaderIter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_loader</span></em>, <em class="sig-param"><span class="n">auto_reset</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#TrainDataLoaderIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.TrainDataLoaderIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.tuning.lr_finder.DataLoaderIter" title="athena.tuning.lr_finder.DataLoaderIter"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.tuning.lr_finder.DataLoaderIter</span></code></a></p>
+<p>Iterates through the dataset in a cyclic manner.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.ValDataLoaderIter">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">ValDataLoaderIter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_loader</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#ValDataLoaderIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.ValDataLoaderIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.tuning.lr_finder.DataLoaderIter" title="athena.tuning.lr_finder.DataLoaderIter"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.tuning.lr_finder.DataLoaderIter</span></code></a></p>
+<p>This iterator will reset itself <strong>only</strong> when it is acquired by
+the syntax of normal <code class="docutils literal notranslate"><span class="pre">iterator</span></code>. That is, this iterator just works
+like a <code class="docutils literal notranslate"><span class="pre">torch.data.DataLoader</span></code>. If you want to restart it, you
+should use it like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loader_iter</span> <span class="o">=</span> <span class="n">ValDataLoaderIter</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader_iter</span><span class="p">:</span>
+    <span class="o">...</span>
+<span class="c1"># `loader_iter` should run out of values now, you can restart it by:</span>
+<span class="c1"># 1. the way we use a `torch.data.DataLoader`</span>
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader_iter</span><span class="p">:</span>        <span class="c1"># __iter__ is called implicitly</span>
+    <span class="o">...</span>
+<span class="c1"># 2. passing it into `iter()` manually</span>
+<span class="n">loader_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">loader_iter</span><span class="p">)</span>  <span class="c1"># __iter__ is called by `iter()`</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.LRFinder">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">LRFinder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">criterion</span></em>, <em class="sig-param"><span class="n">acc_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">memory_cache</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cache_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LRFinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LRFinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Learning rate range test.
+The learning rate range test increases the learning rate in a pre-training run
+between two boundaries in a linear or exponential manner. It provides valuable
+information on how well the network can be trained over a range of learning rates
+and what is the optimal learning rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>torch.nn.Module</em>) – wrapped model.</p></li>
+<li><p><strong>optimizer</strong> (<em>torch.optim.Optimizer</em>) – wrapped optimizer where the defined learning
+is assumed to be the lower boundary of the range test.</p></li>
+<li><p><strong>criterion</strong> (<em>torch.nn.Module</em>) – wrapped loss function.</p></li>
+<li><p><strong>acc_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The function to calculate accuracy.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em> or </em><em>torch.device</em><em>, </em><em>optional</em>) – a string (“cpu” or “cuda”) with an
+optional ordinal for the device type (e.g. “cuda:X”, where is the ordinal).
+Alternatively, can be an object representing the device on which the
+computation will take place. Default: None, uses the same device as <code class="docutils literal notranslate"><span class="pre">model</span></code>.</p></li>
+<li><p><strong>memory_cache</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if this flag is set to True, <cite>state_dict</cite> of
+model and optimizer will be cached in memory. Otherwise, they will be saved
+to files under the <code class="docutils literal notranslate"><span class="pre">cache_dir</span></code>.</p></li>
+<li><p><strong>cache_dir</strong> (<em>string</em><em>, </em><em>optional</em>) – path for storing temporary files. If no path is
+specified, system-wide temporary directory is used. Notice that this
+parameter will be ignored if <code class="docutils literal notranslate"><span class="pre">memory_cache</span></code> is True.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># to inspect the loss-learning rate graph</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span> <span class="c1"># to reset the model and optimizer to their initial state</span>
+</pre></div>
+</div>
+<p>Reference:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/1506.01186">Cyclical Learning Rates for Training Neural Networks</a></p></li>
+<li><p><a class="reference external" href="https://github.com/fastai/fastai">fastai/lr_find</a></p></li>
+</ul>
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.LRFinder.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LRFinder.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LRFinder.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores the model and optimizer to their initial states.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.LRFinder.range_test">
+<code class="sig-name descname">range_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">val_loader</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_lr</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">num_iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">step_mode</span><span class="o">=</span><span class="default_value">'exp'</span></em>, <em class="sig-param"><span class="n">smooth_f</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">diverge_th</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">accumulation_steps</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">non_blocking_transfer</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LRFinder.range_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LRFinder.range_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the learning rate range test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_loader</strong> (<code class="docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>                 <em>or child of</em> <code class="docutils literal notranslate"><span class="pre">TrainDataLoaderIter</span></code>, <em>optional</em>) – the training set data loader.
+If your dataset (data loader) returns a tuple (inputs, labels,*) then
+Pytorch data loader object can be provided. However, if a dataset
+returns different outputs e.g. dicts, then you should inherit
+from <code class="docutils literal notranslate"><span class="pre">TrainDataLoaderIter</span></code> class and redefine <code class="docutils literal notranslate"><span class="pre">inputs_labels_from_batch</span></code>
+method so that it outputs (inputs, labels).</p></li>
+<li><p><strong>val_loader</strong> (<code class="docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>                 <em>or child of</em> <code class="docutils literal notranslate"><span class="pre">ValDataLoaderIter</span></code>, <em>optional</em>) – will only use the training loss. When given a data loader, the model is
+evaluated after each iteration on that dataset and the evaluation loss
+is used. Note that in this mode the test takes significantly longer but
+generally produces more precise results.
+Similarly to <code class="docutils literal notranslate"><span class="pre">train_loader</span></code>, if your dataset outputs are not standard
+you should inherit from <code class="docutils literal notranslate"><span class="pre">ValDataLoaderIter</span></code> class and
+redefine method <code class="docutils literal notranslate"><span class="pre">inputs_labels_from_batch</span></code> so that
+it outputs (inputs, labels). Default: None.</p></li>
+<li><p><strong>start_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – the starting learning rate for the range test.
+Default: None (uses the learning rate from the optimizer).</p></li>
+<li><p><strong>end_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – the maximum learning rate to test. Default: 10.</p></li>
+<li><p><strong>num_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – the number of iterations over which the test
+occurs. Default: 100.</p></li>
+<li><p><strong>step_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – one of the available learning rate policies,
+linear or exponential (“linear”, “exp”). Default: “exp”.</p></li>
+<li><p><strong>smooth_f</strong> (<em>float</em><em>, </em><em>optional</em>) – the loss smoothing factor within the [0, 1[
+interval. Disabled if set to 0, otherwise the loss is smoothed using
+exponential smoothing. Default: 0.05.</p></li>
+<li><p><strong>diverge_th</strong> (<em>int</em><em>, </em><em>optional</em>) – the test is stopped when the loss surpasses the
+threshold:  diverge_th * best_loss. Default: 5.</p></li>
+<li><p><strong>accumulation_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – steps for gradient accumulation. If it
+is 1, gradients are not accumulated. Default: 1.</p></li>
+<li><p><strong>non_blocking_transfer</strong> (<em>bool</em><em>, </em><em>optional</em>) – when non_blocking_transfer is set,
+tries to convert/move data to the device asynchronously if possible,
+e.g., moving CPU Tensors with pinned memory to CUDA devices. Default: True.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example (fastai approach):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example (Leslie Smith’s approach):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr_finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span><span class="n">trainloader</span><span class="p">,</span> <span class="n">val_loader</span><span class="o">=</span><span class="n">val_loader</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step_mode</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gradient accumulation is supported; example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">train_data</span> <span class="o">=</span> <span class="o">...</span>    <span class="c1"># prepared dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">desired_bs</span><span class="p">,</span> <span class="n">real_bs</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">4</span>         <span class="c1"># batch size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">accumulation_steps</span> <span class="o">=</span> <span class="n">desired_bs</span> <span class="o">//</span> <span class="n">real_bs</span>     <span class="c1"># required steps for accumulation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">real_bs</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acc_lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acc_lr_finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">accumulation_steps</span><span class="o">=</span><span class="n">accumulation_steps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If your DataLoader returns e.g. dict, or other non standard output, inherit from TrainDataLoaderIter,
+redefine method <code class="docutils literal notranslate"><span class="pre">inputs_labels_from_batch</span></code> so that it outputs (inputs, lables) data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch_lr_finder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">TrainIter</span><span class="p">(</span><span class="n">torch_lr_finder</span><span class="o">.</span><span class="n">TrainDataLoaderIter</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">inputs_labels_from_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_data</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">return</span> <span class="p">(</span><span class="n">batch_data</span><span class="p">[</span><span class="s1">&#39;user_features&#39;</span><span class="p">],</span> <span class="n">batch_data</span><span class="p">[</span><span class="s1">&#39;user_history&#39;</span><span class="p">]),</span> <span class="n">batch_data</span><span class="p">[</span><span class="s1">&#39;y_labels&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_data_iter</span> <span class="o">=</span> <span class="n">TrainIter</span><span class="p">(</span><span class="n">train_dl</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">finder</span> <span class="o">=</span> <span class="n">torch_lr_finder</span><span class="o">.</span><span class="n">LRFinder</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_train_loss</span><span class="p">,</span> <span class="n">need_one_hot</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">finder</span><span class="o">.</span><span class="n">range_test</span><span class="p">(</span><span class="n">train_data_iter</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">diverge_th</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Reference:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://medium.com/huggingface/ec88c3e51255">Training Neural Nets on Larger Batches: Practical Tips for 1-GPU, Multi-GPU &amp; Distributed setups</a></p></li>
+<li><p><a class="reference external" href="https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3">thomwolf/gradient_accumulation</a></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.LRFinder.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">skip_start</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">skip_end</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">log_lr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">suggest_lr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'loss'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LRFinder.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LRFinder.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the learning rate range test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skip_start</strong> (<em>int</em><em>, </em><em>optional</em>) – number of batches to trim from the start.
+Default: 10.</p></li>
+<li><p><strong>skip_end</strong> (<em>int</em><em>, </em><em>optional</em>) – number of batches to trim from the start.
+Default: 5.</p></li>
+<li><p><strong>log_lr</strong> (<em>bool</em><em>, </em><em>optional</em>) – True to plot the learning rate in a logarithmic
+scale; otherwise, plotted in a linear scale. Default: True.</p></li>
+<li><p><strong>show_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – if set, adds a vertical line to visualize the
+specified learning rate. Default: None.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – the plot is created in the specified
+matplotlib axes object and the figure is not be shown. If <cite>None</cite>, then
+the figure and axes object are created in this method and the figure is
+shown . Default: None.</p></li>
+<li><p><strong>suggest_lr</strong> (<em>bool</em><em>, </em><em>optional</em>) – suggest a learning rate by
+- ‘steepest’: the point with steepest gradient (minimal gradient)
+you can use that point as a first guess for an LR. Will only be calculated
+when plot mode is “loss”. Default: True.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – If “loss”, plots loss vs learning rate curve. if
+“acc”, plots accuracy vs learning rate curve. Default: “loss”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The matplotlib.axes.Axes object that contains the plot,
+and the suggested learning rate (if set suggest_lr=True).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.LinearLR">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">LinearLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">end_lr</span></em>, <em class="sig-param"><span class="n">num_iter</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LinearLR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LinearLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler._LRScheduler</span></code></p>
+<p>Linearly increases the learning rate between two boundaries over a number of
+iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimizer</strong> (<em>torch.optim.Optimizer</em>) – wrapped optimizer.</p></li>
+<li><p><strong>end_lr</strong> (<em>float</em>) – the final learning rate.</p></li>
+<li><p><strong>num_iter</strong> (<em>int</em>) – the number of iterations over which the test occurs.</p></li>
+<li><p><strong>last_epoch</strong> (<em>int</em><em>, </em><em>optional</em>) – the index of last epoch. Default: -1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.LinearLR.get_lr">
+<code class="sig-name descname">get_lr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#LinearLR.get_lr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.LinearLR.get_lr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and returns the lr for the current step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="athena.tuning.lr_finder.ExponentialLR">
+<em class="property">class </em><code class="sig-prename descclassname">athena.tuning.lr_finder.</code><code class="sig-name descname">ExponentialLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">end_lr</span></em>, <em class="sig-param"><span class="n">num_iter</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#ExponentialLR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.ExponentialLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler._LRScheduler</span></code></p>
+<p>Exponentially increases the learning rate between two boundaries over a number of
+iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimizer</strong> (<em>torch.optim.Optimizer</em>) – wrapped optimizer.</p></li>
+<li><p><strong>end_lr</strong> (<em>float</em>) – the final learning rate.</p></li>
+<li><p><strong>num_iter</strong> (<em>int</em>) – the number of iterations over which the test occurs.</p></li>
+<li><p><strong>last_epoch</strong> (<em>int</em><em>, </em><em>optional</em>) – the index of last epoch. Default: -1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="athena.tuning.lr_finder.ExponentialLR.get_lr">
+<code class="sig-name descname">get_lr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/tuning/lr_finder.html#ExponentialLR.get_lr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.tuning.lr_finder.ExponentialLR.get_lr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and returns the lr for the current step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="athena.utils.html" class="btn btn-neutral float-right" title="athena.utils package" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="athena.solvers.html" class="btn btn-neutral" title="athena.solvers package" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">athena.tuning package</a><ul>
+<li><a class="reference internal" href="#lr-finder-module"><code class="docutils literal notranslate"><span class="pre">lr_finder</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/language_data.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <p>
+        Built with Sphinx and the 
+        <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="../index.html">
+            Athena
+          </a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+</html>

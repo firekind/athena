@@ -6,12 +6,12 @@ athena.visualizations package
 
 This package contains various classes and functions that help with visualizing the model and inputs / outputs.
 
-``experiment`` module
+``scalars`` module
 ---------------------
 
-This module contains functions that helps with visualizing an :class:`Experiment`.
+This module contains functions that plot the scalars of a tensorboard log using ``matplotlib``.
 
-.. automodule:: athena.visualizations.experiment
+.. automodule:: athena.visualizations.scalars
    :members:
    :undoc-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ This module contains functions that helps with visualizing an :class:`Experiment
 ``misclassified`` module
 ------------------------
 
-This module contains functions that helps with visualizing misclassified images
+This module contains functions that helps with visualizing misclassified images.
 
 .. automodule:: athena.visualizations.misclassified
     :members:

@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>athena.visualizations.experiment &mdash; Athena  documentation</title>
+  <title>athena.visualizations.scalars &mdash; Athena  documentation</title>
   
 
   
@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -175,7 +176,7 @@
         
           <li><a href="../../index.html">Module code</a> &gt;</li>
         
-      <li>athena.visualizations.experiment</li>
+      <li>athena.visualizations.scalars</li>
     
     
       <li class="pytorch-breadcrumbs-aside">
@@ -201,95 +202,106 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
-  <h1>Source code for athena.visualizations.experiment</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+  <h1>Source code for athena.visualizations.scalars</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">axes</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">axes</span>
+<span class="kn">from</span> <span class="nn">tensorboard.backend.event_processing.event_multiplexer</span> <span class="kn">import</span> <span class="n">EventMultiplexer</span>
 
-<span class="kn">from</span> <span class="nn">athena</span> <span class="kn">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">Experiments</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">plot_grid</span>
 
 
-<div class="viewcode-block" id="plot_experiments"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.experiment.plot_experiments">[docs]</a><span class="k">def</span> <span class="nf">plot_experiments</span><span class="p">(</span>
-    <span class="n">experiments</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Experiments</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">]],</span>
-    <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+<div class="viewcode-block" id="plot_scalars"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.scalars.plot_scalars">[docs]</a><span class="k">def</span> <span class="nf">plot_scalars</span><span class="p">(</span>
+    <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">figsize</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots the metrics of the experiments given. Experiments that have recorded the same metric will have overlapping plots.</span>
+<span class="sd">    Plots the scalars from a tensorboard log directory as a single matplotlib</span>
+<span class="sd">    plot.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        experiments (Union[Experiments, List[Experiment]]): The list of ``Experiments`` to plot</span>
-<span class="sd">        save_path (str, optional): The path to save the plot. Defaults to None.</span>
-<span class="sd">        figsize (Tuple[int, int], optional): The size of the plot. Defaults to (18, 13).</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        Exception: When there are no metrics to plot.</span>
+<span class="sd">        log_dir (str): The path to the tensorboard log directory.</span>
+<span class="sd">        figsize (Tuple[int, int]): The size of the figure. Defaults to ``(15, 10)``.</span>
+<span class="sd">        save_path (str, optional): The path to save the figure to. Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiments</span><span class="p">,</span> <span class="n">Experiments</span><span class="p">):</span>
-        <span class="n">experiments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
 
-    <span class="c1"># getting the list of metrics to plot</span>
-    <span class="n">metric_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+    <span class="c1"># creating ``EventMultiplexer`` to read tensorboard log files</span>
+    <span class="n">mux</span> <span class="o">=</span> <span class="n">EventMultiplexer</span><span class="p">()</span><span class="o">.</span><span class="n">AddRunsFromDirectory</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span>
+
+    <span class="c1"># reading log files</span>
+    <span class="n">mux</span><span class="o">.</span><span class="n">Reload</span><span class="p">()</span>
+
+    <span class="c1"># getting list of scalars from all the log files</span>
+    <span class="n">scalars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="n">metric</span>
-            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span>
-            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">mux</span><span class="o">.</span><span class="n">Runs</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">mux</span><span class="o">.</span><span class="n">GetAccumulator</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">Tags</span><span class="p">()[</span><span class="s2">&quot;scalars&quot;</span><span class="p">]</span>
         <span class="p">}</span>
     <span class="p">)</span>
-    <span class="n">metric_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="n">num_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)</span>
+    <span class="n">scalars</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="c1"># getting the list of runs</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">mux</span><span class="o">.</span><span class="n">Runs</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">runs</span><span class="p">[</span><span class="n">run</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">runs</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span>
+        <span class="n">runs</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">list</span><span class="p">(</span><span class="n">mux</span><span class="o">.</span><span class="n">Runs</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
+        <span class="n">runs</span><span class="p">[</span><span class="s2">&quot;.&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">plot_grid</span><span class="p">(</span>
-        <span class="n">num_metrics</span><span class="p">,</span>
-        <span class="k">lambda</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">_plot_metric</span><span class="p">(</span><span class="n">metric_names</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">experiments</span><span class="p">,</span> <span class="n">ax</span><span class="p">),</span>
-        <span class="n">figsize</span><span class="p">,</span>
-        <span class="n">save_path</span><span class="p">,</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">scalars</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">_plot_scalar</span><span class="p">(</span><span class="n">mux</span><span class="p">,</span> <span class="n">scalars</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">runs</span><span class="p">,</span> <span class="n">ax</span><span class="p">),</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_plot_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experiment</span><span class="p">],</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_scalar</span><span class="p">(</span><span class="n">mux</span><span class="p">:</span> <span class="n">EventMultiplexer</span><span class="p">,</span> <span class="n">scalar</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">runs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots a metric for the given list of experiments.</span>
+<span class="sd">    Plots a scalar for the given runs.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        metric (str): The metric to plot.</span>
-<span class="sd">        experiments (List[Experiment]): The list of experiments whose metrics have to be plotted.</span>
+<span class="sd">        scalar (str): The metric to plot.</span>
+<span class="sd">        runs (Dict): The runs to plot.</span>
 <span class="sd">        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># setting title of the plot</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">scalar</span><span class="p">)</span>
 
-    <span class="c1"># for every experiment</span>
-    <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
-        <span class="c1"># plot the metric of the experiment</span>
-        <span class="n">_plot_experiment</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+    <span class="c1"># for every run</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+        <span class="c1"># plot the scalar of the run</span>
+        <span class="n">_plot_run</span><span class="p">(</span><span class="n">mux</span><span class="p">,</span> <span class="n">scalar</span><span class="p">,</span> <span class="n">runs</span><span class="p">[</span><span class="n">run</span><span class="p">],</span> <span class="n">ax</span><span class="p">)</span>
 
     <span class="c1"># enable legend</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
 
-<span class="k">def</span> <span class="nf">_plot_experiment</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_run</span><span class="p">(</span><span class="n">mux</span><span class="p">:</span> <span class="n">EventMultiplexer</span><span class="p">,</span> <span class="n">scalar</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots a metric of a given experiment.</span>
+<span class="sd">    Plots a scalar of a given run.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        metric (str): The metric to plot.</span>
-<span class="sd">        experiment (Experiment): The experiment to plot.</span>
+<span class="sd">        scalar (str): The scalar to plot.</span>
+<span class="sd">        run (str): The run to plot.</span>
 <span class="sd">        ax (axes.Axes): The ``~matplotlib.axes.Axes`` to plot on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># if the experiment has not recorded that metric</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">has_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">):</span>
+    <span class="n">accumulator</span> <span class="o">=</span> <span class="n">mux</span><span class="o">.</span><span class="n">GetAccumulator</span><span class="p">(</span><span class="n">run</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">])</span>
+
+    <span class="c1"># if the run has not recorded that scalar</span>
+    <span class="k">if</span> <span class="n">scalar</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accumulator</span><span class="o">.</span><span class="n">Tags</span><span class="p">()[</span><span class="s2">&quot;scalars&quot;</span><span class="p">]:</span>
         <span class="k">return</span>
 
-    <span class="c1"># plot the metric</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">experiment</span><span class="o">.</span><span class="n">get_solver</span><span class="p">()</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span><span class="o">.</span><span class="n">get_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">experiment</span><span class="o">.</span><span class="n">name</span>
-    <span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">accumulator</span><span class="o">.</span><span class="n">Scalars</span><span class="p">(</span><span class="n">scalar</span><span class="p">))</span>
+
+    <span class="c1"># plot the scalar</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">run</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span>
 </pre></div>
 
              </article>

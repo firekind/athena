@@ -131,6 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.layers.html">athena.layers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.models.html">athena.models package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/athena.tuning.html">athena.tuning package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.utils.html">athena.utils package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/athena.visualizations.html">athena.visualizations package</a></li>
 </ul>
@@ -213,6 +214,7 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -222,12 +224,15 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.acc_fn">acc_fn() (athena.solvers.classification_solver.ClassificationSolver method)</a>
+</li>
       <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.add">add() (athena.experiment.ExperimentsBuilder method)</a>
 </li>
       <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.apply_gradcam">apply_gradcam() (in module athena.visualizations.gradcam)</a>
@@ -260,6 +265,8 @@
         <li><a href="apis/athena.experiment.html#module-athena.experiment">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     athena.solvers.base_solver
 
@@ -274,34 +281,11 @@
         <li><a href="apis/athena.solvers.html#module-athena.solvers.classification_solver">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    athena.solvers.regression_solver
-
-      <ul>
-        <li><a href="apis/athena.solvers.html#module-athena.solvers.regression_solver">module</a>
-</li>
-      </ul></li>
-      <li>
-    athena.utils.checkpoint
-
-      <ul>
-        <li><a href="apis/athena.utils.html#module-athena.utils.checkpoint">module</a>
-</li>
-      </ul></li>
       <li>
     athena.utils.transforms
 
       <ul>
         <li><a href="apis/athena.utils.html#module-athena.utils.transforms">module</a>
-</li>
-      </ul></li>
-      <li>
-    athena.visualizations.experiment
-
-      <ul>
-        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.experiment">module</a>
 </li>
       </ul></li>
       <li>
@@ -318,6 +302,13 @@
         <li><a href="apis/athena.visualizations.html#module-athena.visualizations.misclassified">module</a>
 </li>
       </ul></li>
+      <li>
+    athena.visualizations.scalars
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.scalars">module</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -332,16 +323,24 @@
 </li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.batch_size">batch_size() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.build">build() (athena.datasets.base_dataset.BaseDataset method)</a>
+
+      <ul>
+        <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.build">(athena.datasets.cifar10.cifar10 method)</a>
+</li>
+        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.build">(athena.datasets.mnist.mnist method)</a>
+</li>
+        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.build">(athena.experiment.ExperimentBuilder method)</a>
+</li>
+        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.build">(athena.experiment.ExperimentsBuilder method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BatchResult">BatchResult (class in athena.solvers.base_solver)</a>
-</li>
       <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.builder">builder() (athena.experiment.Experiment static method)</a>
 
       <ul>
         <li><a href="apis/athena.experiment.html#athena.experiment.Experiments.builder">(athena.experiment.Experiments static method)</a>
-</li>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.builder">(athena.solvers.classification_solver.ClassificationSolver static method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -350,41 +349,21 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpoint">Checkpoint (class in athena.utils.checkpoint)</a>
-</li>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpointable">Checkpointable (class in athena.utils.checkpoint)</a>
-</li>
       <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10">cifar10 (class in athena.datasets.cifar10)</a>
 </li>
       <li><a href="apis/athena.models.html#athena.models.cifar10_v1.Cifar10V1">Cifar10V1 (class in athena.models.cifar10_v1)</a>
 </li>
       <li><a href="apis/athena.models.html#athena.models.cifar10_v2.Cifar10V2">Cifar10V2 (class in athena.models.cifar10_v2)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver">ClassificationSolver (class in athena.solvers.classification_solver)</a>
-</li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolverBuilder">ClassificationSolverBuilder (class in athena.solvers.classification_solver)</a>
-</li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.cleanup">cleanup() (athena.solvers.base_solver.BaseSolver method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver">ClassificationSolver (class in athena.solvers.classification_solver)</a>
+</li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.collate_fn">collate_fn() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
+      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.configure_optimizers">configure_optimizers() (athena.solvers.base_solver.BaseSolver method)</a>
+</li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.create">create() (athena.datasets.base_dataset.BaseDataset method)</a>
-
-      <ul>
-        <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.create">(athena.datasets.cifar10.cifar10 method)</a>
-</li>
-        <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.create">(athena.datasets.mnist.mnist method)</a>
-</li>
-        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.create">(athena.experiment.ExperimentBuilder method)</a>
-</li>
-        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.create">(athena.experiment.ExperimentsBuilder method)</a>
-</li>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolverBuilder.create">(athena.solvers.classification_solver.ClassificationSolverBuilder method)</a>
-</li>
-      </ul></li>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpoint.current_checkpoint_path">current_checkpoint_path() (athena.utils.checkpoint.Checkpoint property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -392,12 +371,14 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.default_loss_fn">default_loss_fn() (athena.solvers.base_solver.BaseSolver method)</a>
-
-      <ul>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.default_loss_fn">(athena.solvers.classification_solver.ClassificationSolver method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.data">data() (athena.experiment.ExperimentBuilder method)</a>
 </li>
-      </ul></li>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.DataLoaderIter">DataLoaderIter (class in athena.tuning.lr_finder)</a>
+</li>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.DataLoaderIter.dataset">dataset() (athena.tuning.lr_finder.DataLoaderIter property)</a>
+</li>
+      <li><a href="apis/athena.models.html#athena.models.davidnet.DavidNet">DavidNet (class in athena.models.davidnet)</a>
+</li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.default_test_transform">default_test_transform() (athena.datasets.base_dataset.BaseDataset method)</a>
 
       <ul>
@@ -428,6 +409,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.epochs">epochs() (athena.experiment.ExperimentBuilder method)</a>
+</li>
       <li><a href="apis/athena.experiment.html#athena.experiment.Experiment">Experiment (class in athena.experiment)</a>
 </li>
       <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder">ExperimentBuilder (class in athena.experiment)</a>
@@ -438,15 +421,25 @@
 </li>
       <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder">ExperimentsBuilder (class in athena.experiment)</a>
 </li>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.ExponentialLR">ExponentialLR (class in athena.tuning.lr_finder)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCam.forward">forward() (athena.visualizations.gradcam.GradCam method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.fit_one_cycle">fit_one_cycle() (athena.experiment.Experiment method)</a>
+</li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.force_restart">force_restart() (athena.experiment.ExperimentBuilder method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.forward">forward() (athena.solvers.base_solver.BaseSolver method)</a>
 
       <ul>
+        <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCam.forward">(athena.visualizations.gradcam.GradCam method)</a>
+</li>
         <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCamPP.forward">(athena.visualizations.gradcam.GradCamPP method)</a>
 </li>
       </ul></li>
@@ -456,22 +449,32 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_history">get_history() (athena.solvers.base_solver.BaseSolver method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.get_log_dir">get_log_dir() (athena.experiment.ExperimentsBuilder method)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.get_misclassified">get_misclassified() (athena.solvers.classification_solver.ClassificationSolver method)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.ExponentialLR.get_lr">get_lr() (athena.tuning.lr_finder.ExponentialLR method)</a>
+
+      <ul>
+        <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LinearLR.get_lr">(athena.tuning.lr_finder.LinearLR method)</a>
+</li>
+      </ul></li>
+      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.get_lr_log_dict">get_lr_log_dict() (athena.solvers.base_solver.BaseSolver method)</a>
 </li>
       <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.get_model">get_model() (athena.experiment.Experiment method)</a>
 </li>
-      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.get_solver">get_solver() (athena.experiment.Experiment method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.get_solver">get_solver() (athena.experiment.Experiment method)</a>
+</li>
       <li><a href="apis/athena.layers.html#athena.layers.ghostbatchnorm.GhostBatchNorm">GhostBatchNorm (class in athena.layers.ghostbatchnorm)</a>
 </li>
       <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCam">GradCam (class in athena.visualizations.gradcam)</a>
 </li>
-      <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.gradcam_misclassified">gradcam_misclassified() (in module athena.visualizations.gradcam)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.gradcam_misclassified">gradcam_misclassified() (athena.experiment.Experiment method)</a>
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.gradcam_misclassified">(in module athena.visualizations.gradcam)</a>
 </li>
+      </ul></li>
       <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.GradCamPP">GradCamPP (class in athena.visualizations.gradcam)</a>
 </li>
   </ul></td>
@@ -480,19 +483,23 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.handle">handle() (athena.experiment.ExperimentBuilder method)</a>
-
-      <ul>
-        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.handle">(athena.experiment.ExperimentsBuilder method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.handle">handle() (athena.experiment.ExperimentsBuilder method)</a>
 </li>
-      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.DataLoaderIter.inputs_labels_from_batch">inputs_labels_from_batch() (athena.tuning.lr_finder.DataLoaderIter method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpointable.load_state_dict">load_state_dict() (athena.utils.checkpoint.Checkpointable method)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LinearLR">LinearLR (class in athena.tuning.lr_finder)</a>
 </li>
       <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.log_directory">log_directory() (athena.experiment.ExperimentBuilder method)</a>
 
@@ -502,7 +509,9 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.log_results">log_results() (athena.solvers.base_solver.BaseSolver static method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.lr_range_test">lr_range_test() (athena.experiment.Experiment method)</a>
+</li>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LRFinder">LRFinder (class in athena.tuning.lr_finder)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -520,12 +529,6 @@
 </li>
       <li><a href="apis/athena.models.html#athena.models.mnist.MnistNet">MnistNet (class in athena.models.mnist)</a>
 </li>
-      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.model">model() (athena.experiment.ExperimentBuilder method)</a>
-
-      <ul>
-        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.model">(athena.experiment.ExperimentsBuilder method)</a>
-</li>
-      </ul></li>
       <li>
     module
 
@@ -542,17 +545,13 @@
 </li>
         <li><a href="apis/athena.solvers.html#module-athena.solvers.classification_solver">athena.solvers.classification_solver</a>
 </li>
-        <li><a href="apis/athena.solvers.html#module-athena.solvers.regression_solver">athena.solvers.regression_solver</a>
-</li>
-        <li><a href="apis/athena.utils.html#module-athena.utils.checkpoint">athena.utils.checkpoint</a>
-</li>
         <li><a href="apis/athena.utils.html#module-athena.utils.transforms">athena.utils.transforms</a>
-</li>
-        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.experiment">athena.visualizations.experiment</a>
 </li>
         <li><a href="apis/athena.visualizations.html#module-athena.visualizations.gradcam">athena.visualizations.gradcam</a>
 </li>
         <li><a href="apis/athena.visualizations.html#module-athena.visualizations.misclassified">athena.visualizations.misclassified</a>
+</li>
+        <li><a href="apis/athena.visualizations.html#module-athena.visualizations.scalars">athena.visualizations.scalars</a>
 </li>
       </ul></li>
   </ul></td>
@@ -562,7 +561,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.name">name() (athena.experiment.ExperimentBuilder method)</a>
+
+      <ul>
+        <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentsBuilder.name">(athena.experiment.ExperimentsBuilder method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.num_workers">num_workers() (athena.datasets.base_dataset.BaseDataset method)</a>
@@ -572,6 +575,10 @@
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.on_train_epoch_start">on_train_epoch_start() (athena.solvers.classification_solver.ClassificationSolver method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.overlay_gradcam_mask">overlay_gradcam_mask() (in module athena.visualizations.gradcam)</a>
 </li>
@@ -583,17 +590,29 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.pin_memory">pin_memory() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      <li><a href="apis/athena.visualizations.html#athena.visualizations.experiment.plot_experiments">plot_experiments() (in module athena.visualizations.experiment)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LRFinder.plot">plot() (athena.tuning.lr_finder.LRFinder method)</a>
 </li>
       <li><a href="apis/athena.visualizations.html#athena.visualizations.gradcam.plot_gradcam">plot_gradcam() (in module athena.visualizations.gradcam)</a>
 </li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.plot_lr_finder">plot_lr_finder() (athena.experiment.Experiment method)</a>
+</li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.plot_misclassified">plot_misclassified() (athena.experiment.Experiment method)</a>
+
+      <ul>
+        <li><a href="apis/athena.visualizations.html#athena.visualizations.misclassified.plot_misclassified">(in module athena.visualizations.misclassified)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.visualizations.html#athena.visualizations.misclassified.plot_misclassified">plot_misclassified() (in module athena.visualizations.misclassified)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.Experiment.plot_scalars">plot_scalars() (athena.experiment.Experiment method)</a>
+
+      <ul>
+        <li><a href="apis/athena.experiment.html#athena.experiment.Experiments.plot_scalars">(athena.experiment.Experiments method)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.prog_bar">prog_bar() (athena.solvers.base_solver.BaseSolver static method)</a>
+        <li><a href="apis/athena.visualizations.html#athena.visualizations.scalars.plot_scalars">(in module athena.visualizations.scalars)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.prog_bar_update">prog_bar_update() (athena.solvers.base_solver.BaseSolver static method)</a>
+      </ul></li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.props">props() (athena.experiment.ExperimentBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -601,9 +620,11 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver">RegressionSolver (class in athena.solvers.regression_solver)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LRFinder.range_test">range_test() (athena.tuning.lr_finder.LRFinder method)</a>
 </li>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpoint.restore">restore() (athena.utils.checkpoint.Checkpoint method)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.LRFinder.reset">reset() (athena.tuning.lr_finder.LRFinder method)</a>
+</li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.resume_from_checkpoint">resume_from_checkpoint() (athena.experiment.ExperimentBuilder method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -623,15 +644,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.sampler">sampler() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpoint.save">save() (athena.utils.checkpoint.Checkpoint method)</a>
-</li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.shuffle">shuffle() (athena.datasets.base_dataset.BaseDataset method)</a>
-</li>
-      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.solver">solver() (athena.experiment.ExperimentBuilder method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.utils.html#athena.utils.checkpoint.Checkpointable.state_dict">state_dict() (athena.utils.checkpoint.Checkpointable method)</a>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.solver">solver() (athena.experiment.ExperimentBuilder method)</a>
 </li>
       <li><a href="apis/athena.datasets.html#athena.datasets.cifar10.cifar10.std">std (athena.datasets.cifar10.cifar10 attribute)</a>
 
@@ -639,8 +656,6 @@
         <li><a href="apis/athena.datasets.html#athena.datasets.mnist.mnist.std">(athena.datasets.mnist.mnist attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.StepResult">StepResult (class in athena.solvers.base_solver)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -651,46 +666,32 @@
 </li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.test">test() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.test_step">test_step() (athena.solvers.classification_solver.ClassificationSolver method)</a>
-
-      <ul>
-        <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.test_step">(athena.solvers.regression_solver.RegressionSolver method)</a>
-</li>
-      </ul></li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.timeout">timeout() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.transforms.ToNumpy">ToNumpy() (in module athena.utils.transforms)</a>
 </li>
       <li><a href="apis/athena.utils.html#athena.utils.transforms.ToTensor">ToTensor() (in module athena.utils.transforms)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.track">track() (athena.solvers.base_solver.BaseSolver method)</a>
-
-      <ul>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.track">(athena.solvers.classification_solver.ClassificationSolver method)</a>
+      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.train">train() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
-      </ul></li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.train_loader">train_loader() (athena.experiment.ExperimentBuilder method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.train">train() (athena.datasets.base_dataset.BaseDataset method)</a>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.TrainDataLoaderIter">TrainDataLoaderIter (class in athena.tuning.lr_finder)</a>
+</li>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.trainer_args">trainer_args() (athena.experiment.ExperimentBuilder method)</a>
+</li>
+      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.training">training (athena.solvers.base_solver.BaseSolver attribute)</a>
 
       <ul>
-        <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train">(athena.solvers.base_solver.BaseSolver method)</a>
-</li>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train">(athena.solvers.classification_solver.ClassificationSolver method)</a>
-</li>
-        <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train">(athena.solvers.regression_solver.RegressionSolver method)</a>
+        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.training">(athena.solvers.classification_solver.ClassificationSolver attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train_on_batch">train_on_batch() (athena.solvers.classification_solver.ClassificationSolver method)</a>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.training_epoch_end">training_epoch_end() (athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
-      <li><a href="apis/athena.solvers.html#athena.solvers.base_solver.BaseSolver.train_step">train_step() (athena.solvers.base_solver.BaseSolver static method)</a>
-
-      <ul>
-        <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.train_step">(athena.solvers.classification_solver.ClassificationSolver method)</a>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.training_step">training_step() (athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
-        <li><a href="apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train_step">(athena.solvers.regression_solver.RegressionSolver method)</a>
-</li>
-      </ul></li>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.transform">transform() (athena.datasets.base_dataset.BaseDataset method)</a>
 </li>
   </ul></td>
@@ -704,6 +705,22 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apis/athena.datasets.html#athena.datasets.base_dataset.BaseDataset.use_default_transforms">use_default_transforms() (athena.datasets.base_dataset.BaseDataset method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.experiment.html#athena.experiment.ExperimentBuilder.val_loader">val_loader() (athena.experiment.ExperimentBuilder method)</a>
+</li>
+      <li><a href="apis/athena.tuning.html#athena.tuning.lr_finder.ValDataLoaderIter">ValDataLoaderIter (class in athena.tuning.lr_finder)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.validation_epoch_end">validation_epoch_end() (athena.solvers.classification_solver.ClassificationSolver method)</a>
+</li>
+      <li><a href="apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.validation_step">validation_step() (athena.solvers.classification_solver.ClassificationSolver method)</a>
 </li>
   </ul></td>
 </tr></table>
