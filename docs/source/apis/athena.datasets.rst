@@ -27,6 +27,18 @@ The CIFAR10 dataset. This module contains a a ``builder()`` function to build a 
    :undoc-members:
    :show-inheritance:
 
+
+``athena.datasets.tinyimagenet`` module
+---------------------------------------
+
+The Tiny ImageNet dataset. This module contains a a ``builder()`` function to build a ``DataLoader`` of the Tiny ImageNet dataset, as well as some default train and test transforms that are commonly applied.
+
+.. automodule:: athena.datasets.tinyimagenet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 ``athena.datasets.base`` module
 ---------------------------------------
 
