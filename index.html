@@ -227,14 +227,14 @@ various parameters that are to be used for the experiment.</p>
 
 <span class="c1"># creating the datasets</span>
 <span class="n">train_loader</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">datasets</span><span class="o">.</span><span class="n">mnist</span><span class="p">()</span>
+   <span class="n">datasets</span><span class="o">.</span><span class="n">mnist</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
    <span class="o">.</span><span class="n">batch_size</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
    <span class="o">.</span><span class="n">use_default_transforms</span><span class="p">()</span>
    <span class="o">.</span><span class="n">build</span><span class="p">()</span>
 <span class="p">)</span>
 
 <span class="n">test_loader</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">datasets</span><span class="o">.</span><span class="n">mnist</span><span class="p">()</span>
+   <span class="n">datasets</span><span class="o">.</span><span class="n">mnist</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
    <span class="o">.</span><span class="n">test</span><span class="p">()</span>
    <span class="o">.</span><span class="n">batch_size</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
    <span class="o">.</span><span class="n">use_default_transforms</span><span class="p">()</span>

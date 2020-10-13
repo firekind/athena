@@ -1,0 +1,585 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>athena.utils.checkpoint &mdash; Athena  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" /> -->
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a href= "../../../index.html">
+        <h1 class="header-logo" style="margin: 0px">
+          Athena
+        </h1>
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+
+  </div>
+</div>
+
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="../../index.html">Module code</a> &gt;</li>
+        
+      <li>athena.utils.checkpoint</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <h1>Source code for athena.utils.checkpoint</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+
+
+<div class="viewcode-block" id="Checkpoint"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpoint">[docs]</a><span class="k">class</span> <span class="nc">Checkpoint</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">track</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates, restores and manages checkpoint files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to the checkpoint directory.</span>
+<span class="sd">            track (List): a list of objects that either extends :class:`Checkpointable` or a \</span>
+<span class="sd">                valid pytorch object that has ``state_dict`` and ``load_state_dict`` attributes.</span>
+<span class="sd">            max_to_keep (Union[int, str], optional): The max number of checkpoint files to keep. \</span>
+<span class="sd">                Defaults to &quot;all&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">track</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">_Index</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">),</span> <span class="n">max_to_keep</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Checkpoint.save"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpoint.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a checkpoint file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create dict to save</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+        <span class="c1"># save dict</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_checkpoint_path</span><span class="p">)</span>
+
+        <span class="c1"># updating state</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">add_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_checkpoint_path</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+        <span class="c1"># delete old</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_checkpoint</span><span class="p">(</span><span class="n">to_remove</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Checkpoint.restore"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpoint.restore">[docs]</a>    <span class="k">def</span> <span class="nf">restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restores data from a checkpoint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str, optional): The path to the checkpoint file. If None, restores from the \</span>
+<span class="sd">                latest checkpoint. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># getting the latest checkpoint</span>
+        <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_latest_checkpoint</span><span class="p">()</span>
+
+        <span class="c1"># if there is no latest checkpoint, returning</span>
+        <span class="k">if</span> <span class="n">checkpoint_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># else loading it and restoring the objects</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Restored checkpoint from </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_delete_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deletes a checkpoint file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): Path to the checkpoint file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_checkpoint_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Path to the current checkpoint.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;checkpoint_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_file_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_Index</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_to_keep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Represents all the required information about the checkpoints.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to the directory that will contain the checkpoints.</span>
+<span class="sd">            max_to_keep (Union[str, int]): The max number of checkpoints to keep.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;.index&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span> <span class="o">=</span> <span class="n">max_to_keep</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">created_on</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%m-%Y %H:%M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates or loads the info from the index file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># creating the directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># creating the index file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;max_to_keep&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span><span class="p">,</span>
+                        <span class="s2">&quot;created_on&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span><span class="p">),</span>
+                        <span class="s2">&quot;file_count&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span><span class="p">,</span>
+                        <span class="s2">&quot;checkpoints&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints</span><span class="p">,</span>
+                    <span class="p">},</span>
+                    <span class="n">f</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="c1"># loading the data in the index file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+            <span class="c1"># updating instance variables from file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;max_to_keep&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">created_on</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;created_on&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_count&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;checkpoints&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">add_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the index file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            checkpoint_file_path (str): The path to the checkpoint file that has to be added \</span>
+<span class="sd">                to the index file</span>
+<span class="sd">            timestamp (datetime): The timestamp of when the checkpoint file was created.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The old checkpoint file to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># incrementing file count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increment_file_count</span><span class="p">()</span>
+
+        <span class="c1"># getting the index file contents</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># updating the file count</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span>
+
+        <span class="c1"># getting checkpoint files present</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;checkpoints&quot;</span><span class="p">]</span>
+
+        <span class="c1"># removing old files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_to_keep</span><span class="p">:</span>
+            <span class="n">to_remove</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># adding the current checkpoint file</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_checkpoint_entry</span><span class="p">(</span><span class="n">checkpoint_file_path</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">))</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;checkpoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
+
+        <span class="c1"># writing contents to checkpoint file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># returning path of the file to remove or None if there</span>
+        <span class="c1"># is nothing to remove</span>
+        <span class="k">if</span> <span class="n">to_remove</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">to_remove</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_latest_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the path to the latest checkpoint.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># loading index file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># returning the path of the last checkpoint entry</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;checkpoints&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c1"># at this stage there are no checkpoint entries, so returning None</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">increment_file_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increments the file count by 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_create_checkpoint_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a checkpoint entry for the index file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): The path to the checkpoint file.</span>
+<span class="sd">            timestamp (datetime): The timestamp.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: The entry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">get_file_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the file count.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_count</span>
+
+
+<div class="viewcode-block" id="Checkpointable"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpointable">[docs]</a><span class="k">class</span> <span class="nc">Checkpointable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Checkpointable.load_state_dict"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpointable.load_state_dict">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the state of the object from the given data. This data is the same \</span>
+<span class="sd">            data that is returned from :func:`state_dict`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (Dict): The data from the checkpoint file.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Checkpointable.state_dict"><a class="viewcode-back" href="../../../apis/athena.utils.html#athena.utils.checkpoint.Checkpointable.state_dict">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the data in the instance that has to be checkpointed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: A dictionary containing the data to be checkpointed.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+</pre></div>
+
+             </article>
+             
+            </div>
+            <footer>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+         <script src="../../../_static/jquery.js"></script>
+         <script src="../../../_static/underscore.js"></script>
+         <script src="../../../_static/doctools.js"></script>
+         <script src="../../../_static/language_data.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <p>
+        Built with Sphinx and the 
+        <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="../../../index.html">
+            Athena
+          </a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+</html>

@@ -213,48 +213,68 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
 
-<span class="kn">from</span> <span class="nn">.base_dataset</span> <span class="kn">import</span> <span class="n">BaseDataset</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BaseDataset</span><span class="p">,</span> <span class="n">DataLoaderBuilder</span>
 
 
-<div class="viewcode-block" id="cifar10"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10">[docs]</a><span class="k">class</span> <span class="nc">cifar10</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="cifar10"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10">[docs]</a><span class="k">class</span> <span class="nc">cifar10</span><span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">):</span>
 
     <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.4914</span><span class="p">,</span> <span class="mf">0.4822</span><span class="p">,</span> <span class="mf">0.4465</span><span class="p">)</span>  <span class="c1">#: mean of the dataset.</span>
     <span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2023</span><span class="p">,</span> <span class="mf">0.1994</span><span class="p">,</span> <span class="mf">0.2010</span><span class="p">)</span>  <span class="c1">#: std of the dataset.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_default_transforms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The cifar 10 dataset.</span>
+<span class="sd">        CIFAR10 Dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root (str): The root directory of the dataset.</span>
+<span class="sd">            train (bool, optional): Whether its train or test dataset. Defaults to ``True``.</span>
+<span class="sd">            transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.</span>
+<span class="sd">            target_transform (Callable, optional): The transform to apply on the labels. Defaults \</span>
+<span class="sd">                to ``None``.</span>
+<span class="sd">            download (bool, optional): Whether the dataset should be downloaded or not. Defaults \</span>
+<span class="sd">                to ``False``.</span>
+<span class="sd">            use_default_transforms (bool, optional): Whether the default transforms must be used \</span>
+<span class="sd">                or not. Defaults to ``False``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">target_transform</span><span class="p">,</span> <span class="n">download</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_default_transforms</span> <span class="o">=</span> <span class="n">use_default_transforms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_transforms</span><span class="p">()</span>
 
-<div class="viewcode-block" id="cifar10.build"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Builds the dataset and returns a pytorch ``DataLoader``.</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>  <span class="c1"># img shape: (H, W, C)</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            DataLoader: The cifar10 ``DataLoader``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">cifar10</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="c1"># converting img from a uint8 np array (with range 0-255) to float32 np array (with range 0-1)</span>
+        <span class="c1"># and channels last.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
-        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-            <span class="n">_cifar10_dataset</span><span class="p">(</span>
-                <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span>
-                <span class="n">train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">,</span>
-                <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">,</span>
-                <span class="n">target_transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_transform</span><span class="p">,</span>
-                <span class="n">download</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_download</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span>
-            <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">,</span>
-            <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="p">,</span>
-            <span class="n">batch_sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_sampler</span><span class="p">,</span>
-            <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span><span class="p">,</span>
-            <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_collate_fn</span><span class="p">,</span>
-            <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pin_memory</span><span class="p">,</span>
-            <span class="n">drop_last</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_drop_last</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span>
-            <span class="n">worker_init_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_init_fn</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">BasicTransform</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">BaseCompose</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">)[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">BasicTransform</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">BaseCompose</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">target</span><span class="p">)[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span><span class="p">,</span> <span class="n">target</span>
 
 <div class="viewcode-block" id="cifar10.default_train_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.default_train_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_train_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -301,51 +321,29 @@
                 <span class="p">),</span>  <span class="c1"># Normalizing</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToTensor</span><span class="p">),</span>
             <span class="p">]</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_set_transforms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the transform for the dataset, if ``use_default_transforms`` is enabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-<span class="k">class</span> <span class="nc">_cifar10_dataset</span><span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">_cifar10_dataset</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">root</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">target_transform</span><span class="p">,</span> <span class="n">download</span>
-        <span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_default_transforms</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span>
+        <span class="p">),</span> <span class="s2">&quot;Specify only `use_default_transforms` or `transform`, not both.&quot;</span>
 
-        <span class="c1"># channels first cuz this is used in solver while writing the model</span>
-        <span class="c1"># to tensorboard</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-        <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>  <span class="c1"># img shape: (H, W, C)</span>
-
-        <span class="c1"># converting img from a uint8 np array (with range 0-255) to float32 np array (with range 0-1)</span>
-        <span class="c1"># and channels last.</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">BasicTransform</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">BaseCompose</span><span class="p">)</span>
-            <span class="p">):</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">)[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_default_transforms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_train_transform</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_test_transform</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">,</span>
-                <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">BasicTransform</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">BaseCompose</span><span class="p">),</span>
-            <span class="p">):</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">target</span><span class="p">)[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">img</span><span class="p">,</span> <span class="n">target</span>
+<div class="viewcode-block" id="cifar10.builder"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.builder">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoaderBuilder</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a DataLoader builder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DataLoaderBuilder</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div></div>
 </pre></div>
 
              </article>

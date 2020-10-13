@@ -1,0 +1,660 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>athena.solvers.regression_solver &mdash; Athena  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" /> -->
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a href= "../../../index.html">
+        <h1 class="header-logo" style="margin: 0px">
+          Athena
+        </h1>
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+
+  </div>
+</div>
+
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.html">athena package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.datasets.html">athena.datasets package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.experiment.html">athena.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.layers.html">athena.layers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.models.html">athena.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.solvers.html">athena.solvers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.utils.html">athena.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apis/athena.visualizations.html">athena.visualizations package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="../../index.html">Module code</a> &gt;</li>
+        
+      <li>athena.solvers.regression_solver</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <h1>Source code for athena.solvers.regression_solver</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">OneCycleLR</span><span class="p">,</span> <span class="n">Optimizer</span>
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">_LRScheduler</span> <span class="k">as</span> <span class="n">LRScheduler</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">athena.utils.progbar</span> <span class="kn">import</span> <span class="n">Kbar</span>
+<span class="kn">from</span> <span class="nn">.history</span> <span class="kn">import</span> <span class="n">History</span>
+<span class="kn">from</span> <span class="nn">.base_solver</span> <span class="kn">import</span> <span class="n">BaseSolver</span>
+
+
+<div class="viewcode-block" id="RegressionSolver"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver">[docs]</a><span class="k">class</span> <span class="nc">RegressionSolver</span><span class="p">(</span><span class="n">BaseSolver</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A solver for regression problems. This solver supports models that have mulitple inputs, and thus, </span>
+<span class="sd">        multiple losses</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (nn.Module): The model to act on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">RegressionSolver</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RegressionSolver.train"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]],</span>
+        <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+            <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
+        <span class="p">],</span>
+        <span class="n">scheduler</span><span class="p">:</span> <span class="n">LRScheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">use_tqdm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">History</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains the model.</span>
+
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            look at the notes in :meth:`athena.solvers.regression_solver.RegressionSolver.train_step` and in \</span>
+<span class="sd">            :meth:`athena.solvers.regression_solver.RegressionSolver.test_step`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epochs (int): The number of epochs to train for.</span>
+<span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
+<span class="sd">            optimizer (Optimizer): The optimizer to use.</span>
+<span class="sd">            loss_fn (Callable[[torch.Tensor, torch.Tensor], List[Tuple[str, torch.Tensor]]]): The loss function to use. \</span>
+<span class="sd">                the loss function should take in the predicted output of the model and target output from the dataset as \</span>
+<span class="sd">                the arguments and return a list of tuples, in which the first element of each tuple is a label for the \</span>
+<span class="sd">                loss and the second element is the loss value.</span>
+<span class="sd">            acc_fn (Callable[[List[Tuple[str, torch.Tensor]], torch.Tensor], List[Tuple[str, torch.Tensor]]]): The accuracy \</span>
+<span class="sd">                function to use. The function should take in two arguments, first, a list of tuples, where the first element \ </span>
+<span class="sd">                of each tuple is the label for the loss and the second element is the loss value, and the second argument \</span>
+<span class="sd">                the target output from the dataset. The function should return a list of tuples, first element of the tuple \</span>
+<span class="sd">                should be the label of the accuracy and the second element should be the accuracy value.</span>
+<span class="sd">            scheduler (LRScheduler, optional): The ``LRScheduler`` to use. Defaults to None.</span>
+<span class="sd">            test_loader (DataLoader, optional): The ``DataLoader`` for the test data. Defaults to None.</span>
+<span class="sd">            device (str, optional): A valid pytorch device string. Defaults to ``cpu``.</span>
+<span class="sd">            use_tqdm (bool, optional): If True, uses tqdm instead of a keras style progress bar (``pkbar``). Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            History: An History object containing training information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Epoch: </span><span class="si">%d</span><span class="s2"> / </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span><span class="p">),</span> <span class="n">flush</span><span class="o">=</span><span class="n">use_tqdm</span><span class="p">)</span>
+
+            <span class="c1"># performing train step</span>
+            <span class="n">train_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span>
+                <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">use_tqdm</span>
+            <span class="p">)</span>
+
+            <span class="c1"># adding metrics to history</span>
+            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">train_data</span><span class="p">:</span>
+                <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+            <span class="c1"># stepping scheduler</span>
+            <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">OneCycleLR</span><span class="p">):</span>
+                <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="c1"># performing test step</span>
+            <span class="k">if</span> <span class="n">test_loader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">test_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_step</span><span class="p">(</span>
+                    <span class="n">test_loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">flush_print</span><span class="o">=</span><span class="n">use_tqdm</span>
+                <span class="p">)</span>
+
+                <span class="c1"># adding metrics to history</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_data</span><span class="p">:</span>
+                    <span class="n">history</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">history</span></div>
+
+<div class="viewcode-block" id="RegressionSolver.train_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.train_step">[docs]</a>    <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">scheduler</span><span class="p">:</span> <span class="n">LRScheduler</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]],</span>
+        <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+            <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
+        <span class="p">],</span>
+        <span class="n">use_tqdm</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single train step.</span>
+<span class="sd">            </span>
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
+<span class="sd">            number of batches in the dataset while recording them for an epoch (averaging). So make \</span>
+<span class="sd">            sure any reduction in your functions are ``mean``.</span>
+<span class="sd">            </span>
+<span class="sd">        Args:</span>
+<span class="sd">            train_loader (DataLoader): The ``DataLoader`` for the training data.</span>
+<span class="sd">            optimizer (Optimizer): The optimizer to use.</span>
+<span class="sd">            scheduler (LRScheduler): The LR scheduler to use.</span>
+<span class="sd">            device (str): A valid pytorch device string.</span>
+<span class="sd">            loss_fn (Callable[[torch.Tensor, torch.Tensor], List[Tuple[str, torch.Tensor]]]): The loss function to use. \</span>
+<span class="sd">                the loss function should take in the predicted output of the model and target output from the dataset as \</span>
+<span class="sd">                the arguments and return a list of tuples, in which the first element of each tuple is a label for the \</span>
+<span class="sd">                loss and the second element is the loss value.</span>
+<span class="sd">            acc_fn (Callable[[List[Tuple[str, torch.Tensor]], torch.Tensor], List[Tuple[str, torch.Tensor]]]): The accuracy \</span>
+<span class="sd">                function to use. The function should take in two arguments, first, a list of tuples, where the first element \ </span>
+<span class="sd">                of each tuple is the label for the loss and the second element is the loss value, and the second argument \</span>
+<span class="sd">                the target output from the dataset. The function should return a list of tuples, first element of the tuple \</span>
+<span class="sd">                should be the label of the accuracy and the second element should be the accuracy value.</span>
+<span class="sd">            use_tqdm (bool): If True, uses tqdm instead of a keras style progress bar (``pkbar``).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[str, torch.Tensor]]: A list containing tuples in which the first element of the tuple is the label \</span>
+<span class="sd">                describing the value and the second element is the value itself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># setting model in train mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+        <span class="c1"># creating progress bar</span>
+        <span class="k">if</span> <span class="n">use_tqdm</span><span class="p">:</span>
+            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="n">pbar</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pbar</span> <span class="o">=</span> <span class="n">Kbar</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">),</span> <span class="n">stateful_metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">])</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="n">train_loader</span>
+
+        <span class="c1"># defining variables</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">processed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">train_losses</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">train_accs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iterator</span><span class="p">):</span>
+            <span class="c1"># casting to device</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="c1"># zeroing out accumulated gradients</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+            <span class="c1"># forward prop</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c1"># calculating loss (look at function documentation for details on what is returned by</span>
+            <span class="c1"># the loss_fn)</span>
+            <span class="n">losses_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">train_losses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">train_losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">train_losses</span> <span class="o">=</span> <span class="n">train_losses</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                <span class="p">)</span>
+
+            <span class="c1"># backpropagation</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">loss</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">:</span>
+                <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="c1"># calculating the accuracies (look at function documentation for details on what is returned by</span>
+            <span class="c1"># the acc_fn)</span>
+            <span class="n">acc_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="n">acc_fn</span><span class="p">(</span><span class="n">losses_data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">train_accs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">train_accs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">acc_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">train_accs</span> <span class="o">=</span> <span class="n">train_accs</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">acc_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                <span class="p">)</span>
+
+            <span class="c1"># updating progress bar with instantaneous losses and accuracies</span>
+            <span class="k">if</span> <span class="n">use_tqdm</span><span class="p">:</span>
+                <span class="n">losses_desc</span> <span class="o">=</span> <span class="s2">&quot; - &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">accs_desc</span> <span class="o">=</span> <span class="s2">&quot; - &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">acc_data</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Batch_id: </span><span class="si">{</span><span class="n">batch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">losses_desc</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">accs_desc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">losses_data</span><span class="p">,</span> <span class="o">*</span><span class="n">acc_data</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">OneCycleLR</span><span class="p">):</span>
+                <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_tqdm</span><span class="p">:</span>
+            <span class="c1"># required for pkbar</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">losses_data</span><span class="p">,</span> <span class="o">*</span><span class="n">acc_data</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="o">*</span><span class="nb">list</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span>
+                    <span class="c1"># getting the labels of each loss value</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">],</span>
+                    <span class="c1"># dividing the value of each of the losses by the number of batches in the dataset</span>
+                    <span class="p">[</span><span class="n">loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span> <span class="k">for</span> <span class="n">loss</span> <span class="ow">in</span> <span class="n">train_losses</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="o">*</span><span class="nb">list</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span>
+                    <span class="c1"># getting the labels of each accuracy value</span>
+                    <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">acc_data</span><span class="p">],</span>
+                    <span class="c1"># dividing the value of each accuracy by the number of batches in the dataset</span>
+                    <span class="p">[</span><span class="n">acc</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span> <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">train_accs</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="RegressionSolver.test_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.regression_solver.RegressionSolver.test_step">[docs]</a>    <span class="k">def</span> <span class="nf">test_step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">test_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]],</span>
+        <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+            <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
+        <span class="p">],</span>
+        <span class="n">flush_print</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single test step.</span>
+
+<span class="sd">        Note: </span>
+<span class="sd">            </span>
+<span class="sd">            the losses and accuracies returned by the ``loss_fn`` and ``acc_fn`` are divided by the \</span>
+<span class="sd">            number of batches in the dataset (while calculating the average loss and average accuracy during the \</span>
+<span class="sd">            train step) and displayed as the result. So make sure any reduction in your functions are ``mean``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            test_loader (DataLoader): The ``DataLoader`` for the test data.</span>
+<span class="sd">            device (str): A valid pytorch device string.</span>
+<span class="sd">            loss_fn (Callable[[torch.Tensor, torch.Tensor], List[Tuple[str, torch.Tensor]]]): The loss function to use. \</span>
+<span class="sd">                the loss function should take in the predicted output of the model and target output from the dataset as \</span>
+<span class="sd">                the arguments and return a list of tuples, in which the first element of each tuple is a label for the \</span>
+<span class="sd">                loss and the second element is the loss value.</span>
+<span class="sd">            acc_fn (Callable[[List[Tuple[str, torch.Tensor]], torch.Tensor], List[Tuple[str, torch.Tensor]]]): The accuracy \</span>
+<span class="sd">                function to use. The function should take in two arguments, first, a list of tuples, where the first element \ </span>
+<span class="sd">                of each tuple is the label for the loss and the second element is the loss value, and the second argument \</span>
+<span class="sd">                the target output from the dataset. The function should return a list of tuples, first element of the tuple \</span>
+<span class="sd">                should be the label of the accuracy and the second element should be the accuracy value.</span>
+<span class="sd">            flush_print (bool, optional): Whether to flush the print statement or not. Needed when tqdm is used in a notebook. \ </span>
+<span class="sd">                Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[str, torch.Tensor]]: A list containing tuples in which the first element of the tuple is the label \</span>
+<span class="sd">                describing the value and the second element is the value itself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># setting model to evaluation mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+        <span class="c1"># defining variables</span>
+        <span class="n">test_losses</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">test_accs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+                <span class="c1"># casting data to device</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+                <span class="c1"># forward prop</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="c1"># calculating loss</span>
+                <span class="n">losses_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">test_losses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">test_losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">test_losses</span> <span class="o">=</span> <span class="n">test_losses</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">losses_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># calculating accuracy</span>
+                <span class="n">accs_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="n">acc_fn</span><span class="p">(</span><span class="n">losses_data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">test_accs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">test_accs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">accs_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">test_accs</span> <span class="o">=</span> <span class="n">test_accs</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">accs_data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">)</span>
+
+        <span class="c1"># averaging loss</span>
+        <span class="n">test_losses</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+        <span class="n">test_accs</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_loader</span><span class="p">)</span>
+
+        <span class="c1"># constructing average loss data and description to be displayed</span>
+        <span class="n">avg_loss_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">loss</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">losses_data</span><span class="p">,</span> <span class="n">test_losses</span><span class="p">):</span>
+            <span class="n">avg_loss_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loss</span><span class="p">))</span>
+        <span class="n">loss_desc</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">avg_loss_data</span><span class="p">])</span>
+
+        <span class="c1"># constructing accuracy data and description to be displayed</span>
+        <span class="n">avg_acc_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">acc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">accs_data</span><span class="p">,</span> <span class="n">test_accs</span><span class="p">):</span>
+            <span class="n">avg_acc_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">acc</span><span class="p">))</span>
+        <span class="n">acc_desc</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">avg_acc_data</span><span class="p">])</span>
+
+        <span class="c1"># printing result</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test set: </span><span class="si">{</span><span class="n">loss_desc</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acc_desc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="n">flush_print</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="o">*</span><span class="n">avg_loss_data</span><span class="p">,</span> <span class="o">*</span><span class="n">avg_acc_data</span><span class="p">]</span></div></div>
+</pre></div>
+
+             </article>
+             
+            </div>
+            <footer>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+         <script src="../../../_static/jquery.js"></script>
+         <script src="../../../_static/underscore.js"></script>
+         <script src="../../../_static/doctools.js"></script>
+         <script src="../../../_static/language_data.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <p>
+        Built with Sphinx and the 
+        <a href="https://github.com/pytorch/pytorch_sphinx_theme">pytorch sphinx theme</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="../../../index.html">
+            Athena
+          </a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/firekind/athena">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+</html>
