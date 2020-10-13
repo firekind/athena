@@ -232,8 +232,12 @@ class ProgbarCallback(ProgressBarBase):
             )
             self.train_prog_bar = self.init_train_bar()
 
-    def on_train_batch_end(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
-        super().on_train_batch_end(trainer, pl_module, batch, batch_idx, dataloader_idx)
+    def on_train_batch_end(
+        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx
+    ):
+        super().on_train_batch_end(
+            trainer, pl_module, outputs, batch, batch_idx, dataloader_idx
+        )
 
         if len(self.train_metrics) == 0:
             self._populate_train_metrics(trainer.progress_bar_dict)
@@ -246,8 +250,8 @@ class ProgbarCallback(ProgressBarBase):
 
             self.train_prog_bar.update(batch_idx, values=values)
 
-    def on_train_epoch_end(self, trainer, pl_module):
-        super().on_train_epoch_start(trainer, pl_module)
+    def on_train_epoch_end(self, trainer, pl_module, outputs):
+        super().on_train_epoch_end(trainer, pl_module, outputs)
 
         if self.enabled:
             self.train_prog_bar.add(1)

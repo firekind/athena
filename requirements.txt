@@ -3,11 +3,11 @@ torch~=1.6.0
 torchsummary~=1.5.1
 tqdm~=4.48.2
 torchvision~=0.7.0
-matplotlib~=3.3.1
+matplotlib~=3.2.2
 sphinx~=3.2.1
 tensorboard~=2.2.0
 albumentations~=0.4.6
 opencv-python~=4.4.0.42
-pytorch-lightning~=0.9.0
+pytorch-lightning~=1.0.0
 ipympl~=0.5.8
 git+https://github.com/firekind/pytorch_sphinx_theme

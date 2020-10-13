@@ -59,5 +59,5 @@ class BaseSolver(pl.LightningModule):
         else:
             for idx, param_group in enumerate(self.optimizer.param_groups):
                 data[f"param_group_{idx}_lr"] = param_group["lr"]
-            
+
         return data

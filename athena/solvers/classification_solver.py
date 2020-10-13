@@ -10,7 +10,13 @@ from .base_solver import BaseSolver
 
 
 class ClassificationSolver(BaseSolver):
-    def __init__(self, model: nn.Module, optimizer: Optimizer, scheduler: _LRScheduler=None, loss_fn:Callable=None):
+    def __init__(
+        self,
+        model: nn.Module,
+        optimizer: Optimizer,
+        scheduler: _LRScheduler = None,
+        loss_fn: Callable = None,
+    ):
         """
         Solver for classification problems.
 
@@ -40,24 +46,24 @@ class ClassificationSolver(BaseSolver):
 
         avg_running_acc = self.running_train_acc / (batch_idx + 1)
 
+        # displaying train accuracy on progress bar
+        self.log("train accuracy", avg_running_acc, prog_bar=True, logger=False)
+
+        # logging learning rates of all parameter groups
+        for key, value in self.get_lr_log_dict().items():
+            self.log(key, value)
+
         return {
             "loss": loss,
             "acc": avg_running_acc,
-            "progress_bar": {"train accuracy": avg_running_acc},
-            "log": self.get_lr_log_dict()
         }
 
     def training_epoch_end(self, outputs):
         loss = torch.mean(torch.tensor([o["loss"] for o in outputs]))
         acc = outputs[-1]["acc"]
 
-        return {
-            "log": {
-                "training loss": loss,
-                "training accuracy": acc,
-                "step": self.current_epoch + 1,
-            }
-        }
+        self.log("training loss", loss)
+        self.log("training accuracy", acc)
 
     def validation_step(self, batch, batch_idx):
         data, target = batch
@@ -72,12 +78,8 @@ class ClassificationSolver(BaseSolver):
         acc = torch.tensor([o["val_acc"] for o in outputs]).mean()
         loss = torch.tensor([o["val_loss"] for o in outputs]).mean()
 
-        results = pl.EvalResult(checkpoint_on=loss)
-        results.log("validation loss", loss, prog_bar=True)
-        results.log("validation accuracy", acc, prog_bar=True)
-        results.log("step", self.current_epoch + 1)
-
-        return results
+        self.log("validation loss", loss, prog_bar=True)
+        self.log("validation accuracy", acc, prog_bar=True)
 
     def acc_fn(self, outputs, targets):
         pred_classes = outputs.detach().argmax(dim=1, keepdim=True)

@@ -83,9 +83,10 @@ class Experiment:
             trainer_args["callbacks"] = [ProgbarCallback()]
 
         tensorboard_logger = TensorBoardLogger(
-            Path(log_dir).parent, name="", version=name
+            Path(log_dir).parent, name="", version=name, default_hp_metric=False
         )
         self.trainer = pl.Trainer(
+            default_root_dir=log_dir,
             max_epochs=epochs,
             logger=tensorboard_logger,
             resume_from_checkpoint=resume_from_checkpoint,
