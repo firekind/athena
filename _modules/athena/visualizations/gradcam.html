@@ -347,7 +347,7 @@
 <div class="viewcode-block" id="GradCamPP"><a class="viewcode-back" href="../../../apis/athena.visualizations.html#athena.visualizations.gradcam.GradCamPP">[docs]</a><span class="k">class</span> <span class="nc">GradCamPP</span><span class="p">(</span><span class="n">GradCam</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">target_layer</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs GradCam Plus Plus algorithm on the model and </span>
+<span class="sd">        Performs GradCam Plus Plus algorithm on the model and</span>
 <span class="sd">        using the target layer.</span>
 <span class="sd">        Code taken from `here &lt;https://github.com/vickyliin/gradcam_plus_plus-pytorch&gt;`_.</span>
 
@@ -467,7 +467,7 @@
 <span class="sd">        opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of </span>
+<span class="sd">        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of</span>
 <span class="sd">        both images is ``(C, H, W)``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># converting mask to numpy int type to apply cv2 functions</span>
@@ -500,7 +500,7 @@
     <span class="n">retain_graph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
     <span class="n">use_gradcampp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the gradcam (or gradcam plus plus) algorithm using a model and target layer on an image, and</span>
@@ -590,7 +590,7 @@
         <span class="n">retain_graph</span><span class="p">,</span>
         <span class="n">device</span><span class="p">,</span>
         <span class="n">use_gradcampp</span><span class="p">,</span>
-        <span class="n">alpha</span>
+        <span class="n">alpha</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># clipping input range</span>
@@ -624,7 +624,7 @@
     <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mean</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">std</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots gradcam to the misclassified images of the experiment.</span>
@@ -674,9 +674,7 @@
 
         <span class="c1"># generate overlay</span>
         <span class="n">overlays</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlay_gradcam_mask</span><span class="p">(</span>
-            <span class="n">heatmap_mask</span><span class="p">,</span>
-            <span class="n">image</span> <span class="k">if</span> <span class="n">unnormalize</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">unnormalize</span><span class="p">(</span><span class="n">image</span><span class="p">),</span>
-            <span class="n">opacity</span>
+            <span class="n">heatmap_mask</span><span class="p">,</span> <span class="n">image</span> <span class="k">if</span> <span class="n">unnormalize</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">unnormalize</span><span class="p">(</span><span class="n">image</span><span class="p">),</span> <span class="n">opacity</span>
         <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># plot results</span>

@@ -377,6 +377,84 @@
 </dd></dl>
 
 </div>
+<div class="section" id="athena-datasets-tinyimagenet-module">
+<h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.tinyimagenet</span></code> module<a class="headerlink" href="#athena-datasets-tinyimagenet-module" title="Permalink to this headline">¶</a></h2>
+<p>The Tiny ImageNet dataset. This module contains a a <code class="docutils literal notranslate"><span class="pre">builder()</span></code> function to build a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> of the Tiny ImageNet dataset, as well as some default train and test transforms that are commonly applied.</p>
+<span class="target" id="module-athena.datasets.tinyimagenet"></span><dl class="py class">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet">
+<em class="property">class </em><code class="sig-prename descclassname">athena.datasets.tinyimagenet.</code><code class="sig-name descname">tinyimagenet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root</span></em>, <em class="sig-param"><span class="n">train</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">download</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_default_transforms</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/tinyimagenet.html#tinyimagenet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#athena.datasets.base.BaseDataset" title="athena.datasets.base.BaseDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">athena.datasets.base.BaseDataset</span></code></a></p>
+<p>Tiny ImageNet Dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<em>str</em>) – The root directory of the dataset.</p></li>
+<li><p><strong>train</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether its train or test dataset. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The tranform to apply on the data. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>target_transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – The transform to apply on the labels. Defaults                 to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>download</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the dataset should be downloaded or not. Defaults                 to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>use_default_transforms</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the default transforms must be used                 or not. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet.url">
+<code class="sig-name descname">url</code><em class="property"> = 'http://cs231n.stanford.edu/tiny-imagenet-200.zip'</em><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>url of the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet.mean">
+<code class="sig-name descname">mean</code><em class="property"> = (0.4802, 0.4481, 0.3975)</em><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>mean of the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet.std">
+<code class="sig-name descname">std</code><em class="property"> = (0.2296, 0.2263, 0.2255)</em><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>std of the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet.default_train_transform">
+<code class="sig-name descname">default_train_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/tinyimagenet.html#tinyimagenet.default_train_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet.default_train_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default cifar10 training transforms. Performs</p>
+<ul class="simple">
+<li><p>Normalization using mean: (0.4802, 0.4481, 0.3975), std: (0.2296, 0.2263, 0.2255)</p></li>
+<li><p>Random crop of 64x64 (after padding it by 8 on each side)</p></li>
+<li><p>Random horizontal flip</p></li>
+<li><p>16x16 Cutout</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="athena.datasets.tinyimagenet.tinyimagenet.default_test_transform">
+<code class="sig-name descname">default_test_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/tinyimagenet.html#tinyimagenet.default_test_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.tinyimagenet.tinyimagenet.default_test_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default cifar10 test transforms. Performs</p>
+<ul class="simple">
+<li><p>Normalization using mean: (0.4802, 0.4481, 0.3975), std: (0.2296, 0.2263, 0.2255)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The transform, an <code class="docutils literal notranslate"><span class="pre">albumentations.Compose</span></code> object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="athena-datasets-base-module">
 <h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.base</span></code> module<a class="headerlink" href="#athena-datasets-base-module" title="Permalink to this headline">¶</a></h2>
 <p>The base class which all datasets that want to use the builder API must implement.</p>
@@ -793,6 +871,7 @@
 <li><a class="reference internal" href="#">athena.datasets package</a><ul>
 <li><a class="reference internal" href="#athena-datasets-mnist-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.mnist</span></code> module</a></li>
 <li><a class="reference internal" href="#athena-datasets-cifar10-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.cifar10</span></code> module</a></li>
+<li><a class="reference internal" href="#athena-datasets-tinyimagenet-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.tinyimagenet</span></code> module</a></li>
 <li><a class="reference internal" href="#athena-datasets-base-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.base</span></code> module</a></li>
 </ul>
 </li>

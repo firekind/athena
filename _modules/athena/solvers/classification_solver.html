@@ -215,7 +215,13 @@
 
 
 <div class="viewcode-block" id="ClassificationSolver"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver">[docs]</a><span class="k">class</span> <span class="nc">ClassificationSolver</span><span class="p">(</span><span class="n">BaseSolver</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">:</span> <span class="n">_LRScheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">:</span><span class="n">Callable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">scheduler</span><span class="p">:</span> <span class="n">_LRScheduler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loss_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Solver for classification problems.</span>
 
@@ -245,24 +251,24 @@
 
         <span class="n">avg_running_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_train_acc</span> <span class="o">/</span> <span class="p">(</span><span class="n">batch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
+        <span class="c1"># displaying train accuracy on progress bar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train accuracy&quot;</span><span class="p">,</span> <span class="n">avg_running_acc</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># logging learning rates of all parameter groups</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lr_log_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span>
             <span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">avg_running_acc</span><span class="p">,</span>
-            <span class="s2">&quot;progress_bar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;train accuracy&quot;</span><span class="p">:</span> <span class="n">avg_running_acc</span><span class="p">},</span>
-            <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lr_log_dict</span><span class="p">()</span>
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.training_epoch_end"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.training_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">training_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">o</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]))</span>
         <span class="n">acc</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;acc&quot;</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;training loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span>
-                <span class="s2">&quot;training accuracy&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span>
-                <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;training loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;training accuracy&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.validation_step"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">batch</span>
@@ -277,12 +283,8 @@
         <span class="n">acc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">o</span><span class="p">[</span><span class="s2">&quot;val_acc&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">o</span><span class="p">[</span><span class="s2">&quot;val_loss&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">EvalResult</span><span class="p">(</span><span class="n">checkpoint_on</span><span class="o">=</span><span class="n">loss</span><span class="p">)</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;validation loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;validation accuracy&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">results</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">results</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;validation loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;validation accuracy&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ClassificationSolver.acc_fn"><a class="viewcode-back" href="../../../apis/athena.solvers.html#athena.solvers.classification_solver.ClassificationSolver.acc_fn">[docs]</a>    <span class="k">def</span> <span class="nf">acc_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
         <span class="n">pred_classes</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

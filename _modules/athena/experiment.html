@@ -288,9 +288,10 @@
             <span class="n">trainer_args</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ProgbarCallback</span><span class="p">()]</span>
 
         <span class="n">tensorboard_logger</span> <span class="o">=</span> <span class="n">TensorBoardLogger</span><span class="p">(</span>
-            <span class="n">Path</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">name</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">default_hp_metric</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
+            <span class="n">default_root_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span>
             <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">tensorboard_logger</span><span class="p">,</span>
             <span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="n">resume_from_checkpoint</span><span class="p">,</span>
