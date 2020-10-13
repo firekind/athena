@@ -36,7 +36,7 @@ def ToNumpy(x: torch.Tensor, **kwargs) -> np.ndarray:
 
 def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
     """
-    Function that converts a numpy array of shape ``(H, W, C)`` or ``(H, W)`` to a ``torch.Tensor`` 
+    Function that converts a numpy array of shape ``(H, W, C)`` or ``(H, W)`` to a ``torch.Tensor``
     of shape ``(C, H, W)``.
 
     Args:
@@ -51,10 +51,10 @@ def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
 
     if not isinstance(x, np.ndarray):
         raise ValueError("Expected np.ndarray, but got {}".format(type(x)))
-    
+
     if x.ndim == 2:
         x = x[:, :, None]
-    
+
     # code from torchvision.functional.to_tensor
     x = torch.tensor(x.transpose(2, 0, 1)).contiguous()
 
@@ -74,7 +74,7 @@ class UnNormalize:
         """
         self.mean = mean
         self.std = std
-    
+
     def __call__(self, x):
         tensor = x.clone()
         for t, m, s in zip(tensor, self.mean, self.std):

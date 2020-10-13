@@ -5,7 +5,7 @@ from athena.layers import DepthwiseConv2d
 
 
 class Cifar10V1(nn.Module):
-    def __init__(self, in_channels: int=3, dropout_value: float=0.25):
+    def __init__(self, in_channels: int = 3, dropout_value: float = 0.25):
         """
         Cifar 10 model made for assignment 7. Implemented by Shyamant Achar. Model summary:
 

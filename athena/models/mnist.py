@@ -13,9 +13,9 @@ class MnistNet(nn.Module):
     ):
         """
         Model used on MNIST dataset. Model summary:
-        
+
         .. code-block:: none
-        
+
             ----------------------------------------------------------------
                     Layer (type)               Output Shape         Param #
             ================================================================
@@ -53,7 +53,7 @@ class MnistNet(nn.Module):
             Params size (MB): 0.03
             Estimated Total Size (MB): 0.62
             ----------------------------------------------------------------
-        
+
 
         Args:
             use_ghost_batch_norm (bool, optional): Whether to use Ghost Batch Norm instead of regular Batch Norm. Defaults to False.

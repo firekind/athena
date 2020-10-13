@@ -142,7 +142,7 @@ class GradCam:
 class GradCamPP(GradCam):
     def __init__(self, model: nn.Module, target_layer: nn.Module):
         """
-        Performs GradCam Plus Plus algorithm on the model and 
+        Performs GradCam Plus Plus algorithm on the model and
         using the target layer.
         Code taken from `here <https://github.com/vickyliin/gradcam_plus_plus-pytorch>`_.
 
@@ -262,7 +262,7 @@ def overlay_gradcam_mask(
         opacity (float, optional): The amount of opacity to apply to the heatmap mask. Defaults to 1.0.
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of 
+        Tuple[torch.Tensor, torch.Tensor]: The heatmap and the resultant image. Shape of
         both images is ``(C, H, W)``.
     """
     # converting mask to numpy int type to apply cv2 functions
@@ -295,7 +295,7 @@ def apply_gradcam(
     retain_graph: bool = False,
     device: str = "cpu",
     use_gradcampp: bool = True,
-    alpha: float = 1.0
+    alpha: float = 1.0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Applies the gradcam (or gradcam plus plus) algorithm using a model and target layer on an image, and
@@ -385,7 +385,7 @@ def plot_gradcam(
         retain_graph,
         device,
         use_gradcampp,
-        alpha
+        alpha,
     )
 
     # clipping input range
@@ -419,7 +419,7 @@ def gradcam_misclassified(
     save_path: str = None,
     mean: Tuple = None,
     std: Tuple = None,
-    opacity: float = 1.0
+    opacity: float = 1.0,
 ):
     """
     Plots gradcam to the misclassified images of the experiment.
@@ -469,9 +469,7 @@ def gradcam_misclassified(
 
         # generate overlay
         overlays[idx] = overlay_gradcam_mask(
-            heatmap_mask,
-            image if unnormalize is None else unnormalize(image),
-            opacity
+            heatmap_mask, image if unnormalize is None else unnormalize(image), opacity
         )[1]
 
     # plot results
