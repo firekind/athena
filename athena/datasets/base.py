@@ -1,13 +1,79 @@
 from abc import abstractmethod
-from typing import Callable, Iterable, Union
+from typing import Callable, Iterable, Union, Type
 
-from torch.utils.data import DataLoader, Sampler
+from torch.utils.data import DataLoader, Sampler, Dataset
 
 
-class BaseDataset:
-    def __init__(self):
+class BaseDataset(Dataset):
+    def __init__(
+        self,
+        root: str,
+        train: bool = True,
+        transform: Callable = None,
+        target_transform: Callable = None,
+        download: bool = False,
+        use_default_transforms: bool = False,
+        **kwargs
+    ):
         """
-        The base class for datasets. Enables the use of a builder style API.
+        Base class for datasets.
+
+        Args:
+            root (str): The root directory of the dataset.
+            train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
+            transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
+            target_transform (Callable, optional): The transform to apply on the labels. Defaults \
+                to ``None``.
+            download (bool, optional): Whether the dataset should be downloaded or not. Defaults \
+                to ``False``.
+            use_default_transforms (bool, optional): Whether the default transforms must be used \
+                or not. Defaults to ``False``.
+        """
+
+        super(BaseDataset, self).__init__()
+
+        self.root = root
+        self.train = train
+        self.transform = transform
+        self.target_transform = target_transform
+        self.download = download
+        self.use_default_transforms = use_default_transforms
+
+        self._set_transforms()
+
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+    def _set_transforms(self) -> DataLoader:
+        """
+        Sets the transform for the dataset, if ``use_default_transforms`` is enabled.
+        """
+
+        assert not (
+            self.use_default_transforms and self.transform
+        ), "Specify only `use_default_transforms` or `transform`, not both."
+
+        if self.use_default_transforms:
+            if self.train:
+                self.transform = self.default_train_transform()
+            else:
+                self.transform = self.default_test_transform()
+
+    def default_train_transform(self):
+        pass
+
+    def default_test_transform(self):
+        pass
+
+    @classmethod
+    def builder(cls):
+        return DataLoaderBuilder(cls)
+
+
+class DataLoaderBuilder:
+    def __init__(self, dataset_cls: Type[BaseDataset]):
+        """
+        Class used to build a dataloader using the builder pattern.
 
         Default values of various parameters (if not set using the builder API):
             * **root** *(str)*: ``"./data"``.
@@ -43,6 +109,7 @@ class BaseDataset:
             * **use_default_transforms** *(bool)*: ``False``
         """
 
+        self.dataset_cls = dataset_cls
         self._root = "./data"
         self._train = True
         self._transform = None
@@ -59,6 +126,35 @@ class BaseDataset:
         self._timeout = 0
         self._worker_init_fn = None
         self._use_default_transforms = False
+
+    def build(self) -> DataLoader:
+        """
+        Builds the dataset and returns a pytorch ``DataLoader``.
+
+        Returns:
+            DataLoader: The cifar10 ``DataLoader``.
+        """
+
+        return DataLoader(
+            self.dataset_cls(
+                root=self._root,
+                train=self._train,
+                transform=self._transform,
+                target_transform=self._target_transform,
+                download=self._download,
+                use_default_transforms=self._use_default_transforms,
+            ),
+            batch_size=self._batch_size,
+            shuffle=self._shuffle,
+            sampler=self._sampler,
+            batch_sampler=self._batch_sampler,
+            num_workers=self._num_workers,
+            collate_fn=self._collate_fn,
+            pin_memory=self._pin_memory,
+            drop_last=self._drop_last,
+            timeout=self._timeout,
+            worker_init_fn=self._worker_init_fn,
+        )
 
     def root(self, path: str) -> "BaseDataset":
         """
@@ -271,58 +367,18 @@ class BaseDataset:
         self._worker_init_fn = worker_init_fn
         return self
 
-    def use_default_transforms(self, use_default_transforms: bool = True) -> "BaseDataset":
+    def use_default_transforms(
+        self, use_default_transforms: bool = True
+    ) -> "BaseDataset":
         """
         Sets the ``use_default_transforms``. Used in the builder API
 
         Args:
-            batch_size (bool, optional): If true, will use the default train and test transforms \ 
-                specified in :meth:`default_train_transform` and :meth:`default_test_transform`. Defaults to True.
+            batch_size (bool, optional): If true, will use the default train and test transforms specified \
+                in :meth:`default_train_transform` and :meth:`default_test_transform`. Defaults to True.
 
         Returns:
             BaseDataset: Object of this class.
         """
         self._use_default_transforms = use_default_transforms
         return self
-
-    def create(self) -> DataLoader:
-        """
-        Builds the dataset and returns the dataloader.
-        """
-
-        assert not (
-            self._use_default_transforms and self._transform
-        ), "Specify only `use_default_transforms` or `transform`, not both."
-
-        if self._use_default_transforms:
-            if self._train:
-                self._transform = self.default_train_transform()
-            else:
-                self._transform = self.default_test_transform()
-
-    @abstractmethod
-    def default_train_transform(self) -> Callable:
-        """
-        The default train transforms. The transform should taken in a ``numpy.ndarray`` and return a ``numpy.ndarray``.
-
-        Returns:
-            Callable: The transform.
-        """
-
-    @abstractmethod
-    def default_test_transform(self) -> Callable:
-        """
-        The default test transforms.  The transform should taken in a ``numpy.ndarray`` and return a ``numpy.ndarray``.
-
-        Returns:
-            Callable: The transform.
-        """
-
-    @abstractmethod
-    def build(self) -> DataLoader:
-        """
-        Builds the dataset.
-
-        Returns:
-            DataLoader: The dataloader of the dataset.
-        """

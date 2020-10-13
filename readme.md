@@ -36,14 +36,14 @@ batch_size = 128 if torch.cuda.is_available() else 64
 
 # creating the datasets 
 train_loader = (
-    datasets.mnist()
+    datasets.mnist.builder()
     .batch_size(batch_size)
     .use_default_transforms()
     .build()
 )
 
 test_loader = (
-    datasets.mnist()
+    datasets.mnist.builder()
     .test()
     .batch_size(batch_size)
     .use_default_transforms()

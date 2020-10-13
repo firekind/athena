@@ -6,49 +6,63 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets
 
-from .base_dataset import BaseDataset
+from .base import BaseDataset, DataLoaderBuilder
 from athena.utils.transforms import ToNumpy, ToTensor
 
 
-class mnist(BaseDataset):
+class mnist(datasets.MNIST):
 
     mean = (0.1307,)  #: mean of the dataset.
     std = (0.3081,)  #: std of the dataset.
 
-    def __init__(self):
+    def __init__(
+        self,
+        root: str,
+        train: bool = True,
+        transform: Callable = None,
+        target_transform: Callable = None,
+        download: bool = False,
+        use_default_transforms: bool = False,
+    ):
         """
-        The mnist dataset.
-        """
-        super(mnist, self).__init__()
+        MNIST dataset.
 
-    def build(self) -> DataLoader:
+        Args:
+            root (str): The root directory of the dataset.
+            train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
+            transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
+            target_transform (Callable, optional): The transform to apply on the labels. Defaults \
+                to ``None``.
+            download (bool, optional): Whether the dataset should be downloaded or not. Defaults \
+                to ``False``.
+            use_default_transforms (bool, optional): Whether the default transforms must be used \
+                or not. Defaults to ``False``.
         """
-        Builds the dataset and returns a pytorch ``DataLoader``.
+        super(mnist, self).__init__(root, train, transform, target_transform, download)
+        self.use_default_transforms = use_default_transforms
+        self._set_transforms()
 
-        Returns:
-            DataLoader: The mnist ``DataLoader``.
-        """
-        super(mnist, self).create()
+    def __getitem__(self, index) -> Tuple[np.ndarray, int]:
+        img, target = self.data[index].numpy(), int(self.targets[index])
 
-        return DataLoader(
-            _mnist_dataset(
-                root=self._root,
-                train=self._train,
-                transform=self._transform,
-                target_transform=self._target_transform,
-                download=self._download,
-            ),
-            batch_size=self._batch_size,
-            shuffle=self._shuffle,
-            sampler=self._sampler,
-            batch_sampler=self._batch_sampler,
-            num_workers=self._num_workers,
-            collate_fn=self._collate_fn,
-            pin_memory=self._pin_memory,
-            drop_last=self._drop_last,
-            timeout=self._timeout,
-            worker_init_fn=self._worker_init_fn,
-        )
+        # converting uint8 numpy array (values range from 0-255)
+        # to float32 array (values ranging from 0-1)
+        img = img.astype(np.float32) / 255
+        # adding channel dimension at the end
+        img = img[:, :, None]  # final shape: (H, W, C)
+
+        if self.transform is not None:
+            if isinstance(
+                self.transform, (A.BasicTransform, A.core.composition.BaseCompose)
+            ):
+                img = self.transform(image=img)["image"]
+            else:
+                img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return img, target
 
     def default_train_transform(self) -> Callable:
         """
@@ -93,42 +107,25 @@ class mnist(BaseDataset):
             ]
         )
 
+    def _set_transforms(self) -> DataLoader:
+        """
+        Sets the transform for the dataset, if ``use_default_transforms`` is enabled.
+        """
 
-class _mnist_dataset(datasets.MNIST):
-    def __init__(
-        self,
-        root: str,
-        train: bool = True,
-        transform: Callable = None,
-        target_transform: Callable = None,
-        download: bool = False,
-    ):
-        super(_mnist_dataset, self).__init__(
-            root, train, transform, target_transform, download
-        )
+        assert not (
+            self.use_default_transforms and self.transform
+        ), "Specify only `use_default_transforms` or `transform`, not both."
 
-        # channels first cuz this is used in solver while writing the model
-        # to tensorboard
-        self.input_shape = (1, 28, 28)
-
-    def __getitem__(self, index) -> Tuple[np.ndarray, int]:
-        img, target = self.data[index].numpy(), int(self.targets[index])
-        
-        # converting uint8 numpy array (values range from 0-255)
-        # to float32 array (values ranging from 0-1)
-        img = img.astype(np.float32) / 255
-        # adding channel dimension at the end
-        img = img[:, :, None] # final shape: (H, W, C)
-
-        if self.transform is not None:
-            if isinstance(
-                self.transform, (A.BasicTransform, A.core.composition.BaseCompose)
-            ):
-                img = self.transform(image=img)["image"]
+        if self.use_default_transforms:
+            if self.train:
+                self.transform = self.default_train_transform()
             else:
-                img = self.transform(img)
+                self.transform = self.default_test_transform()
 
-        if self.target_transform is not None:
-            target = self.target_transform(target)
+    @classmethod
+    def builder(cls) -> DataLoaderBuilder:
+        """
+        Returns a DataLoader builder.
+        """
 
-        return img, target
+        return DataLoaderBuilder(cls)
