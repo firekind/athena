@@ -138,7 +138,7 @@ class tinyimagenet(BaseDataset):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Normalize(
                     mean=tinyimagenet.mean,
                     std=tinyimagenet.std,
@@ -148,7 +148,7 @@ class tinyimagenet(BaseDataset):
                 A.RandomCrop(64, 64),
                 A.HorizontalFlip(),
                 A.Cutout(num_holes=1, max_h_size=16, max_w_size=16),
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )
 
@@ -163,10 +163,10 @@ class tinyimagenet(BaseDataset):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Normalize(
                     mean=tinyimagenet.mean, std=tinyimagenet.std, max_pixel_value=1.0
                 ),  # Normalizing
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )

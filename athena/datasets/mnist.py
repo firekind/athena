@@ -77,14 +77,14 @@ class mnist(datasets.MNIST):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Rotate(
                     limit=5
                 ),  # Randomly rotating the image in the range -5,5 degrees
                 A.Normalize(
                     mean=mnist.mean, std=mnist.std, max_pixel_value=1.0
                 ),  # Normalizing
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )
 
@@ -99,11 +99,11 @@ class mnist(datasets.MNIST):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Normalize(
                     mean=mnist.mean, std=mnist.std, max_pixel_value=1.0
                 ),  # Normalizing
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )
 

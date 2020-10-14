@@ -85,7 +85,7 @@ class cifar10(datasets.CIFAR10):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Normalize(
                     mean=cifar10.mean,
                     std=cifar10.std,
@@ -95,7 +95,7 @@ class cifar10(datasets.CIFAR10):
                 A.RandomCrop(32, 32),
                 A.HorizontalFlip(),
                 A.Cutout(num_holes=1),
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )
 
@@ -110,11 +110,11 @@ class cifar10(datasets.CIFAR10):
         """
         return A.Compose(
             [
-                A.Lambda(ToNumpy),
+                A.Lambda(ToNumpy, name="ToNumpy"),
                 A.Normalize(
                     mean=cifar10.mean, std=cifar10.std, max_pixel_value=1.0
                 ),  # Normalizing
-                A.Lambda(ToTensor),
+                A.Lambda(ToTensor, name="ToTensor"),
             ]
         )
 
