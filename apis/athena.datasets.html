@@ -829,6 +829,38 @@
 </dd></dl>
 
 </div>
+<div class="section" id="athena-datasets-utils-module">
+<h2><code class="docutils literal notranslate"><span class="pre">athena.datasets.utils</span></code> module<a class="headerlink" href="#athena-datasets-utils-module" title="Permalink to this headline">¶</a></h2>
+<p>Some useful utility functions.</p>
+<span class="target" id="module-athena.datasets.utils"></span><dl class="py function">
+<dt id="athena.datasets.utils.train_val_split">
+<code class="sig-prename descclassname">athena.datasets.utils.</code><code class="sig-name descname">train_val_split</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch_size</span></em>, <em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">val_split</span></em>, <em class="sig-param"><span class="n">shuffle</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">num_workers</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">collate_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pin_memory</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">drop_last</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">worker_init_fn</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/datasets/utils.html#train_val_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.datasets.utils.train_val_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits the dataset into train and validation dataloaders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_size</strong> (<em>int</em>) – The batch size</p></li>
+<li><p><strong>dataset</strong> (<em>Dataset</em>) – The dataset to split</p></li>
+<li><p><strong>val_split</strong> (<em>float</em>) – The amount of data from the original dataset to be used             in the validation dataloader. Should be a value between 0 and 1.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the train and validation data are chosen at             random. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – How many subprocesses to use for data loading. Defaults to 4.</p></li>
+<li><p><strong>collate_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Merges a list of samples to form a mini-batch of Tensor(s).             Used when using batched loading from a map-style dataset. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, copies Tensors to cuda pinned memory. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>drop_last</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> to drop the last incomplete batch. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>timeout</strong> (<em>float</em><em>, </em><em>optional</em>) – If positive, the timeout value for collecting a batch from workers.             Should always be non-negative. Defaults to 0.</p></li>
+<li><p><strong>worker_init_fn</strong> (<em>Callable</em><em>, </em><em>optional</em>) – If not None, this will be called on each worker subprocess with             the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The train dataloader and the validation dataloader</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[DataLoader, DataLoader]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -873,6 +905,7 @@
 <li><a class="reference internal" href="#athena-datasets-cifar10-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.cifar10</span></code> module</a></li>
 <li><a class="reference internal" href="#athena-datasets-tinyimagenet-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.tinyimagenet</span></code> module</a></li>
 <li><a class="reference internal" href="#athena-datasets-base-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.base</span></code> module</a></li>
+<li><a class="reference internal" href="#athena-datasets-utils-module"><code class="docutils literal notranslate"><span class="pre">athena.datasets.utils</span></code> module</a></li>
 </ul>
 </li>
 </ul>

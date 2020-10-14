@@ -48,3 +48,14 @@ The base class which all datasets that want to use the builder API must implemen
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+``athena.datasets.utils`` module
+---------------------------------------
+
+Some useful utility functions.
+
+.. automodule:: athena.datasets.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

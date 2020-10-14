@@ -282,14 +282,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToNumpy</span><span class="p">),</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToNumpy</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ToNumpy&quot;</span><span class="p">),</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">Rotate</span><span class="p">(</span>
                     <span class="n">limit</span><span class="o">=</span><span class="mi">5</span>
                 <span class="p">),</span>  <span class="c1"># Randomly rotating the image in the range -5,5 degrees</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span>
                     <span class="n">mean</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="n">max_pixel_value</span><span class="o">=</span><span class="mf">1.0</span>
                 <span class="p">),</span>  <span class="c1"># Normalizing</span>
-                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToTensor</span><span class="p">),</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToTensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ToTensor&quot;</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
 
@@ -304,11 +304,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToNumpy</span><span class="p">),</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToNumpy</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ToNumpy&quot;</span><span class="p">),</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span>
                     <span class="n">mean</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">mnist</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="n">max_pixel_value</span><span class="o">=</span><span class="mf">1.0</span>
                 <span class="p">),</span>  <span class="c1"># Normalizing</span>
-                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToTensor</span><span class="p">),</span>
+                <span class="n">A</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="n">ToTensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ToTensor&quot;</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
 
