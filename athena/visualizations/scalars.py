@@ -50,7 +50,7 @@ def plot_scalars(
     plot_grid(
         len(scalars),
         lambda idx, ax: _plot_scalar(mux, scalars[idx], runs, ax),
-        figsize=(15, 10),
+        figsize=figsize,
         save_path=save_path,
     )
 
