@@ -391,7 +391,7 @@ class LRFinder(object):
             if acc is not None:
                 self.history["acc"].append(acc)
             if loss > diverge_th * self.best_loss:
-                print("Stopping early, the loss has diverged")
+                print("\nStopping early, the loss has diverged")
                 break
 
             pbar.add(1)
