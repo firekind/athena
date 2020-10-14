@@ -65,6 +65,7 @@ class Experiment:
             os.path.exists(log_dir)
             and len(os.listdir(log_dir)) != 0
             and not force_restart
+            and resume_from_checkpoint is None
         ):
             raise FileExistsError(
                 f"The directory '{log_dir}' is not empty. Use the force_restart property to start"
