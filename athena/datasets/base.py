@@ -166,7 +166,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._root = root
+        self._root = path
         return self
 
     def train(self, train: bool = True) -> "BaseDataset":
