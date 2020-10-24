@@ -1,7 +1,9 @@
-from typing import Tuple, Callable
+from typing import Callable, Tuple, Union
 
 import numpy as np
-from torch.utils.data import Dataset, SubsetRandomSampler, DataLoader
+import torch
+from athena.utils.transforms import ToTensor
+from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 
 
 def train_val_split(
@@ -79,3 +81,42 @@ def train_val_split(
             worker_init_fn=worker_init_fn,
         ),
     )
+
+
+def calculate_mean_and_std(
+    data_gen: Union[DataLoader, Dataset], device: str = "best"
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Calculates the mean and standard deviation of a image based dataset (or dataloader)
+
+    Args:
+        data_gen (Union[DataLoader, Dataset]): The dataset or dataloader.
+        device (str, optional): A valid pytorch device string. If "best", automatically chooses the best device. \
+            Defaults to "best".
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: The mean and standard deviation.
+    """
+    mean = 0.0
+    std = 0.0
+    num_samples = 0.0
+
+    if device == "best":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    for data, target in data_gen:
+        data = ToTensor(data).to(device)
+
+        if isinstance(data_gen, DataLoader):
+            batch_samples = data.size(0)
+            data = data.view(batch_samples, data.size(1), -1)
+            mean += data.mean(2).sum(0)
+            std += data.std(2).sum(0)
+            num_samples += batch_samples
+        else:
+            data = data.view(data.size(0), -1)
+            mean += data.mean(1)
+            std += data.std(1)
+            num_samples += 1
+
+    return mean / num_samples, std / num_samples

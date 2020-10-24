@@ -1,10 +1,12 @@
 ifeq ($(OS),Windows_NT)
-	PYTHON_PATH=./venv/Scripts/python.exe
+	ENV_NAME=win_env
+	PYTHON_PATH=./$(ENV_NAME)/Scripts/python.exe
 else
-	PYTHON_PATH=./venv/bin/python
+	ENV_NAME=lin_env
+	PYTHON_PATH=./$(ENV_NAME)/bin/python
 endif
 
 venv:
-	@virtualenv venv
+	@virtualenv $(ENV_NAME)
 	@$(PYTHON_PATH) -m pip install -r requirements.txt
 	@$(PYTHON_PATH) -m pip install -e .

@@ -5,3 +5,5 @@ venv/
 data/
 test/
 build/
+win_env/
+lin_env/

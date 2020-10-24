@@ -49,6 +49,9 @@ def ToTensor(x: np.ndarray, **kwargs) -> torch.Tensor:
         torch.Tensor: A ``torch.Tensor`` with shape ``(C, H, W)``.
     """
 
+    if isinstance(x, torch.Tensor):
+        return x
+
     if not isinstance(x, np.ndarray):
         raise ValueError("Expected np.ndarray, but got {}".format(type(x)))
 
