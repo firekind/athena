@@ -280,12 +280,12 @@
 <em class="property">class </em><code class="sig-prename descclassname">athena.experiment.</code><code class="sig-name descname">Experiment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">solver</span></em>, <em class="sig-param"><span class="n">epochs</span></em>, <em class="sig-param"><span class="n">train_loader</span></em>, <em class="sig-param"><span class="n">val_loader</span></em>, <em class="sig-param"><span class="n">log_dir</span></em>, <em class="sig-param"><span class="n">trainer_args</span></em>, <em class="sig-param"><span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">force_restart</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Bundles information regarding an experiment. An experiment is performed on a model, with
-a <code class="docutils literal notranslate"><span class="pre">Solver</span></code> (subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code>.).</p>
+a <code class="docutils literal notranslate"><span class="pre">Solver</span></code> (subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code>, or a <code class="docutils literal notranslate"><span class="pre">pl.LightningModule</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – The name of the experiment.</p></li>
-<li><p><strong>solver</strong> (<a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a>) – The solver the experiment is using.</p></li>
+<li><p><strong>solver</strong> (<em>Union</em><em>[</em><a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver"><em>BaseSolver</em></a><em>, </em><em>pl.LightningModule</em><em>]</em>) – The solver the experiment is using.</p></li>
 <li><p><strong>epochs</strong> (<em>int</em>) – The number of epochs to train for.</p></li>
 <li><p><strong>train_loader</strong> (<em>DataLoader</em>) – The train <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></li>
 <li><p><strong>val_loader</strong> (<em>DataLoader</em>) – The validation <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></li>
@@ -304,12 +304,13 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 
 <dl class="py method">
 <dt id="athena.experiment.Experiment.lr_range_test">
-<code class="sig-name descname">lr_range_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">criterion</span></em>, <em class="sig-param"><span class="n">acc_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_lr</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">num_iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">step_mode</span><span class="o">=</span><span class="default_value">'exp'</span></em>, <em class="sig-param"><span class="n">smooth_f</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">diverge_th</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">accumulation_steps</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">non_blocking_transfer</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">8, 6</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.lr_range_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.lr_range_test" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">lr_range_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">criterion</span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">acc_fn</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_lr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_lr</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">num_iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">step_mode</span><span class="o">=</span><span class="default_value">'exp'</span></em>, <em class="sig-param"><span class="n">smooth_f</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">diverge_th</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">accumulation_steps</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">non_blocking_transfer</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">8, 6</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/athena/experiment.html#Experiment.lr_range_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#athena.experiment.Experiment.lr_range_test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the LR range test.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>criterion</strong> (<em>Callable</em>) – The loss function.</p></li>
+<li><p><strong>optimizer</strong> (<em>Optimizer</em>) – The optimizer to use. If None, tries to make a fresh copy of the optimizer given                 in the solver. If you are not using <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code> as a solver, its best to provide an optimizer.                 Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 <li><p><strong>acc_fn</strong> (<em>Callable</em>) – The accuracy function. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 <li><p><strong>validate</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses the validation dataset specified to validate every                 step of the range test. Defaults to False.</p></li>
 <li><p><strong>start_lr</strong> (<em>float</em><em>, </em><em>optional</em>) – The starting learning rate of the range test. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses the lr from                 the optimizer. Defaults to None.</p></li>
@@ -324,11 +325,14 @@ a <code class="docutils literal notranslate"><span class="pre">Solver</span></co
 <li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the figure. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The learning rate when the loss gradient was the steepest, and the learning                 rate when the loss was the least.</p>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – When the function fails to automatically create a fresh copy of the optimizer.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple[float, float]</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The learning rate when the loss gradient was the steepest, and the learning                 rate when the loss was the least.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[float, float]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -383,7 +387,7 @@ the paper <a class="reference external" href="https://arxiv.org/abs/1708.07120">
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – When a scheduler is already set for the solver.</p>
+<dd class="field-even"><p><strong>ValueError</strong> – When a scheduler is already set for the solver, or when the solver is not an instance of                 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -450,7 +454,7 @@ for classification type solvers.</p>
 <dd class="field-odd"><p>The solver used in this experiment.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>“BaseSolver”</p>
+<dd class="field-even"><p><a class="reference internal" href="athena.solvers.html#athena.solvers.base_solver.BaseSolver" title="athena.solvers.base_solver.BaseSolver">BaseSolver</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -465,6 +469,9 @@ for classification type solvers.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>nn.Module</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>AttributeError</strong> – If the solver is not a <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSolver</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>

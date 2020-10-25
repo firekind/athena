@@ -232,7 +232,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">solver</span><span class="p">:</span> <span class="n">BaseSolver</span><span class="p">,</span>
+        <span class="n">solver</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseSolver</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">],</span>
         <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
         <span class="n">val_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
@@ -243,11 +243,11 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bundles information regarding an experiment. An experiment is performed on a model, with</span>
-<span class="sd">        a ``Solver`` (subclass of :class:`BaseSolver`.).</span>
+<span class="sd">        a ``Solver`` (subclass of :class:`BaseSolver`, or a ``pl.LightningModule``).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the experiment.</span>
-<span class="sd">            solver (BaseSolver): The solver the experiment is using.</span>
+<span class="sd">            solver (Union[BaseSolver, pl.LightningModule]): The solver the experiment is using.</span>
 <span class="sd">            epochs (int): The number of epochs to train for.</span>
 <span class="sd">            train_loader (DataLoader): The train ``DataLoader``.</span>
 <span class="sd">            val_loader (DataLoader): The validation ``DataLoader``.</span>
@@ -270,6 +270,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span>
             <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">log_dir</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span>
             <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_restart</span>
+            <span class="ow">and</span> <span class="n">resume_from_checkpoint</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;The directory &#39;</span><span class="si">{</span><span class="n">log_dir</span><span class="si">}</span><span class="s2">&#39; is not empty. Use the force_restart property to start&quot;</span>
@@ -314,6 +315,7 @@
 <div class="viewcode-block" id="Experiment.lr_range_test"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.lr_range_test">[docs]</a>    <span class="k">def</span> <span class="nf">lr_range_test</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">criterion</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">acc_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">start_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -332,6 +334,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            criterion (Callable): The loss function.</span>
+<span class="sd">            optimizer (Optimizer): The optimizer to use. If None, tries to make a fresh copy of the optimizer given \</span>
+<span class="sd">                in the solver. If you are not using :class:`BaseSolver` as a solver, its best to provide an optimizer. \</span>
+<span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            acc_fn (Callable): The accuracy function. Defaults to ``None``.</span>
 <span class="sd">            validate (bool, optional): If True, uses the validation dataset specified to validate every \</span>
 <span class="sd">                step of the range test. Defaults to False.</span>
@@ -352,20 +357,49 @@
 <span class="sd">            figsize (Tuple[int, int], optional): Size of the plot. Defaults to ``(8, 6)``.</span>
 <span class="sd">            save_path (str, optional): Path to save the figure. Defaults to ``None``.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: When the function fails to automatically create a fresh copy of the optimizer.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \</span>
 <span class="sd">                rate when the loss was the least.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># creating fresh copy of optimizer (without an lr scheduler)</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># creating fresh copy of optimizer (without an lr scheduler)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">BaseSolver</span><span class="p">):</span>
+                <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># solver is a LightningModule</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># getting the optimizer from LightningModule</span>
+                    <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">configure_optimizers</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span>
+
+                        <span class="c1"># creating new copy of optimizer (since there will be a scheduler attached to it</span>
+                        <span class="c1"># as the return type of configure_optimizers is a tuple or list of length 2.)</span>
+                        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">opt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="n">opt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># since the return type was not a list or tuple, there is no scheduler</span>
+                        <span class="c1"># in the solver. So its safe to assign optimizer as opt.</span>
+                        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">opt</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;Error creating optimizer from solver. Please provide the optimizer as a parameter.&quot;</span>
+                    <span class="p">)</span>
 
         <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lr_finder</span> <span class="o">=</span> <span class="n">LRFinder</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
             <span class="n">optimizer</span><span class="p">,</span>
             <span class="n">criterion</span><span class="p">,</span>
             <span class="n">acc_fn</span><span class="o">=</span><span class="n">acc_fn</span><span class="p">,</span>
@@ -500,12 +534,16 @@
 <span class="sd">            verbose (bool, optional): If ``True``, prints a message to stdout for each update. Defaults to ``False``.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: When a scheduler is already set for the solver.</span>
+<span class="sd">            ValueError: When a scheduler is already set for the solver, or when the solver is not an instance of \</span>
+<span class="sd">                :class:`BaseSolver`.</span>
 
 <span class="sd">        .. _Super-Convergence\: Very Fast Training of Neural Networks Using Large Learning Rates: https://arxiv.org/abs/1708.07120</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scheduler is already defined.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">BaseSolver</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Solver is not an instance of BaseSolver.&quot;</span><span class="p">)</span>
 
         <span class="c1"># although it seems to not make a difference, sometimes setting optimizer&#39;s</span>
         <span class="c1"># ``lr = max_lr`` helps</span>
@@ -618,12 +656,12 @@
 
         <span class="n">plot_scalars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Experiment.get_solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.get_solver">[docs]</a>    <span class="k">def</span> <span class="nf">get_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseSolver&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Experiment.get_solver"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.get_solver">[docs]</a>    <span class="k">def</span> <span class="nf">get_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseSolver</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Getter method for the solver.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            &quot;BaseSolver&quot;: The solver used in this experiment.</span>
+<span class="sd">            BaseSolver: The solver used in this experiment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span></div>
 
@@ -633,7 +671,13 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            nn.Module: The model.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: If the solver is not a :class:`BaseSolver`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">BaseSolver</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Solver is not a BaseSolver. Cannot retrieve model.&quot;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">model</span></div>
 
 <div class="viewcode-block" id="Experiment.builder"><a class="viewcode-back" href="../../apis/athena.experiment.html#athena.experiment.Experiment.builder">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -875,17 +919,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># getting signature of the __init__ function of the class</span>
         <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
-
-        <span class="c1"># checking if &quot;model&quot;, &quot;optimizer&quot;, and &quot;scheduler&quot; are arguments</span>
-        <span class="c1"># in the __init__ function</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="s2">&quot;model&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="ow">and</span> <span class="s2">&quot;optimizer&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="ow">and</span> <span class="s2">&quot;scheduler&quot;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;To use the builder, the solver&#39;s __init__ function should have &#39;model&#39;, &#39;optimizer&#39;, and &#39;scheduler&#39; as parameters (and in the same order).&quot;</span>
-            <span class="p">)</span>
 
         <span class="c1"># defining intializer methods</span>
         <span class="k">def</span> <span class="nf">_basic_intializer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
