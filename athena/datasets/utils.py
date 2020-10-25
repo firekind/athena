@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Callable, Tuple, Union
 
 import numpy as np
@@ -7,8 +8,8 @@ from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 
 
 def train_val_split(
-    batch_size: int,
     dataset: Dataset,
+    batch_size: int,
     val_split: float,
     shuffle: bool = True,
     num_workers: int = 4,
@@ -17,6 +18,9 @@ def train_val_split(
     drop_last: bool = False,
     timeout: float = 0,
     worker_init_fn: Callable = None,
+    val_transform: Callable = None,
+    target_val_transform: Callable = None,
+    use_default_val_transform: bool = False,
 ) -> Tuple[DataLoader, DataLoader]:
     """
     Splits the dataset into train and validation dataloaders.
@@ -37,6 +41,11 @@ def train_val_split(
             Should always be non-negative. Defaults to 0.
         worker_init_fn (Callable, optional): If not None, this will be called on each worker subprocess with \
             the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading.
+        val_transform (Callable, optional): The transform to be used in the val dataset. Defaults to None.
+        target_val_transform (Callable, optional): The transform to be used for the targets in the val dataset. \
+            Defaults to None.
+        use_default_val_transform (bool, optional): Whether to use the default val transforms or not. \
+            Defaults to False.
 
     Returns:
         Tuple[DataLoader, DataLoader]: The train dataloader and the validation dataloader
@@ -56,6 +65,17 @@ def train_val_split(
     train_sampler = SubsetRandomSampler(indices[split:])
     val_sampler = SubsetRandomSampler(indices[:split])
 
+    # creating val dataset
+    val_dataset = deepcopy(dataset)
+
+    # setting the transform for the val dataset
+    if use_default_val_transform:
+        val_transform = val_dataset.default_val_transform()
+
+    val_dataset.train = False
+    val_dataset.transform = val_transform
+    val_dataset.target_transform = target_val_transform
+
     # creating and returning dataloaders
     return (
         DataLoader(
@@ -70,7 +90,7 @@ def train_val_split(
             worker_init_fn=worker_init_fn,
         ),
         DataLoader(
-            dataset,
+            val_dataset,
             batch_size=batch_size,
             sampler=val_sampler,
             num_workers=num_workers,

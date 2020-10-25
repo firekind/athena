@@ -17,7 +17,7 @@ class mnist(datasets.MNIST):
 
     def __init__(
         self,
-        root: str,
+        root: str = "./data",
         train: bool = True,
         transform: Callable = None,
         target_transform: Callable = None,
@@ -28,7 +28,7 @@ class mnist(datasets.MNIST):
         MNIST dataset.
 
         Args:
-            root (str): The root directory of the dataset.
+            root (str): The root directory of the dataset. Defaults to "./data". 
             train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
             transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
             target_transform (Callable, optional): The transform to apply on the labels. Defaults \
@@ -88,9 +88,9 @@ class mnist(datasets.MNIST):
             ]
         )
 
-    def default_test_transform(self):
+    def default_val_transform(self):
         """
-        Default mnist test transforms. Performs
+        Default mnist validation transforms. Performs
 
         * Normalization using mean: (0.1307,) and std: (0.3081,)
 
@@ -120,7 +120,7 @@ class mnist(datasets.MNIST):
             if self.train:
                 self.transform = self.default_train_transform()
             else:
-                self.transform = self.default_test_transform()
+                self.transform = self.default_val_transform()
 
     @classmethod
     def builder(cls) -> DataLoaderBuilder:

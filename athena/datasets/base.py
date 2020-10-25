@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, Sampler, Dataset
 class BaseDataset(Dataset):
     def __init__(
         self,
-        root: str,
+        root: str = "./data",
         train: bool = True,
         transform: Callable = None,
         target_transform: Callable = None,
@@ -19,7 +19,7 @@ class BaseDataset(Dataset):
         Base class for datasets.
 
         Args:
-            root (str): The root directory of the dataset.
+            root (str, optional): The root directory of the dataset. Defaults to "./data".
             train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
             transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
             target_transform (Callable, optional): The transform to apply on the labels. Defaults \
@@ -57,12 +57,12 @@ class BaseDataset(Dataset):
             if self.train:
                 self.transform = self.default_train_transform()
             else:
-                self.transform = self.default_test_transform()
+                self.transform = self.default_val_transform()
 
     def default_train_transform(self):
         pass
 
-    def default_test_transform(self):
+    def default_val_transform(self):
         pass
 
     @classmethod
@@ -76,16 +76,6 @@ class DataLoaderBuilder:
         Class used to build a dataloader using the builder pattern.
 
         Default values of various parameters (if not set using the builder API):
-            * **root** *(str)*: ``"./data"``.
-
-            * **train** *(bool)*: ``True``.
-
-            * **transform** *(transforms.Compose)*: ``None``.
-
-            * **target_transform** *(transforms.Compose)*: ``None``.
-
-            * **download** *(bool)*: ``True``.
-
             * **batch_size** *(int)*: 64.
 
             * **shuffle** *(bool)*: ``True``.
@@ -105,16 +95,9 @@ class DataLoaderBuilder:
             * **timeout** *(float)*: 0.
 
             * **worker_init_fn** *(Callable)*: ``None``.
-
-            * **use_default_transforms** *(bool)*: ``False``
         """
 
         self.dataset_cls = dataset_cls
-        self._root = "./data"
-        self._train = True
-        self._transform = None
-        self._target_transform = None
-        self._download = True
         self._batch_size = 64
         self._shuffle = True
         self._sampler = None
@@ -125,7 +108,7 @@ class DataLoaderBuilder:
         self._drop_last = False
         self._timeout = 0
         self._worker_init_fn = None
-        self._use_default_transforms = False
+        self.dataset_args = {}
 
     def build(self) -> DataLoader:
         """
@@ -136,14 +119,7 @@ class DataLoaderBuilder:
         """
 
         return DataLoader(
-            self.dataset_cls(
-                root=self._root,
-                train=self._train,
-                transform=self._transform,
-                target_transform=self._target_transform,
-                download=self._download,
-                use_default_transforms=self._use_default_transforms,
-            ),
+            self.dataset_cls(**self.dataset_args),
             batch_size=self._batch_size,
             shuffle=self._shuffle,
             sampler=self._sampler,
@@ -166,7 +142,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._root = path
+        self.dataset_args["root"] = path
         return self
 
     def train(self, train: bool = True) -> "BaseDataset":
@@ -179,7 +155,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._train = train
+        self.dataset_args["train"] = train
         return self
 
     def test(self) -> "BaseDataset":
@@ -190,7 +166,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._train = False
+        self.dataset_args["train"] = False
         return self
 
     def transform(self, transform: Callable) -> "BaseDataset":
@@ -203,7 +179,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._transform = transform
+        self.dataset_args["transform"] = transform
         return self
 
     def target_transform(self, target_transform: Callable) -> "BaseDataset":
@@ -216,7 +192,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._target_transform = target_transform
+        self.dataset_args["target_transform"] = target_transform
         return self
 
     def download(self, download: bool) -> "BaseDataset":
@@ -229,7 +205,7 @@ class DataLoaderBuilder:
         Returns:
             BaseDataset: Object of this class.
         """
-        self._download = download
+        self.dataset_args["download"] = download
         return self
 
     def batch_size(self, batch_size: int) -> "BaseDataset":
@@ -375,10 +351,10 @@ class DataLoaderBuilder:
 
         Args:
             batch_size (bool, optional): If true, will use the default train and test transforms specified \
-                in :meth:`default_train_transform` and :meth:`default_test_transform`. Defaults to True.
+                in :meth:`default_train_transform` and :meth:`default_val_transform`. Defaults to True.
 
         Returns:
             BaseDataset: Object of this class.
         """
-        self._use_default_transforms = use_default_transforms
+        self.dataset_args["use_default_transforms"] = use_default_transforms
         return self

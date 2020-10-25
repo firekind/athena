@@ -18,7 +18,7 @@ class cifar10(datasets.CIFAR10):
 
     def __init__(
         self,
-        root: str,
+        root: str = "./data",
         train: bool = True,
         transform: Callable = None,
         target_transform: Callable = None,
@@ -29,7 +29,7 @@ class cifar10(datasets.CIFAR10):
         CIFAR10 Dataset.
 
         Args:
-            root (str): The root directory of the dataset.
+            root (str): The root directory of the dataset. Defaults to "./data".
             train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
             transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
             target_transform (Callable, optional): The transform to apply on the labels. Defaults \
@@ -99,9 +99,9 @@ class cifar10(datasets.CIFAR10):
             ]
         )
 
-    def default_test_transform(self):
+    def default_val_transform(self):
         """
-        Default cifar10 test transforms. Performs
+        Default cifar10 validation transforms. Performs
 
         * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)
 
@@ -131,7 +131,7 @@ class cifar10(datasets.CIFAR10):
             if self.train:
                 self.transform = self.default_train_transform()
             else:
-                self.transform = self.default_test_transform()
+                self.transform = self.default_val_transform()
 
     @classmethod
     def builder(cls) -> DataLoaderBuilder:

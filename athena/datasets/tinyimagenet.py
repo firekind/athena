@@ -1,4 +1,5 @@
 import os
+from typing import Callable
 
 import numpy as np
 import cv2
@@ -17,18 +18,18 @@ class tinyimagenet(BaseDataset):
 
     def __init__(
         self,
-        root,
-        train=True,
-        transform=None,
-        target_transform=None,
-        download=False,
-        use_default_transforms=False,
+        root: str = "./data",
+        train: bool = True,
+        transform: Callable = None,
+        target_transform: Callable = None,
+        download: bool = False,
+        use_default_transforms: bool = False,
     ):
         """
         Tiny ImageNet Dataset.
 
         Args:
-            root (str): The root directory of the dataset.
+            root (str): The root directory of the dataset. Defaults to "./data".
             train (bool, optional): Whether its train or test dataset. Defaults to ``True``.
             transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.
             target_transform (Callable, optional): The transform to apply on the labels. Defaults \
@@ -152,9 +153,9 @@ class tinyimagenet(BaseDataset):
             ]
         )
 
-    def default_test_transform(self):
+    def default_val_transform(self):
         """
-        Default cifar10 test transforms. Performs
+        Default cifar10 validation transforms. Performs
 
         * Normalization using mean: (0.4802, 0.4481, 0.3975), std: (0.2296, 0.2263, 0.2255)
 
