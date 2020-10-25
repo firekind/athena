@@ -223,7 +223,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
         <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -234,7 +234,7 @@
 <span class="sd">        CIFAR10 Dataset.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            root (str): The root directory of the dataset.</span>
+<span class="sd">            root (str): The root directory of the dataset. Defaults to &quot;./data&quot;.</span>
 <span class="sd">            train (bool, optional): Whether its train or test dataset. Defaults to ``True``.</span>
 <span class="sd">            transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.</span>
 <span class="sd">            target_transform (Callable, optional): The transform to apply on the labels. Defaults \</span>
@@ -304,9 +304,9 @@
             <span class="p">]</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="cifar10.default_test_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.default_test_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_test_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="cifar10.default_val_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.default_val_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_val_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Default cifar10 test transforms. Performs</span>
+<span class="sd">        Default cifar10 validation transforms. Performs</span>
 
 <span class="sd">        * Normalization using mean: (0.4914, 0.4822, 0.4465), std: (0.2023, 0.1994, 0.2010)</span>
 
@@ -336,7 +336,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_train_transform</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_test_transform</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_val_transform</span><span class="p">()</span>
 
 <div class="viewcode-block" id="cifar10.builder"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.cifar10.cifar10.builder">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoaderBuilder</span><span class="p">:</span>

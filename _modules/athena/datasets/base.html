@@ -212,7 +212,7 @@
 <div class="viewcode-block" id="BaseDataset"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.BaseDataset">[docs]</a><span class="k">class</span> <span class="nc">BaseDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
         <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -224,7 +224,7 @@
 <span class="sd">        Base class for datasets.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            root (str): The root directory of the dataset.</span>
+<span class="sd">            root (str, optional): The root directory of the dataset. Defaults to &quot;./data&quot;.</span>
 <span class="sd">            train (bool, optional): Whether its train or test dataset. Defaults to ``True``.</span>
 <span class="sd">            transform (Callable, optional): The tranform to apply on the data. Defaults to ``None``.</span>
 <span class="sd">            target_transform (Callable, optional): The transform to apply on the labels. Defaults \</span>
@@ -262,12 +262,12 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_train_transform</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_test_transform</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_val_transform</span><span class="p">()</span>
 
 <div class="viewcode-block" id="BaseDataset.default_train_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.BaseDataset.default_train_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_train_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="BaseDataset.default_test_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.BaseDataset.default_test_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_test_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseDataset.default_val_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.BaseDataset.default_val_transform">[docs]</a>    <span class="k">def</span> <span class="nf">default_val_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="BaseDataset.builder"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.BaseDataset.builder">[docs]</a>    <span class="nd">@classmethod</span>
@@ -281,16 +281,6 @@
 <span class="sd">        Class used to build a dataloader using the builder pattern.</span>
 
 <span class="sd">        Default values of various parameters (if not set using the builder API):</span>
-<span class="sd">            * **root** *(str)*: ``&quot;./data&quot;``.</span>
-
-<span class="sd">            * **train** *(bool)*: ``True``.</span>
-
-<span class="sd">            * **transform** *(transforms.Compose)*: ``None``.</span>
-
-<span class="sd">            * **target_transform** *(transforms.Compose)*: ``None``.</span>
-
-<span class="sd">            * **download** *(bool)*: ``True``.</span>
-
 <span class="sd">            * **batch_size** *(int)*: 64.</span>
 
 <span class="sd">            * **shuffle** *(bool)*: ``True``.</span>
@@ -310,16 +300,9 @@
 <span class="sd">            * **timeout** *(float)*: 0.</span>
 
 <span class="sd">            * **worker_init_fn** *(Callable)*: ``None``.</span>
-
-<span class="sd">            * **use_default_transforms** *(bool)*: ``False``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_cls</span> <span class="o">=</span> <span class="n">dataset_cls</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_train</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_target_transform</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_download</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="mi">64</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="kc">None</span>
@@ -330,7 +313,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_drop_last</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_init_fn</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_use_default_transforms</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="DataLoaderBuilder.build"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -341,14 +324,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset_cls</span><span class="p">(</span>
-                <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span>
-                <span class="n">train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">,</span>
-                <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">,</span>
-                <span class="n">target_transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_transform</span><span class="p">,</span>
-                <span class="n">download</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_download</span><span class="p">,</span>
-                <span class="n">use_default_transforms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_default_transforms</span><span class="p">,</span>
-            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset_cls</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">),</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span>
             <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">,</span>
             <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="p">,</span>
@@ -371,7 +347,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.train"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -384,7 +360,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_train</span> <span class="o">=</span> <span class="n">train</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.test"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.test">[docs]</a>    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -395,7 +371,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_train</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -408,7 +384,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">transform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.target_transform"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.target_transform">[docs]</a>    <span class="k">def</span> <span class="nf">target_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_transform</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -421,7 +397,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_target_transform</span> <span class="o">=</span> <span class="n">target_transform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;target_transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_transform</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.download"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">download</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -434,7 +410,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_download</span> <span class="o">=</span> <span class="n">download</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;download&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">download</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataLoaderBuilder.batch_size"><a class="viewcode-back" href="../../../apis/athena.datasets.html#athena.datasets.base.DataLoaderBuilder.batch_size">[docs]</a>    <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseDataset&quot;</span><span class="p">:</span>
@@ -580,12 +556,12 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            batch_size (bool, optional): If true, will use the default train and test transforms specified \</span>
-<span class="sd">                in :meth:`default_train_transform` and :meth:`default_test_transform`. Defaults to True.</span>
+<span class="sd">                in :meth:`default_train_transform` and :meth:`default_val_transform`. Defaults to True.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            BaseDataset: Object of this class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_use_default_transforms</span> <span class="o">=</span> <span class="n">use_default_transforms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_args</span><span class="p">[</span><span class="s2">&quot;use_default_transforms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_default_transforms</span>
         <span class="k">return</span> <span class="bp">self</span></div></div>
 </pre></div>
 
