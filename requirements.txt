@@ -11,3 +11,4 @@ opencv-python~=4.4.0.42
 pytorch-lightning~=1.0.0
 ipympl~=0.5.8
 git+https://github.com/firekind/pytorch_sphinx_theme
+-e .

@@ -4,7 +4,7 @@ athena.solvers package
 .. toctree::
    :hidden:
 
-A ``Solver`` is a class which is used to train the model. It is just a regular pytorch lightning ``LightingModule``, with a single restriction: The model, optimizer and scheduler must be passed in the constructor, and in the same order. Morever, if the solver is to be used using the :class:`athena.experiment.Experiment` builder, Then the name of the parameters must be "model" for the model, "optimizer" for the optimizer, and "scheduler" for the scheduler.
+A ``Solver`` is a class which is used to train the model. It is just a regular pytorch lightning ``LightingModule``. If the solver is to be used using the :class:`athena.experiment.Experiment` builder, Then the name of the parameters must be "model" for the model, "optimizer" for the optimizer, and "scheduler" for the scheduler.
 
 ``classification_solver`` module
 --------------------------------------------

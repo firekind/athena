@@ -117,7 +117,7 @@ class GradCam:
         mask = F.relu(mask)  # performing relu to remove negative values
 
         # upscaling the heat map to match input image size
-        mask = F.upsample(mask, size=(h, w), mode="bilinear", align_corners=False)
+        mask = F.interpolate(mask, size=(h, w), mode="bilinear", align_corners=False)
 
         # normalizing the heat map
         mask = (mask - mask.min()) / (mask.max() - mask.min())
@@ -232,7 +232,7 @@ class GradCamPP(GradCam):
         mask = F.relu(mask)  # performing relu to remove negative values
 
         # upsampling the heat map to match input image size
-        mask = F.upsample(mask, size=(h, w), mode="bilinear", align_corners=False)
+        mask = F.interpolate(mask, size=(h, w), mode="bilinear", align_corners=False)
 
         # normalize
         mask = (mask - mask.min()) / (mask.max() - mask.min())
@@ -454,7 +454,7 @@ def gradcam_misclassified(
     unnormalize = None if mean is None and std is None else UnNormalize(mean, std)
 
     # initializing gradcam
-    cam = GradCamPP(experiment.get_model().to(device), target_layer.to(device))
+    cam = GradCamPP(experiment.get_solver().to(device), target_layer.to(device))
 
     # for every image in the misclassified images
     for idx, image in enumerate(image_data):

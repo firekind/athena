@@ -27,7 +27,7 @@ class Experiment:
     def __init__(
         self,
         name: str,
-        solver: BaseSolver,
+        solver: Union[BaseSolver, pl.LightningModule],
         epochs: int,
         train_loader: DataLoader,
         val_loader: DataLoader,
@@ -38,11 +38,11 @@ class Experiment:
     ):
         """
         Bundles information regarding an experiment. An experiment is performed on a model, with
-        a ``Solver`` (subclass of :class:`BaseSolver`.).
+        a ``Solver`` (subclass of :class:`BaseSolver`, or a ``pl.LightningModule``).
 
         Args:
             name (str): The name of the experiment.
-            solver (BaseSolver): The solver the experiment is using.
+            solver (Union[BaseSolver, pl.LightningModule]): The solver the experiment is using.
             epochs (int): The number of epochs to train for.
             train_loader (DataLoader): The train ``DataLoader``.
             val_loader (DataLoader): The validation ``DataLoader``.
@@ -110,6 +110,7 @@ class Experiment:
     def lr_range_test(
         self,
         criterion: Callable,
+        optimizer: torch.optim.Optimizer = None,
         acc_fn: Callable = None,
         validate: bool = False,
         start_lr: float = None,
@@ -128,6 +129,9 @@ class Experiment:
 
         Args:
             criterion (Callable): The loss function.
+            optimizer (Optimizer): The optimizer to use. If None, tries to make a fresh copy of the optimizer given \
+                in the solver. If you are not using :class:`BaseSolver` as a solver, its best to provide an optimizer. \
+                Defaults to ``None``.
             acc_fn (Callable): The accuracy function. Defaults to ``None``.
             validate (bool, optional): If True, uses the validation dataset specified to validate every \
                 step of the range test. Defaults to False.
@@ -148,20 +152,49 @@ class Experiment:
             figsize (Tuple[int, int], optional): Size of the plot. Defaults to ``(8, 6)``.
             save_path (str, optional): Path to save the figure. Defaults to ``None``.
 
+        Raises:
+            RuntimeError: When the function fails to automatically create a fresh copy of the optimizer.
+
         Returns:
             Tuple[float, float]: The learning rate when the loss gradient was the steepest, and the learning \
                 rate when the loss was the least.
         """
 
-        # creating fresh copy of optimizer (without an lr scheduler)
-        optimizer = self.solver.optimizer.__class__(
-            self.get_model().parameters(), **self.solver.optimizer.__dict__["defaults"]
-        )
+        if optimizer is None:
+            # creating fresh copy of optimizer (without an lr scheduler)
+            if isinstance(self.solver, BaseSolver):
+                optimizer = self.solver.optimizer.__class__(
+                    self.get_model().parameters(),
+                    **self.solver.optimizer.__dict__["defaults"],
+                )
+            else:
+                # solver is a LightningModule
+                try:
+                    # getting the optimizer from LightningModule
+                    opt = self.solver.configure_optimizers()
+
+                    if type(opt) == tuple or type(opt) == list:
+                        if len(opt) != 2:
+                            raise Exception
+
+                        # creating new copy of optimizer (since there will be a scheduler attached to it
+                        # as the return type of configure_optimizers is a tuple or list of length 2.)
+                        optimizer = opt[0][0].__class__(
+                            self.solver.parameters(), **opt[0][0].__dict__["defaults"]
+                        )
+                    else:
+                        # since the return type was not a list or tuple, there is no scheduler
+                        # in the solver. So its safe to assign optimizer as opt.
+                        optimizer = opt
+                except Exception:
+                    raise RuntimeError(
+                        "Error creating optimizer from solver. Please provide the optimizer as a parameter."
+                    )
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.lr_finder = LRFinder(
-            self.get_model().to(device),
+            self.solver.to(device),
             optimizer,
             criterion,
             acc_fn=acc_fn,
@@ -296,12 +329,16 @@ class Experiment:
             verbose (bool, optional): If ``True``, prints a message to stdout for each update. Defaults to ``False``.
 
         Raises:
-            ValueError: When a scheduler is already set for the solver.
+            ValueError: When a scheduler is already set for the solver, or when the solver is not an instance of \
+                :class:`BaseSolver`.
 
         .. _Super-Convergence\: Very Fast Training of Neural Networks Using Large Learning Rates: https://arxiv.org/abs/1708.07120
         """
         if self.solver.scheduler is not None:
             raise ValueError("Scheduler is already defined.")
+
+        if not isinstance(self.solver, BaseSolver):
+            raise ValueError("Solver is not an instance of BaseSolver.")
 
         # although it seems to not make a difference, sometimes setting optimizer's
         # ``lr = max_lr`` helps
@@ -414,12 +451,12 @@ class Experiment:
 
         plot_scalars(self.log_dir, figsize=figsize, save_path=save_path)
 
-    def get_solver(self) -> "BaseSolver":
+    def get_solver(self) -> BaseSolver:
         """
         Getter method for the solver.
 
         Returns:
-            "BaseSolver": The solver used in this experiment.
+            BaseSolver: The solver used in this experiment.
         """
         return self.solver
 
@@ -429,7 +466,13 @@ class Experiment:
 
         Returns:
             nn.Module: The model.
+
+        Raises:
+            AttributeError: If the solver is not a :class:`BaseSolver`.
         """
+        if not isinstance(self.solver, BaseSolver):
+            raise AttributeError("Solver is not a BaseSolver. Cannot retrieve model.")
+
         return self.solver.model
 
     @staticmethod
@@ -671,17 +714,6 @@ class ExperimentBuilder:
         """
         # getting signature of the __init__ function of the class
         sig = signature(cls.__init__)
-
-        # checking if "model", "optimizer", and "scheduler" are arguments
-        # in the __init__ function
-        if (
-            not "model" in sig.parameters
-            and "optimizer" in sig.parameters
-            and "scheduler" in sig.parameters
-        ):
-            raise ValueError(
-                "To use the builder, the solver's __init__ function should have 'model', 'optimizer', and 'scheduler' as parameters (and in the same order)."
-            )
 
         # defining intializer methods
         def _basic_intializer(name, dest):
