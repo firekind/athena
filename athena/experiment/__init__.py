@@ -19,7 +19,6 @@ from athena.visualizations import (
     plot_scalars,
 )
 from matplotlib.axes import Axes
-from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 
@@ -35,6 +34,8 @@ class Experiment:
         trainer_args: Dict[str, Any],
         resume_from_checkpoint: str = None,
         force_restart: bool = False,
+        monitor: str = None,
+        save_top_k: int = None,
     ):
         """
         Bundles information regarding an experiment. An experiment is performed on a model, with
@@ -51,6 +52,8 @@ class Experiment:
             resume_from_checkpoint (str, optional): The path to the checkpoint to resume training from.
             force_restart (bool, optional): If True, deletes old checkpoints and restarts training from beginning. \
                 Defaults to False.
+            monitor (str, optional): The quantity to monitor for checkpointing. Defaults to ``None``.
+            save_top_k: The 'k' best models are saved according to what is to be ``monitor``ed. Defaults to ``None``.
         """
 
         self.name = name
@@ -61,6 +64,10 @@ class Experiment:
         self.log_dir = log_dir
         self.lr_finder = None
 
+        if save_top_k is None and monitor is not None:
+            save_top_k = 1
+
+        # checking if logs already exists
         if (
             os.path.exists(log_dir)
             and len(os.listdir(log_dir)) != 0
@@ -72,9 +79,14 @@ class Experiment:
                 " training from scratch or specify a checkpoint to resume from."
             )
 
+        # removing old logs if specified
         if force_restart and os.path.exists(log_dir):
             shutil.rmtree(log_dir)
 
+        # creating log directory in case it does not exist
+        Path(log_dir).mkdir(parents=True, exist_ok=True)
+
+        # initing trainer_args
         if "gpus" not in trainer_args and torch.cuda.is_available():
             trainer_args["gpus"] = 1
 
@@ -83,13 +95,26 @@ class Experiment:
         else:
             trainer_args["callbacks"] = [ProgbarCallback()]
 
-        tensorboard_logger = TensorBoardLogger(
+        # creating callbacks
+        tensorboard_logger = pl.loggers.TensorBoardLogger(
             Path(log_dir).parent, name="", version=name, default_hp_metric=False
         )
+        checkpoint_callback = pl.callbacks.ModelCheckpoint(
+            filepath=os.path.join(
+                log_dir,
+                "checkpoints",
+                "best-{epoch}-{%s:.4f}" % monitor if monitor else "last",
+            ),
+            monitor=monitor,
+            save_top_k=save_top_k,
+            save_last=True if monitor is not None else None,
+        )
+
+        # creating trainer
         self.trainer = pl.Trainer(
-            default_root_dir=log_dir,
             max_epochs=epochs,
             logger=tensorboard_logger,
+            checkpoint_callback=checkpoint_callback,
             resume_from_checkpoint=resume_from_checkpoint,
             **trainer_args,
         )
@@ -574,6 +599,8 @@ class ExperimentBuilder:
             or os.path.join(self.parent.get_log_dir(), self._props["name"]),
             resume_from_checkpoint=self._props.get("resume_from_checkpoint"),
             force_restart=self._props.get("force_restart", False),
+            monitor=self._props.get("monitor", None),
+            save_top_k=self._props.get("save_top_k", None),
         )
 
         # if there is a parent `ExperimentsBuilder`, sending the created ``Experiment``
@@ -687,6 +714,28 @@ class ExperimentBuilder:
         """
 
         self._props["force_restart"] = value
+        return self
+
+    def monitor(self, value: str) -> "ExperimentBuilder":
+        """
+        The value to be monitored while checkpointing.
+
+        Args:
+            value (str): The name of the value.
+        """
+
+        self._props["monitor"] = value
+        return self
+
+    def save_top_k(self, k: int) -> "ExperimentBuilder":
+        """
+        The top 'k' checkpoints are kept based on the monitored value.
+
+        Args:
+            k (int): The number of checkpoints to keep.
+        """
+
+        self._props["save_top_k"] = k
         return self
 
     def props(self) -> "ExperimentBuilder":
